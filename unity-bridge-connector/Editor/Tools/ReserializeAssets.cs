@@ -2,9 +2,9 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Name = "reserialize", Description = "Force reserialize Unity assets. No params = entire project.")]
+    [UnityBridgeTool(Name = "reserialize", Description = "Force reserialize Unity assets. No params = entire project.")]
     public static class ReserializeAssets
     {
         public class Parameters
@@ -36,12 +36,12 @@ namespace UnityCliConnector.Tools
             if (paths == null || paths.Length == 0)
             {
                 AssetDatabase.ForceReserializeAssets();
-                Debug.Log("[UnityCliConnector] ForceReserializeAssets: entire project");
+                Debug.Log("[UnityBridge] ForceReserializeAssets: entire project");
                 return new SuccessResponse("Reserialized entire project");
             }
 
             AssetDatabase.ForceReserializeAssets(paths);
-            Debug.Log($"[UnityCliConnector] ForceReserializeAssets: {string.Join(", ", paths)}");
+            Debug.Log($"[UnityBridge] ForceReserializeAssets: {string.Join(", ", paths)}");
             return new SuccessResponse($"Reserialized {paths.Length} asset(s)", new { paths });
         }
     }

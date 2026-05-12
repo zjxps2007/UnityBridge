@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using Newtonsoft.Json.Linq;
 using UnityEditor;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Name = "menu", Description = "Execute a Unity menu item by path.")]
+    [UnityBridgeTool(Name = "menu", Description = "Execute a Unity menu item by path.")]
     public static class ExecuteMenuItem
     {
         private static readonly HashSet<string> Blacklist = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "File/Quit" };

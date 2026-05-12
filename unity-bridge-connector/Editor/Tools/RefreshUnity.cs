@@ -6,9 +6,9 @@ using UnityEditor;
 using UnityEditor.Compilation;
 using UnityEngine;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Description = "Refresh Unity assets and optionally request script compilation.")]
+    [UnityBridgeTool(Description = "Refresh Unity assets and optionally request script compilation.")]
     public static class RefreshUnity
     {
         public class Parameters

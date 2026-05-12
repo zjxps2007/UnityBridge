@@ -210,6 +210,22 @@ unity-bridge my_custom_tool first second
 플래그는 `true`, `--no-name`은 `false`로 전달됩니다. 일반 위치 인자는 `args` 배열로
 전달됩니다.
 
+Unity 쪽 custom tool은 connector namespace와 attribute를 사용하면 됩니다.
+
+```csharp
+using Newtonsoft.Json.Linq;
+using UnityBridgeConnector;
+
+[UnityBridgeTool(Name = "my_custom_tool")]
+public static class MyCustomTool
+{
+    public static object HandleCommand(JObject parameters)
+    {
+        return new SuccessResponse("ok");
+    }
+}
+```
+
 단, `profiler`, `console`, `test`처럼 이미 UnityBridge 전용 명령어로 예약된 이름은 전용 CLI가
 먼저 처리합니다. 이런 built-in command에 아직 짧은 옵션으로 열려 있지 않은 세부 파라미터를
 보내려면 `unity-bridge call <command> --params '{...}'` 형식을 사용하세요.

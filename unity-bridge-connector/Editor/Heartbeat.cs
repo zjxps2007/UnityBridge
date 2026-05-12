@@ -6,7 +6,7 @@ using Newtonsoft.Json;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityCliConnector
+namespace UnityBridgeConnector
 {
     [InitializeOnLoad]
     public static class Heartbeat

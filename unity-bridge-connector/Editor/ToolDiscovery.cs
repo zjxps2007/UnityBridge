@@ -4,10 +4,10 @@ using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json.Linq;
 
-namespace UnityCliConnector
+namespace UnityBridgeConnector
 {
     /// <summary>
-    /// Finds [UnityCliTool] handlers on demand via reflection.
+    /// Finds [UnityBridgeTool] handlers on demand via reflection.
     /// No caching, no registration — every call scans live.
     /// </summary>
     public static class ToolDiscovery
@@ -26,7 +26,7 @@ namespace UnityCliConnector
                 foreach (var type in types)
                 {
                     if (type.IsClass == false) continue;
-                    var attr = type.GetCustomAttribute<UnityCliToolAttribute>();
+                    var attr = type.GetCustomAttribute<UnityBridgeToolAttribute>();
                     if (attr == null) continue;
 
                     var name = attr.Name ?? StringCaseUtility.ToSnakeCase(type.Name);
@@ -41,7 +41,7 @@ namespace UnityCliConnector
                     if (found != null)
                     {
                         UnityEngine.Debug.LogError(
-                            $"[UnityCliConnector] Duplicate tool '{command}': " +
+                            $"[UnityBridge] Duplicate tool '{command}': " +
                             $"{foundType.FullName} and {type.FullName}. Using first found.");
                         continue;
                     }
@@ -68,7 +68,7 @@ namespace UnityCliConnector
                 foreach (var type in types)
                 {
                     if (type.IsClass == false) continue;
-                    var attr = type.GetCustomAttribute<UnityCliToolAttribute>();
+                    var attr = type.GetCustomAttribute<UnityBridgeToolAttribute>();
                     if (attr == null) continue;
 
                     var name = attr.Name ?? StringCaseUtility.ToSnakeCase(type.Name);
@@ -76,7 +76,7 @@ namespace UnityCliConnector
                     if (nameToType.TryGetValue(name, out var existing))
                     {
                         UnityEngine.Debug.LogError(
-                            $"[UnityCliConnector] Duplicate tool name '{name}': " +
+                            $"[UnityBridge] Duplicate tool name '{name}': " +
                             $"{existing.FullName} and {type.FullName}. " +
                             $"Rename one or remove the duplicate.");
                         continue;

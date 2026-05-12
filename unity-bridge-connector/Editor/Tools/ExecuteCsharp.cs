@@ -11,9 +11,9 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Name = "exec", Description = "Execute arbitrary C# code at runtime. Full access to Unity and all loaded assemblies.")]
+    [UnityBridgeTool(Name = "exec", Description = "Execute arbitrary C# code at runtime. Full access to Unity and all loaded assemblies.")]
     public static class ExecuteCsharp
     {
         const int CompileTimeoutMs = 30000;

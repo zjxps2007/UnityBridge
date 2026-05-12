@@ -1,8 +1,8 @@
 {
-  "name": "UnityCliConnector.TestRunner",
-  "rootNamespace": "UnityCliConnector.TestRunner",
+  "name": "UnityBridgeConnector.TestRunner",
+  "rootNamespace": "UnityBridgeConnector.TestRunner",
   "references": [
-    "UnityCliConnector.Editor",
+    "UnityBridgeConnector.Editor",
     "UnityEditor.TestRunner"
   ],
   "includePlatforms": ["Editor"],

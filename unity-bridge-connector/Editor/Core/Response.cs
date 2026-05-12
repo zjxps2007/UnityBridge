@@ -1,4 +1,4 @@
-namespace UnityCliConnector
+namespace UnityBridgeConnector
 {
     public class SuccessResponse
     {

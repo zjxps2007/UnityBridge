@@ -6,9 +6,9 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Name = "console", Description = "Read or clear Unity console logs.")]
+    [UnityBridgeTool(Name = "console", Description = "Read or clear Unity console logs.")]
     public static class ReadConsole
     {
         private static MethodInfo _startGettingEntriesMethod, _endGettingEntriesMethod, _clearMethod, _getCountMethod, _getEntryMethod;
@@ -46,7 +46,7 @@ namespace UnityCliConnector.Tools
             }
             catch (Exception e)
             {
-                Debug.LogError($"[UnityCliConnector] ReadConsole init failed: {e.Message}");
+                Debug.LogError($"[UnityBridge] ReadConsole init failed: {e.Message}");
                 _startGettingEntriesMethod = _endGettingEntriesMethod = _clearMethod = _getCountMethod = _getEntryMethod = null;
                 _modeField = _messageField = _fileField = _lineField = null;
                 _logEntryType = null;

@@ -10,9 +10,9 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
-namespace UnityCliConnector.TestRunner
+namespace UnityBridgeConnector.TestRunner
 {
-    [UnityCliTool(Description = "Run Unity EditMode or PlayMode tests and return results.")]
+    [UnityBridgeTool(Description = "Run Unity EditMode or PlayMode tests and return results.")]
     public static class RunTests
     {
         internal static readonly string StatusDir = Path.Combine(
@@ -208,7 +208,7 @@ namespace UnityCliConnector.TestRunner
             }
             catch (Exception ex)
             {
-                Debug.LogError($"[UnityCliConnector] Failed to write test results: {ex.Message}");
+                Debug.LogError($"[UnityBridge] Failed to write test results: {ex.Message}");
             }
         }
 

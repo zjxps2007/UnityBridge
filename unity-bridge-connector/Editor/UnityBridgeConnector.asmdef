@@ -1,6 +1,6 @@
 {
-  "name": "UnityCliConnector.Editor",
-  "rootNamespace": "UnityCliConnector",
+  "name": "UnityBridgeConnector.Editor",
+  "rootNamespace": "UnityBridgeConnector",
   "references": [],
   "includePlatforms": ["Editor"],
   "excludePlatforms": [],

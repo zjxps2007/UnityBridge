@@ -4,9 +4,9 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Name = "screenshot", Description = "Capture a screenshot of the Unity editor. Views: scene, game.")]
+    [UnityBridgeTool(Name = "screenshot", Description = "Capture a screenshot of the Unity editor. Views: scene, game.")]
     public static class EditorScreenshot
     {
         private const int DefaultWidth = 1920;

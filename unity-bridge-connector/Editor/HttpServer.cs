@@ -10,7 +10,7 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEngine;
 
-namespace UnityCliConnector
+namespace UnityBridgeConnector
 {
     /// <summary>
     /// Lightweight HTTP server on localhost. Receives CLI commands as POST /command,
@@ -75,7 +75,7 @@ namespace UnityCliConnector
 
             Heartbeat.MarkStopped();
             ScheduleRetry();
-            LogStartFailure("[UnityCliConnector] Failed to start HTTP server — no available port", true);
+            LogStartFailure("[UnityBridge] Failed to start HTTP server — no available port", true);
         }
 
         static bool TryStartOnPort(int port)
@@ -95,7 +95,7 @@ namespace UnityCliConnector
 
                 _ = ListenLoop(listener, cts);
 
-                Debug.Log($"[UnityCliConnector] HTTP server started on port {port}");
+                Debug.Log($"[UnityBridge] HTTP server started on port {port}");
                 return true;
             }
             catch (HttpListenerException)
@@ -110,7 +110,7 @@ namespace UnityCliConnector
             catch (Exception ex)
             {
                 ScheduleRetry();
-                LogStartFailure($"[UnityCliConnector] Failed to start HTTP server on port {port}: {ex.Message}", true);
+                LogStartFailure($"[UnityBridge] Failed to start HTTP server on port {port}: {ex.Message}", true);
                 return false;
             }
         }
@@ -172,7 +172,7 @@ namespace UnityCliConnector
             var port = s_Port;
             StopListener();
             Heartbeat.MarkStopped();
-            Debug.Log($"[UnityCliConnector] HTTP server stopped (was port {port})");
+            Debug.Log($"[UnityBridge] HTTP server stopped (was port {port})");
         }
 
         static void ForceEditorUpdate()
@@ -241,7 +241,7 @@ namespace UnityCliConnector
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"[UnityCliConnector] ListenLoop crashed: {ex.Message}");
+                System.Diagnostics.Debug.WriteLine($"[UnityBridge] ListenLoop crashed: {ex.Message}");
             }
             finally
             {

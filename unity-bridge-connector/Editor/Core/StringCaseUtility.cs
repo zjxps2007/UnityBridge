@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace UnityCliConnector
+namespace UnityBridgeConnector
 {
     public static class StringCaseUtility
     {

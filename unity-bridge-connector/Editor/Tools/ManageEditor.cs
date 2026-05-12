@@ -5,9 +5,9 @@ using Newtonsoft.Json.Linq;
 using UnityEditor;
 using UnityEditorInternal;
 
-namespace UnityCliConnector.Tools
+namespace UnityBridgeConnector.Tools
 {
-    [UnityCliTool(Description = "Controls Unity editor state. Actions: play, stop, pause, refresh, set_active_tool, add_tag, remove_tag, add_layer, remove_layer.")]
+    [UnityBridgeTool(Description = "Controls Unity editor state. Actions: play, stop, pause, refresh, set_active_tool, add_tag, remove_tag, add_layer, remove_layer.")]
     public static class ManageEditor
     {
         private const int FirstUserLayerIndex = 8;
@@ -50,7 +50,7 @@ namespace UnityCliConnector.Tools
                 case "play":
                     if (!EditorApplication.isPlaying)
                     {
-                        UnityCliConnector.Heartbeat.MarkEnteringPlayMode();
+                        UnityBridgeConnector.Heartbeat.MarkEnteringPlayMode();
                         EditorApplication.isPlaying = true;
                         if (waitForCompletion)
                         {
@@ -72,7 +72,7 @@ namespace UnityCliConnector.Tools
                 case "stop":
                     if (EditorApplication.isPlaying)
                     {
-                        UnityCliConnector.Heartbeat.MarkExitingPlayMode();
+                        UnityBridgeConnector.Heartbeat.MarkExitingPlayMode();
                         EditorApplication.isPlaying = false;
                         if (waitForCompletion)
                         {

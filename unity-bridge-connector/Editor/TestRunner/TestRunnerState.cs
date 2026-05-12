@@ -7,7 +7,7 @@ using UnityEditor.TestTools.TestRunner.Api;
 using UnityEngine;
 using Object = UnityEngine.Object;
 
-namespace UnityCliConnector.TestRunner
+namespace UnityBridgeConnector.TestRunner
 {
     /// <summary>
     /// Survives domain reloads via [InitializeOnLoad].

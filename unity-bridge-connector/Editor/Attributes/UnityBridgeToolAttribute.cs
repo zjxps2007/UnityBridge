@@ -1,14 +1,14 @@
 using System;
 
-namespace UnityCliConnector
+namespace UnityBridgeConnector
 {
     /// <summary>
-    /// Marks a static class as a CLI tool handler.
+    /// Marks a static class as a UnityBridge tool handler.
     /// The class must have a static HandleCommand(Newtonsoft.Json.Linq.JObject) method.
     /// Class name is auto-converted to snake_case for the command name.
     /// </summary>
     [AttributeUsage(AttributeTargets.Class)]
-    public class UnityCliToolAttribute : Attribute
+    public class UnityBridgeToolAttribute : Attribute
     {
         public string Description { get; set; } = "";
         public string Name { get; set; }

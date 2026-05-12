@@ -214,6 +214,22 @@ Unknown command names are sent directly as connector commands. Flags such as
 Flags without values are sent as `true`; `--no-name` is sent as `false`.
 Plain positional arguments are sent in an `args` array.
 
+Custom Unity-side tools should use the connector namespace and attribute:
+
+```csharp
+using Newtonsoft.Json.Linq;
+using UnityBridgeConnector;
+
+[UnityBridgeTool(Name = "my_custom_tool")]
+public static class MyCustomTool
+{
+    public static object HandleCommand(JObject parameters)
+    {
+        return new SuccessResponse("ok");
+    }
+}
+```
+
 Reserved names such as `profiler`, `console`, and `test` are handled by
 UnityBridge's built-in CLI first. If a built-in command needs detailed
 parameters that are not exposed as short flags yet, use
