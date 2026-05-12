@@ -83,7 +83,7 @@ unity-bridge tools
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.0
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.1
 ```
 
 ## CLI 사용법

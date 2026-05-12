@@ -19,7 +19,7 @@ namespace UnityCliConnector
         const double REFRESH_GRACE_SECONDS = 1.0;
         const double COMPILE_GRACE_SECONDS = 5.0;
         const double PLAYMODE_GRACE_SECONDS = 5.0;
-        const string CONNECTOR_VERSION = "0.1.0";
+        const string CONNECTOR_VERSION = "0.1.1";
         static string s_ForcedState;
         static double s_RefreshRequestTime;
         static double s_CompileRequestTime;

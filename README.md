@@ -85,7 +85,7 @@ unity-bridge tools
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.0
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.1
 ```
 
 ## CLI Usage
