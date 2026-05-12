@@ -186,8 +186,14 @@ unity-bridge screenshot --view game --width 1280 --height 720
 unity-bridge exec --code "return UnityEditor.EditorApplication.isPlaying;"
 unity-bridge exec --code "return UnityEngine.Application.dataPath;"
 unity-bridge exec --code-file .\query.cs
+unity-bridge exec --file .\query.cs
+Get-Content .\query.cs -Raw | unity-bridge exec --stdin
 unity-bridge exec --code "return Unity.Entities.World.All.Count;" --using Unity.Entities
 ```
+
+Use inline `--code` for short snippets. For multi-line C# or code containing
+characters that shells often interpret, prefer `--file`/`--code-file` or
+`--stdin`.
 
 ### Raw Connector Commands
 

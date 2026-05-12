@@ -132,7 +132,8 @@ def build_parser() -> argparse.ArgumentParser:
     exec_command = sub.add_parser("exec", parents=[parent], help="Execute arbitrary C# code through Unity.")
     code_group = exec_command.add_mutually_exclusive_group(required=True)
     code_group.add_argument("--code", help="C# code to execute. Use 'return' for output.")
-    code_group.add_argument("--code-file", help="Read C# code from a file.")
+    code_group.add_argument("--code-file", "--file", dest="code_file", help="Read C# code from a file.")
+    code_group.add_argument("--stdin", action="store_true", help="Read C# code from standard input.")
     exec_command.add_argument("--using", dest="usings", action="append", help="Additional using namespace. Repeatable.")
     exec_command.add_argument("--csc", help="Override csc compiler path.")
     exec_command.add_argument("--dotnet", help="Override dotnet runtime path.")
@@ -481,10 +482,12 @@ def _direct_json_requested(argv: list[str]) -> bool:
 def _read_code_arg(args: argparse.Namespace) -> str:
     if args.code is not None:
         return args.code
+    if getattr(args, "stdin", False):
+        return sys.stdin.read()
     try:
         return Path(args.code_file).read_text(encoding="utf-8")
     except OSError as exc:
-        raise DiscoveryError(f"cannot read --code-file: {exc}") from exc
+        raise DiscoveryError(f"cannot read --code-file/--file: {exc}") from exc
 
 
 def _parse_params(value: str) -> Any:

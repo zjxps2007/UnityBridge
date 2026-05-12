@@ -788,6 +788,64 @@ class CliTests(unittest.TestCase):
                 },
             )
 
+    def test_cli_exec_accepts_file_alias(self) -> None:
+        response_body = json.dumps({"success": True, "message": "ok"}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp) / "instances"
+            directory.mkdir()
+            code_file = Path(tmp) / "query.cs"
+            code_file.write_text("return UnityEngine.Application.dataPath;", encoding="utf-8")
+            write_instance(directory, "game", port=server.port, pid=0)
+
+            with redirect_stdout(StringIO()):
+                exit_code = cli_main(
+                    [
+                        "--instances-dir",
+                        str(directory),
+                        "exec",
+                        "--file",
+                        str(code_file),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                server.received[0]["body"],
+                {
+                    "command": "exec",
+                    "params": {"code": "return UnityEngine.Application.dataPath;"},
+                },
+            )
+
+    def test_cli_exec_accepts_stdin(self) -> None:
+        response_body = json.dumps({"success": True, "message": "ok"}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, pid=0)
+            old_stdin = sys.stdin
+            sys.stdin = StringIO("return 1 + 2;")
+            try:
+                with redirect_stdout(StringIO()):
+                    exit_code = cli_main(
+                        [
+                            "--instances-dir",
+                            str(directory),
+                            "exec",
+                            "--stdin",
+                        ]
+                    )
+            finally:
+                sys.stdin = old_stdin
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                server.received[0]["body"],
+                {
+                    "command": "exec",
+                    "params": {"code": "return 1 + 2;"},
+                },
+            )
+
     def test_cli_direct_custom_tool_accepts_dynamic_flags(self) -> None:
         response_body = json.dumps({"success": True, "message": "Enemy spawned"}).encode("utf-8")
         with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
