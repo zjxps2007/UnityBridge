@@ -130,12 +130,14 @@ bridge.refresh_assets()
 bridge.refresh_assets(paths=[r"D:\UnityProjects\MyGame\Assets\Scripts\Player.cs"], wait=True)
 logs = bridge.read_console(count=50, types=["error", "warning", "log"])
 tests = bridge.run_tests(mode="EditMode")
+play = bridge.editor_play(wait=True)
 ```
 
 `refresh_assets()`에 경로를 넘기지 않으면 Unity 전체 에셋 새로고침을 실행합니다.
 `paths`를 넘기면 해당 asset path만 import하며, Unity 프로젝트 내부의 절대 경로는 connector가
 Unity asset path로 정규화합니다. Agent 워크플로에서 refresh/import 이후 안정적인 Unity `ready`
-heartbeat를 기다려야 한다면 `wait=True`를 사용하세요.
+heartbeat를 기다려야 한다면 `wait=True`를 사용하세요. 대기형 adapter 작업은 프로젝트 경로
+기준으로 Unity를 다시 찾기 때문에, 도메인 리로드로 connector 포트가 바뀌어도 따라갈 수 있습니다.
 
 adapter는 의도적으로 얇은 계층입니다. 쓰기 쉬운 Python 메서드를 connector command로 매핑하지만,
 allowlist나 denylist 같은 정책 계층은 추가하지 않습니다. connector params를 정확히 지정해야 하면

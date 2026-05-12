@@ -105,10 +105,15 @@ unity-bridge console --clear
 ```powershell
 unity-bridge editor play
 unity-bridge editor play --wait
+unity-bridge editor play --wait --timeout-sec 300
 unity-bridge editor stop
 unity-bridge editor stop --wait
 unity-bridge editor pause
 ```
+
+`--wait`를 사용하면 `play`는 `playing` heartbeat를, `stop`은 안정적인 `ready`
+heartbeat를 기다립니다. 도메인 리로드 중 connector가 다른 포트에서 다시 열려도 같은 Unity
+프로젝트를 기준으로 다시 찾아서 대기합니다.
 
 ### 테스트 실행
 
@@ -125,7 +130,8 @@ unity-bridge test --mode PlayMode --no-wait
 
 `PlayMode` 테스트는 기본적으로 Unity가 결과 파일을 쓸 때까지 기다린 뒤 최종 성공/실패를
 반환합니다. 즉, 테스트 실패 시 CLI exit code도 실패로 처리됩니다. 즉시 반환이 필요하면
-`--no-wait`를 사용하세요.
+`--no-wait`를 사용하세요. 대기 중에는 처음 포트가 계속 유효하다고 가정하지 않고 프로젝트
+경로 기준으로 Unity Editor를 다시 찾습니다.
 
 `test` 명령은 Unity Test Framework(`com.unity.test-framework`)가 설치된 프로젝트에서만
 사용할 수 있습니다. UnityBridge는 이 패키지를 자동 설치하지 않습니다. 설치되어 있지 않으면
@@ -146,7 +152,11 @@ unity-bridge menu "Window/General/Console"
 unity-bridge reserialize
 unity-bridge reserialize Assets/Prefabs/Player.prefab
 unity-bridge reserialize Assets/Scenes/Main.unity Assets/Scenes/Lobby.unity
+unity-bridge reserialize Assets/Prefabs/Player.prefab --wait
 ```
+
+리시리얼라이즈가 긴 Editor 업데이트를 유발할 수 있고 다음 Agent 단계가 안정적인 Unity 상태를
+필요로 한다면 `--wait`를 사용하세요.
 
 ### Profiler
 

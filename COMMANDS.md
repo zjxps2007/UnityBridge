@@ -108,10 +108,15 @@ unity-bridge console --clear
 ```powershell
 unity-bridge editor play
 unity-bridge editor play --wait
+unity-bridge editor play --wait --timeout-sec 300
 unity-bridge editor stop
 unity-bridge editor stop --wait
 unity-bridge editor pause
 ```
+
+With `--wait`, `play` waits for a `playing` heartbeat and `stop` waits for a
+stable `ready` heartbeat. The wait follows the same Unity project even if the
+connector restarts on a different port during a domain reload.
 
 ### Tests
 
@@ -128,7 +133,9 @@ unity-bridge test --mode PlayMode --no-wait
 
 `PlayMode` tests wait for Unity's result file by default, then return the final
 success or failure. Test failures therefore produce a failing CLI exit code.
-Use `--no-wait` when you intentionally want to return immediately.
+Use `--no-wait` when you intentionally want to return immediately. While
+waiting, UnityBridge resolves the editor again by project path instead of
+assuming the original port is still valid.
 
 The `test` command requires Unity Test Framework (`com.unity.test-framework`) in
 the Unity project. UnityBridge does not install that package automatically. If it
@@ -149,7 +156,11 @@ unity-bridge menu "Window/General/Console"
 unity-bridge reserialize
 unity-bridge reserialize Assets/Prefabs/Player.prefab
 unity-bridge reserialize Assets/Scenes/Main.unity Assets/Scenes/Lobby.unity
+unity-bridge reserialize Assets/Prefabs/Player.prefab --wait
 ```
+
+Use `--wait` when reserialization may trigger a long editor update and the next
+agent step needs Unity to be stable before continuing.
 
 ### Profiler
 

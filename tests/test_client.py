@@ -325,6 +325,9 @@ class HttpClientTests(unittest.TestCase):
 
             self.assertTrue(response.success)
             self.assertIn("connection closed before response", response.message)
+            self.assertTrue(response.completion_unknown)
+            self.assertEqual(response.data["completion"], "unknown")
+            self.assertTrue(response.data["connection_closed"])
 
     def test_unity_client_discovers_instance_and_calls_command(self) -> None:
         response_body = json.dumps({"success": True, "message": "ok"}).encode("utf-8")
@@ -373,7 +376,7 @@ class AdapterTests(unittest.TestCase):
                 },
             )
 
-    def test_adapter_refresh_assets_can_wait_for_new_ready_heartbeat(self) -> None:
+    def test_adapter_refresh_assets_can_wait_for_new_ready_heartbeat_on_new_port(self) -> None:
         response_body = json.dumps(
             {
                 "success": True,
@@ -387,7 +390,7 @@ class AdapterTests(unittest.TestCase):
             adapter = UnityBridgeAdapter(instances_dir=directory, process_checker=lambda pid: False)
 
             def write_ready() -> None:
-                write_instance(directory, "game", port=server.port, timestamp=20)
+                write_instance(directory, "game", port=server.port + 1, timestamp=20)
 
             timer = threading.Timer(0.05, write_ready)
             timer.start()
@@ -404,6 +407,8 @@ class AdapterTests(unittest.TestCase):
 
             self.assertTrue(result.success)
             self.assertEqual(result.data["ready"]["timestamp"], 20)
+            self.assertEqual(result.data["initial_port"], server.port)
+            self.assertEqual(result.data["current_port"], server.port + 1)
             self.assertEqual(
                 server.received[0]["body"],
                 {
@@ -445,21 +450,37 @@ class AdapterTests(unittest.TestCase):
                 },
             )
 
-    def test_adapter_editor_play_maps_to_manage_editor(self) -> None:
+    def test_adapter_editor_play_waits_for_playing_state_after_port_change(self) -> None:
         response_body = json.dumps({"success": True, "message": "Entered play mode (confirmed)."}).encode("utf-8")
         with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
             directory = Path(tmp)
-            write_instance(directory, "game", port=server.port)
+            write_instance(directory, "game", port=server.port, timestamp=10)
             adapter = UnityBridgeAdapter(instances_dir=directory, process_checker=lambda pid: False)
 
-            result = adapter.editor_play(wait=True)
+            def write_playing() -> None:
+                write_instance(directory, "game", state="playing", port=server.port + 2, timestamp=20)
+
+            timer = threading.Timer(0.05, write_playing)
+            timer.start()
+            try:
+                result = adapter.editor_play(
+                    wait=True,
+                    timeout_sec=2,
+                    poll_interval_sec=0.01,
+                )
+            finally:
+                timer.cancel()
 
             self.assertTrue(result.success)
+            self.assertEqual(result.data["completion"], "confirmed")
+            self.assertEqual(result.data["state"]["state"], "playing")
+            self.assertEqual(result.data["initial_port"], server.port)
+            self.assertEqual(result.data["current_port"], server.port + 2)
             self.assertEqual(
                 server.received[0]["body"],
                 {
                     "command": "manage_editor",
-                    "params": {"action": "play", "wait_for_completion": True},
+                    "params": {"action": "play", "wait_for_completion": False},
                 },
             )
 
@@ -479,6 +500,35 @@ class AdapterTests(unittest.TestCase):
                     "params": {"menu_path": "File/Save Project"},
                 },
             )
+
+    def test_adapter_reserialize_can_wait_for_ready_after_port_change(self) -> None:
+        response_body = json.dumps({"success": True, "message": "Reserialize complete."}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, timestamp=10)
+            adapter = UnityBridgeAdapter(instances_dir=directory, process_checker=lambda pid: False)
+
+            def write_ready() -> None:
+                write_instance(directory, "game", port=server.port + 3, timestamp=20)
+
+            timer = threading.Timer(0.05, write_ready)
+            timer.start()
+            try:
+                result = adapter.reserialize_assets(
+                    ["Assets/Prefabs/Player.prefab"],
+                    wait=True,
+                    timeout_sec=2,
+                    stable_sec=0.01,
+                    poll_interval_sec=0.01,
+                )
+            finally:
+                timer.cancel()
+
+            self.assertTrue(result.success)
+            self.assertEqual(result.data["completion"], "confirmed")
+            self.assertEqual(result.data["ready"]["timestamp"], 20)
+            self.assertEqual(result.data["initial_port"], server.port)
+            self.assertEqual(result.data["current_port"], server.port + 3)
 
     def test_adapter_exec_csharp_has_no_policy_gate(self) -> None:
         response_body = json.dumps({"success": True, "message": "ok", "data": 3}).encode("utf-8")

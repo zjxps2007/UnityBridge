@@ -50,6 +50,7 @@ namespace UnityCliConnector.Tools
                 case "play":
                     if (!EditorApplication.isPlaying)
                     {
+                        UnityCliConnector.Heartbeat.MarkEnteringPlayMode();
                         EditorApplication.isPlaying = true;
                         if (waitForCompletion)
                         {
@@ -71,6 +72,7 @@ namespace UnityCliConnector.Tools
                 case "stop":
                     if (EditorApplication.isPlaying)
                     {
+                        UnityCliConnector.Heartbeat.MarkExitingPlayMode();
                         EditorApplication.isPlaying = false;
                         if (waitForCompletion)
                         {

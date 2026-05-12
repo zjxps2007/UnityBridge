@@ -18,10 +18,12 @@ namespace UnityCliConnector
         const double INTERVAL = 0.5;
         const double REFRESH_GRACE_SECONDS = 1.0;
         const double COMPILE_GRACE_SECONDS = 5.0;
+        const double PLAYMODE_GRACE_SECONDS = 5.0;
         const string CONNECTOR_VERSION = "0.1.0";
         static string s_ForcedState;
         static double s_RefreshRequestTime;
         static double s_CompileRequestTime;
+        static double s_PlayModeTransitionTime;
         static string s_FilePath;
 
         static Heartbeat()
@@ -34,6 +36,7 @@ namespace UnityCliConnector
                 s_ForcedState = null;
                 s_RefreshRequestTime = 0;
                 s_CompileRequestTime = 0;
+                s_PlayModeTransitionTime = 0;
                 s_LastWrite = 0;
             };
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
@@ -47,7 +50,15 @@ namespace UnityCliConnector
         static void OnPlayModeChanged(PlayModeStateChange change)
         {
             if (change == PlayModeStateChange.ExitingEditMode)
-                WriteState("entering_playmode");
+                MarkEnteringPlayMode();
+            else if (change == PlayModeStateChange.ExitingPlayMode)
+                MarkExitingPlayMode();
+            else if (change == PlayModeStateChange.EnteredPlayMode || change == PlayModeStateChange.EnteredEditMode)
+            {
+                s_PlayModeTransitionTime = 0;
+                s_ForcedState = null;
+                Write();
+            }
         }
 
         static void WriteState(string state)
@@ -76,6 +87,18 @@ namespace UnityCliConnector
             WriteState("compiling");
         }
 
+        public static void MarkEnteringPlayMode()
+        {
+            s_PlayModeTransitionTime = EditorApplication.timeSinceStartup;
+            WriteState("entering_playmode");
+        }
+
+        public static void MarkExitingPlayMode()
+        {
+            s_PlayModeTransitionTime = EditorApplication.timeSinceStartup;
+            WriteState("exiting_playmode");
+        }
+
         static void Tick()
         {
             if (!HttpServer.IsRunning) return;
@@ -83,6 +106,17 @@ namespace UnityCliConnector
             var now = EditorApplication.timeSinceStartup;
             if (now - s_LastWrite < INTERVAL) return;
             s_LastWrite = now;
+
+            if (s_PlayModeTransitionTime > 0 &&
+                (s_ForcedState == "entering_playmode" || s_ForcedState == "exiting_playmode"))
+            {
+                if (now - s_PlayModeTransitionTime < PLAYMODE_GRACE_SECONDS)
+                {
+                    Write();
+                    return;
+                }
+                s_PlayModeTransitionTime = 0;
+            }
 
             if (s_CompileRequestTime > 0)
             {

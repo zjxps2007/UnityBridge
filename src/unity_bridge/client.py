@@ -14,6 +14,7 @@ from typing import Any, Callable
 DEFAULT_TIMEOUT_MS = 120_000
 DEFAULT_READY_TIMEOUT_SEC = 300
 DEFAULT_POLL_INTERVAL_SEC = 0.5
+UNKNOWN_COMPLETION = "unknown"
 
 ProcessDeadChecker = Callable[[int], bool]
 InstanceResolver = Callable[[], "Instance"]
@@ -109,6 +110,10 @@ class CommandResponse:
             payload.pop("data")
         return payload
 
+    @property
+    def completion_unknown(self) -> bool:
+        return isinstance(self.data, dict) and self.data.get("completion") == UNKNOWN_COMPLETION
+
 
 class UnityClient:
     def __init__(
@@ -179,6 +184,22 @@ class UnityClient:
     ) -> Instance:
         return wait_for_ready(
             self.status,
+            timeout_sec=timeout_sec,
+            after_timestamp=after_timestamp,
+            stable_sec=stable_sec,
+        )
+
+    def wait_for_state(
+        self,
+        states: str | set[str] | tuple[str, ...] | list[str],
+        *,
+        timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+        after_timestamp: int = 0,
+        stable_sec: float = 0,
+    ) -> Instance:
+        return wait_for_state(
+            self.status,
+            states,
             timeout_sec=timeout_sec,
             after_timestamp=after_timestamp,
             stable_sec=stable_sec,
@@ -350,6 +371,12 @@ def send_command(
         return CommandResponse(
             success=True,
             message=f"{command} sent (connection closed before response)",
+            data={
+                "accepted": True,
+                "completion": UNKNOWN_COMPLETION,
+                "connection_closed": True,
+                "command": command,
+            },
         )
 
     text = response_body.decode("utf-8", errors="replace")
@@ -398,29 +425,55 @@ def wait_for_ready(
     after_timestamp: int = 0,
     stable_sec: float = 0,
 ) -> Instance:
+    return wait_for_state(
+        resolve,
+        "ready",
+        timeout_sec=timeout_sec,
+        poll_interval_sec=poll_interval_sec,
+        after_timestamp=after_timestamp,
+        stable_sec=stable_sec,
+        timeout_label="Unity compilation",
+    )
+
+
+def wait_for_state(
+    resolve: InstanceResolver,
+    states: str | set[str] | tuple[str, ...] | list[str],
+    *,
+    timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+    poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+    after_timestamp: int = 0,
+    stable_sec: float = 0,
+    timeout_label: str = "Unity state",
+) -> Instance:
+    wanted = {states} if isinstance(states, str) else set(states)
+    if not wanted:
+        raise DiscoveryError("wait_for_state requires at least one state")
+
     deadline = time.monotonic() + timeout_sec
     latest: Instance | None = None
-    ready_since: float | None = None
+    state_since: float | None = None
     while time.monotonic() < deadline:
         time.sleep(poll_interval_sec)
         try:
             latest = resolve()
         except DiscoveryError:
-            ready_since = None
+            state_since = None
             continue
         if after_timestamp and latest.timestamp <= after_timestamp:
-            ready_since = None
+            state_since = None
             continue
-        if latest.state == "ready":
+        if latest.state in wanted:
             now = time.monotonic()
-            if ready_since is None:
-                ready_since = now
-            if now - ready_since >= stable_sec:
+            if state_since is None:
+                state_since = now
+            if now - state_since >= stable_sec:
                 return latest
         else:
-            ready_since = None
+            state_since = None
     detail = f" last_state={latest.state}" if latest is not None else ""
-    raise DiscoveryError(f"timed out waiting for Unity compilation ({timeout_sec}s).{detail}")
+    states_label = ", ".join(sorted(wanted))
+    raise DiscoveryError(f"timed out waiting for {timeout_label} '{states_label}' ({timeout_sec}s).{detail}")
 
 
 def is_process_dead(pid: int) -> bool:

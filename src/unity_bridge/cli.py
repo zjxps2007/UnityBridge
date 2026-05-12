@@ -106,12 +106,19 @@ def build_parser() -> argparse.ArgumentParser:
     editor = sub.add_parser("editor", parents=[parent], help="Control Unity Editor play state.")
     editor.add_argument("action", choices=["play", "stop", "pause"], help="Editor action.")
     editor.add_argument("--wait", action="store_true", help="Wait until play or stop completes.")
+    editor.add_argument("--timeout-sec", type=int, default=300, help="Play/stop wait timeout in seconds.")
+    editor.add_argument("--stable-sec", type=float, default=0.5, help="Required stable ready duration for stop waits.")
+    editor.add_argument("--poll-interval-sec", type=float, default=0.5, help="Play/stop wait poll interval in seconds.")
 
     menu = sub.add_parser("menu", parents=[parent], help="Execute a Unity menu item.")
     menu.add_argument("menu_path", help="Unity menu item path, for example File/Save Project.")
 
     reserialize = sub.add_parser("reserialize", parents=[parent], help="Force reserialize assets.")
     reserialize.add_argument("paths", nargs="*", help="Optional asset paths. Omit for the entire project.")
+    reserialize.add_argument("--wait", action="store_true", help="Wait until Unity reaches stable ready after reserialize.")
+    reserialize.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
+    reserialize.add_argument("--stable-sec", type=float, default=0.5, help="Required stable ready duration when --wait is used.")
+    reserialize.add_argument("--poll-interval-sec", type=float, default=0.5, help="Ready wait poll interval in seconds.")
 
     profiler = sub.add_parser("profiler", parents=[parent], help="Control Unity Profiler.")
     profiler.add_argument("action", nargs="?", default="status", help="Profiler action: status, enable, disable, clear, hierarchy.")
@@ -207,9 +214,18 @@ def main(argv: list[str] | None = None) -> int:
 
         if args.command == "editor":
             if args.action == "play":
-                response = adapter.editor_play(wait=args.wait)
+                response = adapter.editor_play(
+                    wait=args.wait,
+                    timeout_sec=args.timeout_sec,
+                    poll_interval_sec=args.poll_interval_sec,
+                )
             elif args.action == "stop":
-                response = adapter.editor_stop(wait=args.wait)
+                response = adapter.editor_stop(
+                    wait=args.wait,
+                    timeout_sec=args.timeout_sec,
+                    stable_sec=args.stable_sec,
+                    poll_interval_sec=args.poll_interval_sec,
+                )
             else:
                 response = adapter.editor_pause()
             _print(response, json_output=args.json)
@@ -221,7 +237,13 @@ def main(argv: list[str] | None = None) -> int:
             return 0 if response.success else 1
 
         if args.command == "reserialize":
-            response = adapter.reserialize_assets(args.paths or None)
+            response = adapter.reserialize_assets(
+                args.paths or None,
+                wait=args.wait,
+                timeout_sec=args.timeout_sec,
+                stable_sec=args.stable_sec,
+                poll_interval_sec=args.poll_interval_sec,
+            )
             _print(response, json_output=args.json)
             return 0 if response.success else 1
 

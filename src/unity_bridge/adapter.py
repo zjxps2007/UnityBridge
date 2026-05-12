@@ -14,13 +14,16 @@ from .client import CommandResponse
 from .client import DiscoveryError
 from .client import Instance
 from .client import ProcessDeadChecker
+from .client import UnityConnectionError
 from .client import UnityClient
-from .client import find_by_port
+from .client import discover_instance
 from .client import wait_for_ready
+from .client import wait_for_state
 
 
 DEFAULT_TEST_TIMEOUT_SEC = 600
 DEFAULT_TEST_POLL_INTERVAL_SEC = 0.5
+DISRUPTIVE_SEND_TIMEOUT_MS = 10_000
 TEST_FRAMEWORK_MISSING_MESSAGE = (
     "'run_tests' is not available.\n"
     "Install the Unity Test Framework package:\n"
@@ -121,7 +124,11 @@ class UnityBridgeAdapter:
             }
         )
         target = self.client.discover_instance()
-        response = self.client.call("refresh_unity", payload, instance=target)
+        response = self._send_disruptive_command("refresh_unity", payload, target) if wait else self.client.call(
+            "refresh_unity",
+            payload,
+            instance=target,
+        )
         result = UnityActionResult.from_response(
             tool="refresh",
             command="refresh_unity",
@@ -132,17 +139,56 @@ class UnityBridgeAdapter:
             return result
 
         ready = wait_for_ready(
-            lambda: find_by_port(
-                target.port,
-                instances_dir=self.client.instances_dir,
-                process_checker=self.client.process_checker,
-            ),
+            lambda: self._resolve_same_project(target),
             timeout_sec=timeout_sec,
             poll_interval_sec=poll_interval_sec,
             after_timestamp=target.timestamp,
             stable_sec=stable_sec,
         )
-        return _with_data(result, {"ready": ready.to_dict()})
+        return _with_data(
+            result,
+            {
+                "completion": "confirmed",
+                "ready": ready.to_dict(),
+                "initial_port": target.port,
+                "current_port": ready.port,
+            },
+        )
+
+    def wait_for_ready(
+        self,
+        *,
+        timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+        stable_sec: float = 0.5,
+        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+    ) -> Instance:
+        target = self.client.discover_instance()
+        return wait_for_ready(
+            lambda: self._resolve_same_project(target),
+            timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec,
+            after_timestamp=target.timestamp,
+            stable_sec=stable_sec,
+        )
+
+    def wait_for_state(
+        self,
+        states: str | Iterable[str],
+        *,
+        timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+        stable_sec: float = 0,
+        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+        after_timestamp: int = 0,
+    ) -> Instance:
+        target = self.client.discover_instance()
+        return wait_for_state(
+            lambda: self._resolve_same_project(target),
+            states,
+            timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec,
+            after_timestamp=after_timestamp or target.timestamp,
+            stable_sec=stable_sec,
+        )
 
     def read_console(
         self,
@@ -184,7 +230,19 @@ class UnityBridgeAdapter:
             }
         )
         target = self.client.discover_instance()
-        response = self.client.call("run_tests", payload, instance=target)
+        should_wait = wait if wait is not None else mode.lower() == "playmode"
+        is_playmode = mode.lower() == "playmode"
+        try:
+            response = self.client.call(
+                "run_tests",
+                payload,
+                instance=target,
+                timeout_ms=self._disruptive_send_timeout_ms() if should_wait and is_playmode else None,
+            )
+        except UnityConnectionError as exc:
+            if not should_wait or not is_playmode:
+                raise
+            response = _unknown_completion_response("run_tests", exc)
         if _is_unknown_command_response(response, "run_tests"):
             response = CommandResponse(success=False, message=TEST_FRAMEWORK_MISSING_MESSAGE)
         result = UnityActionResult.from_response(
@@ -193,20 +251,21 @@ class UnityBridgeAdapter:
             params=payload,
             response=response,
         )
-        should_wait = wait if wait is not None else mode.lower() == "playmode"
-        if not should_wait or mode.lower() != "playmode" or response.message != "running":
+        if (
+            not should_wait
+            or not is_playmode
+            or not response.success
+            or (response.message != "running" and not response.completion_unknown)
+        ):
             return result
 
+        result_port = _response_port(response, target.port)
         final_response = wait_for_test_results(
-            target.port,
+            result_port,
             status_dir=self.status_dir,
             timeout_sec=timeout_sec,
             poll_interval_sec=poll_interval_sec,
-            status_resolver=lambda: find_by_port(
-                target.port,
-                instances_dir=self.client.instances_dir,
-                process_checker=self.client.process_checker,
-            ),
+            status_resolver=lambda: self._resolve_same_project(target),
         )
         return UnityActionResult.from_response(
             tool="test",
@@ -215,19 +274,79 @@ class UnityBridgeAdapter:
             response=final_response,
         )
 
-    def editor_play(self, *, wait: bool = False) -> UnityActionResult:
-        return self.manage_editor("play", wait=wait)
+    def editor_play(
+        self,
+        *,
+        wait: bool = False,
+        timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+    ) -> UnityActionResult:
+        return self.manage_editor(
+            "play",
+            wait=wait,
+            timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec,
+        )
 
-    def editor_stop(self, *, wait: bool = False) -> UnityActionResult:
-        return self.manage_editor("stop", wait=wait)
+    def editor_stop(
+        self,
+        *,
+        wait: bool = False,
+        timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+        stable_sec: float = 0.5,
+        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+    ) -> UnityActionResult:
+        return self.manage_editor(
+            "stop",
+            wait=wait,
+            timeout_sec=timeout_sec,
+            stable_sec=stable_sec,
+            poll_interval_sec=poll_interval_sec,
+        )
 
     def editor_pause(self) -> UnityActionResult:
         return self.manage_editor("pause")
 
     def manage_editor(self, action: str, **params: Any) -> UnityActionResult:
+        action = action.lower()
+        wait = params.pop("wait", None)
+        timeout_sec = int(params.pop("timeout_sec", DEFAULT_READY_TIMEOUT_SEC))
+        stable_sec = float(params.pop("stable_sec", 0.5 if action == "stop" else 0))
+        poll_interval_sec = float(params.pop("poll_interval_sec", DEFAULT_POLL_INTERVAL_SEC))
         payload = {"action": action, **params}
-        if "wait" in payload:
-            payload["wait_for_completion"] = payload.pop("wait")
+        if wait is not None:
+            payload["wait_for_completion"] = False if wait and action in {"play", "stop"} else bool(wait)
+
+        if wait and action in {"play", "stop"}:
+            target = self.client.discover_instance()
+            response = self._send_disruptive_command("manage_editor", payload, target)
+            result = UnityActionResult.from_response(
+                tool="editor",
+                command="manage_editor",
+                params=payload,
+                response=response,
+            )
+            if not response.success:
+                return result
+            target_state = "playing" if action == "play" else "ready"
+            reached = wait_for_state(
+                lambda: self._resolve_same_project(target),
+                target_state,
+                timeout_sec=timeout_sec,
+                poll_interval_sec=poll_interval_sec,
+                after_timestamp=target.timestamp,
+                stable_sec=stable_sec,
+                timeout_label=f"editor {action}",
+            )
+            return _with_data(
+                result,
+                {
+                    "completion": "confirmed",
+                    "state": reached.to_dict(),
+                    "initial_port": target.port,
+                    "current_port": reached.port,
+                },
+            )
         return self._call("editor", "manage_editor", payload)
 
     def execute_menu_item(self, menu_path: str) -> UnityActionResult:
@@ -236,14 +355,50 @@ class UnityBridgeAdapter:
     def save_project(self) -> UnityActionResult:
         return self.execute_menu_item("File/Save Project")
 
-    def reserialize_assets(self, paths: str | Iterable[str] | None = None) -> UnityActionResult:
+    def reserialize_assets(
+        self,
+        paths: str | Iterable[str] | None = None,
+        *,
+        wait: bool = False,
+        timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
+        stable_sec: float = 0.5,
+        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+    ) -> UnityActionResult:
         if paths is None:
             payload: dict[str, Any] = {}
         elif isinstance(paths, str):
             payload = {"path": paths}
         else:
             payload = {"paths": list(paths)}
-        return self._call("reserialize", "reserialize", payload)
+        if not wait:
+            return self._call("reserialize", "reserialize", payload)
+
+        target = self.client.discover_instance()
+        response = self._send_disruptive_command("reserialize", payload, target)
+        result = UnityActionResult.from_response(
+            tool="reserialize",
+            command="reserialize",
+            params=payload,
+            response=response,
+        )
+        if not response.success:
+            return result
+        ready = wait_for_ready(
+            lambda: self._resolve_same_project(target),
+            timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec,
+            after_timestamp=target.timestamp,
+            stable_sec=stable_sec,
+        )
+        return _with_data(
+            result,
+            {
+                "completion": "confirmed",
+                "ready": ready.to_dict(),
+                "initial_port": target.port,
+                "current_port": ready.port,
+            },
+        )
 
     def profiler(self, *, action: str = "status", **params: Any) -> UnityActionResult:
         return self._call("profiler", "profiler", {"action": action, **params})
@@ -296,6 +451,33 @@ class UnityBridgeAdapter:
             response=response,
         )
 
+    def _send_disruptive_command(
+        self,
+        command: str,
+        payload: dict[str, Any],
+        target: Instance,
+    ) -> CommandResponse:
+        try:
+            return self.client.call(
+                command,
+                payload,
+                instance=target,
+                timeout_ms=self._disruptive_send_timeout_ms(),
+            )
+        except UnityConnectionError as exc:
+            return _unknown_completion_response(command, exc)
+
+    def _resolve_same_project(self, baseline: Instance) -> Instance:
+        return discover_instance(
+            project=baseline.project_path,
+            instances_dir=self.client.instances_dir,
+            cwd=self.client.cwd,
+            process_checker=self.client.process_checker,
+        )
+
+    def _disruptive_send_timeout_ms(self) -> int:
+        return max(1_000, min(self.client.timeout_ms, DISRUPTIVE_SEND_TIMEOUT_MS))
+
 
 def _compact(params: dict[str, Any]) -> dict[str, Any]:
     return {key: value for key, value in params.items() if value is not None}
@@ -318,6 +500,28 @@ def _with_data(result: UnityActionResult, extra: dict[str, Any]) -> UnityActionR
         message=result.message,
         data=data,
     )
+
+
+def _unknown_completion_response(command: str, exc: UnityConnectionError) -> CommandResponse:
+    return CommandResponse(
+        success=True,
+        message=f"{command} sent (completion unknown: {exc})",
+        data={
+            "accepted": True,
+            "completion": "unknown",
+            "connection_error": str(exc),
+            "command": command,
+        },
+    )
+
+
+def _response_port(response: CommandResponse, default: int) -> int:
+    if isinstance(response.data, dict):
+        try:
+            return int(response.data.get("port") or default)
+        except (TypeError, ValueError):
+            return default
+    return default
 
 
 def _is_unknown_command_response(response: CommandResponse, command: str) -> bool:

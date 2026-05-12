@@ -12,6 +12,7 @@ from .client import find_active_by_port
 from .client import find_by_port
 from .client import scan_instances
 from .client import send_command
+from .client import wait_for_state
 
 __all__ = [
     "CommandResponse",
@@ -28,4 +29,5 @@ __all__ = [
     "find_by_port",
     "scan_instances",
     "send_command",
+    "wait_for_state",
 ]
