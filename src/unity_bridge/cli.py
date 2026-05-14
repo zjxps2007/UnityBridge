@@ -86,7 +86,7 @@ def build_parser() -> argparse.ArgumentParser:
     refresh.add_argument("--stable-sec", type=float, default=0.5, help="Required stable ready duration when --wait is used.")
 
     console = sub.add_parser("console", parents=[parent], help="Read or clear Unity console logs.")
-    console.add_argument("--count", type=int, default=50, help="Maximum number of entries to return.")
+    console.add_argument("--count", "--lines", dest="count", type=int, default=50, help="Maximum number of entries to return.")
     console.add_argument("--type", dest="types", action="append", help="Log type: error, warning, or log. Repeatable.")
     console.add_argument("--stacktrace", default="user", choices=["none", "user", "full"], help="Stack trace output mode.")
     console.add_argument("--clear", action="store_true", help="Clear the Unity console.")

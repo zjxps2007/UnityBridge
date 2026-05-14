@@ -94,6 +94,7 @@ Unity가 refresh/import를 관측한 뒤 안정적인 `ready` heartbeat로 돌�
 ```powershell
 unity-bridge console
 unity-bridge console --count 20
+unity-bridge console --lines 20
 unity-bridge console --type error --type warning
 unity-bridge console --stacktrace none
 unity-bridge console --stacktrace full

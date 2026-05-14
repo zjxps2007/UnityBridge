@@ -720,6 +720,32 @@ class CliTests(unittest.TestCase):
                 },
             )
 
+    def test_cli_console_accepts_lines_alias(self) -> None:
+        response_body = json.dumps({"success": True, "message": "Retrieved 0 entries.", "data": []}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, pid=0)
+
+            with redirect_stdout(StringIO()):
+                exit_code = cli_main(
+                    [
+                        "--instances-dir",
+                        str(directory),
+                        "console",
+                        "--lines",
+                        "5",
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                server.received[0]["body"],
+                {
+                    "command": "console",
+                    "params": {"count": 5, "type": "error,warning,log", "stacktrace": "user"},
+                },
+            )
+
     def test_cli_refresh_accepts_repeated_path_flags(self) -> None:
         response_body = json.dumps({"success": True, "message": "Refresh requested."}).encode("utf-8")
         with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:

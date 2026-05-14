@@ -97,6 +97,7 @@ compile or domain reload that starts just after the refresh command returns.
 ```powershell
 unity-bridge console
 unity-bridge console --count 20
+unity-bridge console --lines 20
 unity-bridge console --type error --type warning
 unity-bridge console --stacktrace none
 unity-bridge console --stacktrace full
