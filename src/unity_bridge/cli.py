@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import subprocess
 import sys
 from pathlib import Path
 from typing import Any
@@ -15,6 +16,7 @@ from .client import UnityBridgeError
 from .client import UnityClient
 
 
+DEFAULT_REPOSITORY_URL = "https://github.com/zjxps2007/UnityBridge.git"
 KNOWN_COMMANDS = {
     "instances",
     "status",
@@ -30,6 +32,7 @@ KNOWN_COMMANDS = {
     "exec",
     "call",
     "wait-ready",
+    "update",
 }
 
 GLOBAL_VALUE_OPTIONS = {
@@ -144,6 +147,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     wait_ready = sub.add_parser("wait-ready", parents=[parent], help="Wait until selected Unity instance is ready.")
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
+
+    update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge Python CLI package.")
+    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.1, or a branch name.")
+    update.add_argument("--repo", default=DEFAULT_REPOSITORY_URL, help="Git repository URL.")
+    update.add_argument("--package-spec", help="Full pip package spec. Overrides --repo and --ref.")
+    update.add_argument("--dry-run", action="store_true", help="Print the pip command without running it.")
     return parser
 
 
@@ -283,6 +292,9 @@ def main(argv: list[str] | None = None) -> int:
             instance = client.wait_for_ready(timeout_sec=args.timeout_sec)
             _print(instance, json_output=args.json)
             return 0
+
+        if args.command == "update":
+            return _run_update(args)
 
     except UnityBridgeError as exc:
         if args.json:
@@ -488,6 +500,75 @@ def _read_code_arg(args: argparse.Namespace) -> str:
         return Path(args.code_file).read_text(encoding="utf-8")
     except OSError as exc:
         raise DiscoveryError(f"cannot read --code-file/--file: {exc}") from exc
+
+
+def _run_update(args: argparse.Namespace) -> int:
+    package_spec = args.package_spec or _git_package_spec(args.repo, args.ref)
+    command = [sys.executable, "-m", "pip", "install", "--upgrade", "--force-reinstall", package_spec]
+    connector_url = _connector_package_url(args.repo, args.ref)
+    payload = {
+        "ok": True,
+        "dry_run": bool(args.dry_run),
+        "command": command,
+        "package_spec": package_spec,
+        "connector_url": connector_url,
+        "note": "This updates the Python CLI package. Update the Unity Connector package separately in Unity Package Manager if needed.",
+    }
+
+    if args.dry_run:
+        _print_update_payload(payload, json_output=args.json)
+        return 0
+
+    if not args.json:
+        print("Updating UnityBridge Python package...")
+        print(_format_shell_command(command))
+
+    completed = subprocess.run(command)
+    payload["ok"] = completed.returncode == 0
+    payload["returncode"] = completed.returncode
+
+    if args.json:
+        _print_update_payload(payload, json_output=True)
+    elif completed.returncode == 0:
+        print("UnityBridge Python package updated.")
+        print(f"Unity Connector package URL: {connector_url}")
+    else:
+        print(f"UnityBridge update failed with exit code {completed.returncode}.", file=sys.stderr)
+    return int(completed.returncode)
+
+
+def _git_package_spec(repo: str, ref: str) -> str:
+    repo = repo.strip()
+    ref = ref.strip()
+    if not ref:
+        return f"git+{repo}"
+    return f"git+{repo}@{ref}"
+
+
+def _connector_package_url(repo: str, ref: str) -> str:
+    repo = repo.strip()
+    ref = ref.strip()
+    suffix = f"#{ref}" if ref else ""
+    return f"{repo}?path=/unity-bridge-connector{suffix}"
+
+
+def _print_update_payload(payload: dict[str, Any], *, json_output: bool) -> None:
+    if json_output:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+    print(_format_shell_command(payload["command"]))
+    print(f"Unity Connector package URL: {payload['connector_url']}")
+    print(payload["note"])
+
+
+def _format_shell_command(command: list[str]) -> str:
+    return " ".join(_quote_command_part(part) for part in command)
+
+
+def _quote_command_part(value: str) -> str:
+    if not value or any(ch.isspace() for ch in value):
+        return '"' + value.replace('"', '\\"') + '"'
+    return value
 
 
 def _parse_params(value: str) -> Any:
