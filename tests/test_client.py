@@ -720,6 +720,32 @@ class CliTests(unittest.TestCase):
                 },
             )
 
+    def test_cli_console_accepts_lines_alias(self) -> None:
+        response_body = json.dumps({"success": True, "message": "Retrieved 0 entries.", "data": []}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, pid=0)
+
+            with redirect_stdout(StringIO()):
+                exit_code = cli_main(
+                    [
+                        "--instances-dir",
+                        str(directory),
+                        "console",
+                        "--lines",
+                        "5",
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                server.received[0]["body"],
+                {
+                    "command": "console",
+                    "params": {"count": 5, "type": "error,warning,log", "stacktrace": "user"},
+                },
+            )
+
     def test_cli_refresh_accepts_repeated_path_flags(self) -> None:
         response_body = json.dumps({"success": True, "message": "Refresh requested."}).encode("utf-8")
         with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
@@ -785,6 +811,64 @@ class CliTests(unittest.TestCase):
                         "allow_dirty_scenes": False,
                         "auto_save_scenes": False,
                     },
+                },
+            )
+
+    def test_cli_exec_accepts_file_alias(self) -> None:
+        response_body = json.dumps({"success": True, "message": "ok"}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp) / "instances"
+            directory.mkdir()
+            code_file = Path(tmp) / "query.cs"
+            code_file.write_text("return UnityEngine.Application.dataPath;", encoding="utf-8")
+            write_instance(directory, "game", port=server.port, pid=0)
+
+            with redirect_stdout(StringIO()):
+                exit_code = cli_main(
+                    [
+                        "--instances-dir",
+                        str(directory),
+                        "exec",
+                        "--file",
+                        str(code_file),
+                    ]
+                )
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                server.received[0]["body"],
+                {
+                    "command": "exec",
+                    "params": {"code": "return UnityEngine.Application.dataPath;"},
+                },
+            )
+
+    def test_cli_exec_accepts_stdin(self) -> None:
+        response_body = json.dumps({"success": True, "message": "ok"}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, pid=0)
+            old_stdin = sys.stdin
+            sys.stdin = StringIO("return 1 + 2;")
+            try:
+                with redirect_stdout(StringIO()):
+                    exit_code = cli_main(
+                        [
+                            "--instances-dir",
+                            str(directory),
+                            "exec",
+                            "--stdin",
+                        ]
+                    )
+            finally:
+                sys.stdin = old_stdin
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(
+                server.received[0]["body"],
+                {
+                    "command": "exec",
+                    "params": {"code": "return 1 + 2;"},
                 },
             )
 

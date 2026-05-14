@@ -94,6 +94,7 @@ Unity가 refresh/import를 관측한 뒤 안정적인 `ready` heartbeat로 돌�
 ```powershell
 unity-bridge console
 unity-bridge console --count 20
+unity-bridge console --lines 20
 unity-bridge console --type error --type warning
 unity-bridge console --stacktrace none
 unity-bridge console --stacktrace full
@@ -182,8 +183,14 @@ unity-bridge screenshot --view game --width 1280 --height 720
 unity-bridge exec --code "return UnityEditor.EditorApplication.isPlaying;"
 unity-bridge exec --code "return UnityEngine.Application.dataPath;"
 unity-bridge exec --code-file .\query.cs
+unity-bridge exec --file .\query.cs
+Get-Content .\query.cs -Raw | unity-bridge exec --stdin
 unity-bridge exec --code "return Unity.Entities.World.All.Count;" --using Unity.Entities
 ```
+
+짧은 코드는 inline `--code`를 사용해도 됩니다. 여러 줄 C# 코드이거나 PowerShell이 해석하기 쉬운
+문자(`;`, 따옴표, 줄바꿈 등)가 들어간 코드는 `--file`/`--code-file` 또는 `--stdin`을
+권장합니다.
 
 ### Raw connector command
 
