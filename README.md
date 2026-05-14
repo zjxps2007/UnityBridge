@@ -51,6 +51,13 @@ but `No Throttling` is still recommended for the most stable response times.
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git"
 ```
 
+After installation, the Python CLI can update itself from the default branch:
+
+```powershell
+unity-bridge update --check
+unity-bridge update
+```
+
 The PowerShell installer can also be run directly:
 
 ```powershell
@@ -85,7 +92,7 @@ unity-bridge tools
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.1
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.2
 ```
 
 ## CLI Usage

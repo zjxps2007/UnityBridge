@@ -57,6 +57,7 @@ prefer a full project path or `--port`.
 | `unity-bridge exec` | Execute arbitrary C# code inside the Unity Editor. |
 | `unity-bridge call` | Send a raw connector command name and JSON params. |
 | `unity-bridge wait-ready` | Wait until Unity reaches the ready state. |
+| `unity-bridge update` | Update the installed UnityBridge Python CLI package. |
 | `unity-bridge <tool-name>` | Treat unknown command names as connector/custom tool names and call them directly. |
 
 ## Usage
@@ -69,6 +70,21 @@ unity-bridge status
 unity-bridge tools
 unity-bridge wait-ready --timeout-sec 300
 ```
+
+### Update
+
+```powershell
+unity-bridge update
+unity-bridge update --check
+unity-bridge update --ref main
+unity-bridge update --ref v0.1.2
+unity-bridge update --dry-run
+```
+
+`update` reinstalls the Python CLI package with pip. `--check` compares the
+installed Python package version with the selected Git ref without installing
+anything. The command prints the Unity Connector Git package URL too, but it
+does not edit a Unity project's `Packages/manifest.json` automatically.
 
 ### Asset Refresh
 

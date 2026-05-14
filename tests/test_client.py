@@ -12,10 +12,12 @@ from io import StringIO
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from urllib.parse import urlparse
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 
+import unity_bridge.cli as cli_module
 from unity_bridge import CommandResponse
 from unity_bridge import DiscoveryError
 from unity_bridge import Instance
@@ -948,6 +950,72 @@ class CliTests(unittest.TestCase):
 
             self.assertEqual(exit_code, 0)
             self.assertEqual(server.received[0]["body"], {"command": "list", "params": {}})
+
+    def test_cli_update_dry_run_prints_pip_command(self) -> None:
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            exit_code = cli_main(["update", "--dry-run", "--ref", "feature/test"])
+
+        output = stdout.getvalue()
+        self.assertEqual(exit_code, 0)
+        self.assertIn("-m pip install --upgrade --force-reinstall", output)
+        self.assertIn("git+https://github.com/zjxps2007/UnityBridge.git@feature/test", output)
+        self.assertIn("?path=/unity-bridge-connector#feature/test", output)
+
+    def test_cli_update_dry_run_json_reports_command(self) -> None:
+        stdout = StringIO()
+        with redirect_stdout(stdout):
+            exit_code = cli_main(["--json", "update", "--dry-run", "--package-spec", "unity-bridge==0.1.2"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["ok"])
+        self.assertTrue(payload["dry_run"])
+        self.assertEqual(payload["package_spec"], "unity-bridge==0.1.2")
+        self.assertIn("pip", payload["command"])
+
+    def test_cli_update_check_json_reports_available_version(self) -> None:
+        remote_files = {
+            "pyproject.toml": '[project]\nversion = "0.1.2"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.2"}',
+        }
+
+        with (
+            patch.object(cli_module, "_current_package_version", return_value="0.1.1"),
+            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path: remote_files[path]),
+        ):
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = cli_main(["--json", "update", "--check", "--ref", "v0.1.2"])
+
+        payload = json.loads(stdout.getvalue())
+        self.assertEqual(exit_code, 0)
+        self.assertTrue(payload["ok"])
+        self.assertTrue(payload["check"])
+        self.assertTrue(payload["update_available"])
+        self.assertEqual(payload["status"], "outdated")
+        self.assertEqual(payload["current_version"], "0.1.1")
+        self.assertEqual(payload["latest_version"], "0.1.2")
+        self.assertEqual(payload["target_connector_version"], "0.1.2")
+
+    def test_cli_update_check_prints_up_to_date(self) -> None:
+        remote_files = {
+            "pyproject.toml": '[project]\nversion = "0.1.2"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.2"}',
+        }
+
+        with (
+            patch.object(cli_module, "_current_package_version", return_value="0.1.2"),
+            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path: remote_files[path]),
+        ):
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = cli_main(["update", "--check"])
+
+        output = stdout.getvalue()
+        self.assertEqual(exit_code, 0)
+        self.assertIn("up to date", output)
+        self.assertIn("Target Unity Connector version: 0.1.2", output)
 
 
 if __name__ == "__main__":

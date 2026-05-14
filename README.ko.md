@@ -50,6 +50,13 @@ Edit > Preferences > General > Interaction Mode > No Throttling
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git"
 ```
 
+설치 후에는 Python CLI를 기본 브랜치 기준으로 업데이트할 수 있습니다.
+
+```powershell
+unity-bridge update --check
+unity-bridge update
+```
+
 PowerShell 설치 스크립트를 바로 실행할 수도 있습니다.
 
 ```powershell
@@ -83,7 +90,7 @@ unity-bridge tools
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.1
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.2
 ```
 
 ## CLI 사용법
