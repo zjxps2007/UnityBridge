@@ -55,7 +55,7 @@ unity-bridge --json console --count 20
 | `unity-bridge exec` | Unity Editor 안에서 임의 C# 코드를 실행합니다. |
 | `unity-bridge call` | connector command 이름과 JSON params를 직접 보내는 raw 호출입니다. |
 | `unity-bridge wait-ready` | Unity가 ready 상태가 될 때까지 대기합니다. |
-| `unity-bridge update` | 설치된 UnityBridge Python CLI 패키지를 업데이트합니다. |
+| `unity-bridge update` | 설치된 UnityBridge CLI 패키지 또는 standalone 실행 파일을 업데이트합니다. |
 | `unity-bridge <tool-name>` | 목록에 없는 명령어는 connector/custom tool 이름으로 보고 직접 호출합니다. |
 
 ## 사용 예시
@@ -75,13 +75,14 @@ unity-bridge wait-ready --timeout-sec 300
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.2
+unity-bridge update --ref v0.1.3
 unity-bridge update --dry-run
 ```
 
-`update`는 pip로 Python CLI 패키지를 다시 설치합니다. `--check`는 아무것도 설치하지 않고
-설치된 Python 패키지 버전과 선택한 Git ref의 버전을 비교합니다. Unity Connector용 Git
-패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/manifest.json`은 자동으로 수정하지 않습니다.
+Python 패키지 설치에서는 `update`가 pip로 CLI 패키지를 다시 설치합니다. Windows standalone 빌드에서는
+릴리스 설치 스크립트를 다시 실행해 release 실행 파일을 내려받습니다. `--check`는 아무것도 설치하지 않고
+설치된 CLI 버전과 선택한 Git ref의 버전을 비교합니다. Unity Connector용 Git 패키지 URL도 함께 출력하지만,
+Unity 프로젝트의 `Packages/manifest.json`은 자동으로 수정하지 않습니다.
 
 ### 에셋 새로고침
 

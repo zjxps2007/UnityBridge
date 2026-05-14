@@ -2,11 +2,10 @@
 
 [한국어](README.ko.md) | English
 
-Python-native client and Unity package for controlling the Unity Editor through
-a local HTTP connector.
+Python-native client, standalone Windows CLI, and Unity package for controlling
+the Unity Editor through a local HTTP connector.
 
-The Python client does not require a separate CLI binary. It talks directly to
-the Unity connector by:
+The CLI talks directly to the Unity connector by:
 
 1. Reading instance heartbeat files from `~/.unity-bridge/instances/*.json`.
 2. Selecting a running Unity Editor by port, exact project path, path suffix,
@@ -45,23 +44,43 @@ Edit > Preferences > General > Interaction Mode > No Throttling
 The connector also requests PlayerLoop updates whenever a CLI request arrives,
 but `No Throttling` is still recommended for the most stable response times.
 
-### 2. Install the Python client
+### 2. Install the CLI
+
+Recommended Windows installation downloads the standalone `unity-bridge.exe`
+from the latest GitHub Release, so Python is not required on the target machine:
+
+```powershell
+irm https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 | iex
+```
+
+To install a specific release:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.3
+```
+
+Python package installation is still available for development or for users who
+prefer importing `unity_bridge` directly:
 
 ```powershell
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git"
 ```
 
-After installation, the Python CLI can update itself from the default branch:
+The installer can also run in Python package mode:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -PythonMode
+```
+
+After installation, the CLI can check for updates and update itself:
 
 ```powershell
 unity-bridge update --check
 unity-bridge update
-```
-
-The PowerShell installer can also be run directly:
-
-```powershell
-irm https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 | iex
 ```
 
 ```powershell
@@ -76,6 +95,10 @@ for this process only:
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
+
+The standalone installer requires the GitHub Release to contain
+`unity-bridge-windows-x64.exe`. If that asset is not available yet, use
+`-PythonMode`.
 
 ### 3. Check the connection
 
@@ -92,7 +115,7 @@ unity-bridge tools
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.2
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.3
 ```
 
 ## CLI Usage
