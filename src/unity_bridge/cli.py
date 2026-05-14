@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import argparse
+import base64
+import importlib.metadata as importlib_metadata
 import json
+import re
 import subprocess
 import sys
 from pathlib import Path
 from typing import Any
+import urllib.error
+import urllib.parse
+import urllib.request
 
 from .adapter import UnityActionResult
 from .adapter import UnityBridgeAdapter
@@ -149,10 +155,11 @@ def build_parser() -> argparse.ArgumentParser:
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
 
     update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge Python CLI package.")
-    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.1, or a branch name.")
+    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.2, or a branch name.")
     update.add_argument("--repo", default=DEFAULT_REPOSITORY_URL, help="Git repository URL.")
     update.add_argument("--package-spec", help="Full pip package spec. Overrides --repo and --ref.")
     update.add_argument("--dry-run", action="store_true", help="Print the pip command without running it.")
+    update.add_argument("--check", action="store_true", help="Check available versions without installing.")
     return parser
 
 
@@ -503,6 +510,9 @@ def _read_code_arg(args: argparse.Namespace) -> str:
 
 
 def _run_update(args: argparse.Namespace) -> int:
+    if args.check:
+        return _run_update_check(args)
+
     package_spec = args.package_spec or _git_package_spec(args.repo, args.ref)
     command = [sys.executable, "-m", "pip", "install", "--upgrade", "--force-reinstall", package_spec]
     connector_url = _connector_package_url(args.repo, args.ref)
@@ -537,6 +547,31 @@ def _run_update(args: argparse.Namespace) -> int:
     return int(completed.returncode)
 
 
+def _run_update_check(args: argparse.Namespace) -> int:
+    package_spec = args.package_spec or _git_package_spec(args.repo, args.ref)
+    connector_url = _connector_package_url(args.repo, args.ref)
+    current_version = _current_package_version()
+    latest_version = _remote_python_version(args.repo, args.ref)
+    connector_version = _remote_connector_version(args.repo, args.ref)
+    status = _version_status(current_version, latest_version)
+    payload = {
+        "ok": True,
+        "check": True,
+        "repo": args.repo,
+        "ref": args.ref,
+        "package_spec": package_spec,
+        "connector_url": connector_url,
+        "current_version": current_version,
+        "latest_version": latest_version,
+        "target_connector_version": connector_version,
+        "status": status,
+        "update_available": status == "outdated",
+        "note": "This checks the Python CLI package version. Update the Unity Connector package separately in Unity Package Manager if needed.",
+    }
+    _print_update_check_payload(payload, json_output=args.json)
+    return 0
+
+
 def _git_package_spec(repo: str, ref: str) -> str:
     repo = repo.strip()
     ref = ref.strip()
@@ -559,6 +594,143 @@ def _print_update_payload(payload: dict[str, Any], *, json_output: bool) -> None
     print(_format_shell_command(payload["command"]))
     print(f"Unity Connector package URL: {payload['connector_url']}")
     print(payload["note"])
+
+
+def _print_update_check_payload(payload: dict[str, Any], *, json_output: bool) -> None:
+    if json_output:
+        print(json.dumps(payload, ensure_ascii=False, indent=2))
+        return
+
+    current = payload["current_version"]
+    latest = payload["latest_version"]
+    status = payload["status"]
+    if status == "outdated":
+        print(f"UnityBridge Python package: {current} -> {latest} available")
+        print("Run: unity-bridge update")
+    elif status == "current":
+        print(f"UnityBridge Python package: {current} (up to date)")
+    elif status == "newer":
+        print(f"UnityBridge Python package: {current} (newer than {latest})")
+    else:
+        print(f"UnityBridge Python package: {current} (latest: {latest})")
+    print(f"Target Unity Connector version: {payload['target_connector_version']}")
+    print(f"Unity Connector package URL: {payload['connector_url']}")
+    print(payload["note"])
+
+
+def _current_package_version() -> str:
+    try:
+        return importlib_metadata.version("unity-bridge")
+    except importlib_metadata.PackageNotFoundError:
+        return _local_python_version()
+
+
+def _local_python_version() -> str:
+    pyproject = Path(__file__).resolve().parents[2] / "pyproject.toml"
+    try:
+        return _parse_pyproject_version(pyproject.read_text(encoding="utf-8"))
+    except OSError:
+        return "unknown"
+
+
+def _remote_python_version(repo: str, ref: str) -> str:
+    return _parse_pyproject_version(_read_remote_repository_file(repo, ref, "pyproject.toml"))
+
+
+def _remote_connector_version(repo: str, ref: str) -> str:
+    text = _read_remote_repository_file(repo, ref, "unity-bridge-connector/package.json")
+    try:
+        value = json.loads(text).get("version")
+    except json.JSONDecodeError as exc:
+        raise DiscoveryError(f"failed to parse remote connector package.json: {exc}") from exc
+    if not isinstance(value, str) or not value:
+        raise DiscoveryError("remote connector package.json does not contain a version")
+    return value
+
+
+def _read_remote_repository_file(repo: str, ref: str, path: str) -> str:
+    owner, name = _parse_github_repo(repo)
+    encoded_path = urllib.parse.quote(path, safe="/")
+    encoded_ref = urllib.parse.quote(ref or "main", safe="")
+    url = f"https://api.github.com/repos/{owner}/{name}/contents/{encoded_path}?ref={encoded_ref}"
+    request = urllib.request.Request(
+        url,
+        headers={
+            "Accept": "application/vnd.github.raw",
+            "User-Agent": "unity-bridge-cli",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=10) as response:
+            body = response.read()
+            content_type = response.headers.get("Content-Type", "")
+    except urllib.error.HTTPError as exc:
+        raise DiscoveryError(f"failed to check remote version: GitHub returned HTTP {exc.code}") from exc
+    except urllib.error.URLError as exc:
+        raise DiscoveryError(f"failed to check remote version: {exc.reason}") from exc
+
+    text = body.decode("utf-8")
+    if "json" not in content_type.lower():
+        return text
+
+    try:
+        payload = json.loads(text)
+    except json.JSONDecodeError:
+        return text
+    content = payload.get("content")
+    encoding = payload.get("encoding")
+    if isinstance(content, str) and encoding == "base64":
+        return base64.b64decode(content).decode("utf-8")
+    return text
+
+
+def _parse_github_repo(repo: str) -> tuple[str, str]:
+    repo = repo.strip()
+    ssh_match = re.fullmatch(r"git@github\.com:([^/]+)/(.+?)(?:\.git)?", repo)
+    if ssh_match:
+        return ssh_match.group(1), ssh_match.group(2)
+
+    parsed = urllib.parse.urlparse(repo)
+    if parsed.hostname not in {"github.com", "www.github.com"}:
+        raise DiscoveryError("--check currently supports github.com repository URLs")
+    parts = parsed.path.strip("/").split("/")
+    if len(parts) < 2:
+        raise DiscoveryError("--check requires a GitHub repository URL")
+    name = parts[1]
+    if name.endswith(".git"):
+        name = name[:-4]
+    return parts[0], name
+
+
+def _parse_pyproject_version(text: str) -> str:
+    match = re.search(r'(?m)^version\s*=\s*["\']([^"\']+)["\']', text)
+    if not match:
+        raise DiscoveryError("pyproject.toml does not contain a project version")
+    return match.group(1)
+
+
+def _version_status(current: str, latest: str) -> str:
+    current_key = _version_key(current)
+    latest_key = _version_key(latest)
+    if current_key is None or latest_key is None:
+        return "unknown"
+    if current_key < latest_key:
+        return "outdated"
+    if current_key > latest_key:
+        return "newer"
+    return "current"
+
+
+def _version_key(value: str) -> tuple[int, ...] | None:
+    if value == "unknown":
+        return None
+    parts = re.findall(r"\d+", value)
+    if not parts:
+        return None
+    numbers = [int(part) for part in parts[:4]]
+    while len(numbers) < 4:
+        numbers.append(0)
+    return tuple(numbers)
 
 
 def _format_shell_command(command: list[str]) -> str:

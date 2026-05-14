@@ -73,13 +73,15 @@ unity-bridge wait-ready --timeout-sec 300
 
 ```powershell
 unity-bridge update
+unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.1
+unity-bridge update --ref v0.1.2
 unity-bridge update --dry-run
 ```
 
-`update`는 pip로 Python CLI 패키지를 다시 설치합니다. Unity Connector용 Git 패키지 URL도
-함께 출력하지만, Unity 프로젝트의 `Packages/manifest.json`은 자동으로 수정하지 않습니다.
+`update`는 pip로 Python CLI 패키지를 다시 설치합니다. `--check`는 아무것도 설치하지 않고
+설치된 Python 패키지 버전과 선택한 Git ref의 버전을 비교합니다. Unity Connector용 Git
+패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/manifest.json`은 자동으로 수정하지 않습니다.
 
 ### 에셋 새로고침
 

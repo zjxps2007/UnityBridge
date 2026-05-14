@@ -75,14 +75,16 @@ unity-bridge wait-ready --timeout-sec 300
 
 ```powershell
 unity-bridge update
+unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.1
+unity-bridge update --ref v0.1.2
 unity-bridge update --dry-run
 ```
 
-`update` reinstalls the Python CLI package with pip. It prints the Unity
-Connector Git package URL too, but it does not edit a Unity project's
-`Packages/manifest.json` automatically.
+`update` reinstalls the Python CLI package with pip. `--check` compares the
+installed Python package version with the selected Git ref without installing
+anything. The command prints the Unity Connector Git package URL too, but it
+does not edit a Unity project's `Packages/manifest.json` automatically.
 
 ### Asset Refresh
 
