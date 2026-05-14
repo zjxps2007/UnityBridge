@@ -4,6 +4,7 @@ import argparse
 import base64
 import importlib.metadata as importlib_metadata
 import json
+import os
 import re
 import subprocess
 import sys
@@ -13,6 +14,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
+from . import __version__
 from .adapter import UnityActionResult
 from .adapter import UnityBridgeAdapter
 from .client import CommandResponse
@@ -23,6 +25,8 @@ from .client import UnityClient
 
 
 DEFAULT_REPOSITORY_URL = "https://github.com/zjxps2007/UnityBridge.git"
+DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-x64.exe"
+DEFAULT_INSTALL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1"
 KNOWN_COMMANDS = {
     "instances",
     "status",
@@ -154,8 +158,8 @@ def build_parser() -> argparse.ArgumentParser:
     wait_ready = sub.add_parser("wait-ready", parents=[parent], help="Wait until selected Unity instance is ready.")
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
 
-    update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge Python CLI package.")
-    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.2, or a branch name.")
+    update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge CLI.")
+    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.3, or a branch name.")
     update.add_argument("--repo", default=DEFAULT_REPOSITORY_URL, help="Git repository URL.")
     update.add_argument("--package-spec", help="Full pip package spec. Overrides --repo and --ref.")
     update.add_argument("--dry-run", action="store_true", help="Print the pip command without running it.")
@@ -512,6 +516,8 @@ def _read_code_arg(args: argparse.Namespace) -> str:
 def _run_update(args: argparse.Namespace) -> int:
     if args.check:
         return _run_update_check(args)
+    if _is_standalone_build():
+        return _run_standalone_update(args)
 
     package_spec = args.package_spec or _git_package_spec(args.repo, args.ref)
     command = [sys.executable, "-m", "pip", "install", "--upgrade", "--force-reinstall", package_spec]
@@ -547,6 +553,60 @@ def _run_update(args: argparse.Namespace) -> int:
     return int(completed.returncode)
 
 
+def _run_standalone_update(args: argparse.Namespace) -> int:
+    if args.package_spec:
+        raise DiscoveryError("--package-spec is only supported by Python package installs")
+    if sys.platform != "win32":
+        raise DiscoveryError("standalone self-update is currently only supported on Windows")
+
+    version = _standalone_update_version(args.ref)
+    command = _standalone_update_command(version, wait_pid=os.getpid())
+    connector_ref = "main" if version == "latest" else version
+    connector_url = _connector_package_url(args.repo, connector_ref)
+    payload = {
+        "ok": True,
+        "mode": "standalone",
+        "dry_run": bool(args.dry_run),
+        "command": command,
+        "version": version,
+        "asset_name": DEFAULT_WINDOWS_ASSET_NAME,
+        "connector_url": connector_url,
+        "note": "This updates the standalone Windows executable from GitHub Releases. Update the Unity Connector package separately in Unity Package Manager if needed.",
+    }
+
+    if args.dry_run:
+        _print_update_payload(payload, json_output=args.json)
+        return 0
+
+    if not args.json:
+        print("Updating UnityBridge standalone executable...")
+        print(_format_shell_command(command))
+
+    try:
+        subprocess.Popen(
+            command,
+            creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
+        )
+    except OSError as exc:
+        payload["ok"] = False
+        payload["error"] = str(exc)
+        if args.json:
+            _print_update_payload(payload, json_output=True)
+        else:
+            print(f"UnityBridge standalone update failed to start: {exc}", file=sys.stderr)
+        return 1
+
+    payload["scheduled"] = True
+
+    if args.json:
+        _print_update_payload(payload, json_output=True)
+    else:
+        print("UnityBridge standalone executable update requested.")
+        print("Open a new terminal if PATH changes were applied.")
+        print(f"Unity Connector package URL: {connector_url}")
+    return 0
+
+
 def _run_update_check(args: argparse.Namespace) -> int:
     package_spec = args.package_spec or _git_package_spec(args.repo, args.ref)
     connector_url = _connector_package_url(args.repo, args.ref)
@@ -557,6 +617,7 @@ def _run_update_check(args: argparse.Namespace) -> int:
     payload = {
         "ok": True,
         "check": True,
+        "mode": _install_mode(),
         "repo": args.repo,
         "ref": args.ref,
         "package_spec": package_spec,
@@ -566,7 +627,7 @@ def _run_update_check(args: argparse.Namespace) -> int:
         "target_connector_version": connector_version,
         "status": status,
         "update_available": status == "outdated",
-        "note": "This checks the Python CLI package version. Update the Unity Connector package separately in Unity Package Manager if needed.",
+        "note": "This checks the installed UnityBridge CLI version. Update the Unity Connector package separately in Unity Package Manager if needed.",
     }
     _print_update_check_payload(payload, json_output=args.json)
     return 0
@@ -601,24 +662,27 @@ def _print_update_check_payload(payload: dict[str, Any], *, json_output: bool) -
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
 
+    label = "UnityBridge standalone CLI" if payload.get("mode") == "standalone" else "UnityBridge Python package"
     current = payload["current_version"]
     latest = payload["latest_version"]
     status = payload["status"]
     if status == "outdated":
-        print(f"UnityBridge Python package: {current} -> {latest} available")
+        print(f"{label}: {current} -> {latest} available")
         print("Run: unity-bridge update")
     elif status == "current":
-        print(f"UnityBridge Python package: {current} (up to date)")
+        print(f"{label}: {current} (up to date)")
     elif status == "newer":
-        print(f"UnityBridge Python package: {current} (newer than {latest})")
+        print(f"{label}: {current} (newer than {latest})")
     else:
-        print(f"UnityBridge Python package: {current} (latest: {latest})")
+        print(f"{label}: {current} (latest: {latest})")
     print(f"Target Unity Connector version: {payload['target_connector_version']}")
     print(f"Unity Connector package URL: {payload['connector_url']}")
     print(payload["note"])
 
 
 def _current_package_version() -> str:
+    if _is_standalone_build():
+        return __version__
     try:
         return importlib_metadata.version("unity-bridge")
     except importlib_metadata.PackageNotFoundError:
@@ -630,7 +694,49 @@ def _local_python_version() -> str:
     try:
         return _parse_pyproject_version(pyproject.read_text(encoding="utf-8"))
     except OSError:
-        return "unknown"
+        return __version__ or "unknown"
+
+
+def _is_standalone_build() -> bool:
+    return bool(getattr(sys, "frozen", False))
+
+
+def _install_mode() -> str:
+    return "standalone" if _is_standalone_build() else "python"
+
+
+def _standalone_update_version(ref: str) -> str:
+    ref = (ref or "").strip()
+    if not ref or ref == "main":
+        return "latest"
+    if ref.startswith("refs/tags/"):
+        return ref[len("refs/tags/") :]
+    return ref
+
+
+def _standalone_update_command(version: str, *, wait_pid: int | None = None) -> list[str]:
+    wait_script = ""
+    if wait_pid is not None and wait_pid > 0:
+        wait_script = f"try {{ Wait-Process -Id {int(wait_pid)} -Timeout 30 -ErrorAction SilentlyContinue }} catch {{ }}; "
+    script = (
+        "$ErrorActionPreference = 'Stop'; "
+        + wait_script
+        + "$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'; "
+        + f"Invoke-WebRequest -Uri '{DEFAULT_INSTALL_SCRIPT_URL}' -OutFile $script; "
+        + f"& $script -Version '{_escape_powershell_single_quoted(version)}'"
+    )
+    return [
+        "powershell",
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-Command",
+        "& { " + script + " }",
+    ]
+
+
+def _escape_powershell_single_quoted(value: str) -> str:
+    return value.replace("'", "''")
 
 
 def _remote_python_version(repo: str, ref: str) -> str:

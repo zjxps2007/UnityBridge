@@ -1,61 +1,26 @@
 # Install or update UnityBridge for Windows PowerShell.
 [CmdletBinding()]
 param(
+    [string]$Repo = "zjxps2007/UnityBridge",
+    [string]$Version = "latest",
+    [string]$InstallDir = (Join-Path $env:LOCALAPPDATA "UnityBridge\bin"),
+    [string]$AssetName = "unity-bridge-windows-x64.exe",
     [string]$PackageSpec = "git+https://github.com/zjxps2007/UnityBridge.git",
+    [switch]$PythonMode,
     [switch]$NoPathUpdate
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+if ($PSBoundParameters.ContainsKey("PackageSpec") -and -not $PythonMode) {
+    $PythonMode = $true
+}
 
 function Write-Step {
     param([string]$Message)
     Write-Host "==> $Message" -ForegroundColor Cyan
-}
-
-function Test-PythonCandidate {
-    param(
-        [string]$CommandName,
-        [string[]]$PrefixArgs
-    )
-
-    $command = Get-Command $CommandName -ErrorAction SilentlyContinue
-    if ($null -eq $command) {
-        return $false
-    }
-
-    $probeArgs = @($PrefixArgs) + @(
-        "-c",
-        "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)"
-    )
-    & $command.Source @probeArgs *> $null
-    if ($LASTEXITCODE -ne 0) {
-        return $false
-    }
-
-    $script:PythonCommand = $command.Source
-    $script:PythonArgs = @($PrefixArgs)
-    return $true
-}
-
-function Find-Python {
-    if (Test-PythonCandidate "py" @("-3")) {
-        return
-    }
-    if (Test-PythonCandidate "python" @()) {
-        return
-    }
-    if (Test-PythonCandidate "python3" @()) {
-        return
-    }
-
-    throw "Python 3.10 or newer was not found. Install Python, then run this installer again."
-}
-
-function Invoke-Python {
-    param([string[]]$Arguments)
-    $allArgs = @($script:PythonArgs) + @($Arguments)
-    & $script:PythonCommand @allArgs
 }
 
 function Normalize-PathEntry {
@@ -130,6 +95,138 @@ function Add-UserPathEntry {
     Write-Step "Added to user PATH: $Entry"
 }
 
+function Get-GitHubHeaders {
+    return @{
+        "Accept" = "application/vnd.github+json"
+        "User-Agent" = "UnityBridge installer"
+    }
+}
+
+function Resolve-GitHubRelease {
+    param(
+        [string]$Repository,
+        [string]$ReleaseVersion
+    )
+
+    $repoName = $Repository.Trim().Trim("/")
+    if ([string]::IsNullOrWhiteSpace($repoName) -or -not $repoName.Contains("/")) {
+        throw "Repo must be in owner/name form. Received: $Repository"
+    }
+
+    if ([string]::IsNullOrWhiteSpace($ReleaseVersion) -or $ReleaseVersion -ieq "latest") {
+        $url = "https://api.github.com/repos/$repoName/releases/latest"
+    }
+    else {
+        $tag = [System.Uri]::EscapeDataString($ReleaseVersion)
+        $url = "https://api.github.com/repos/$repoName/releases/tags/$tag"
+    }
+
+    try {
+        return Invoke-RestMethod -Uri $url -Headers (Get-GitHubHeaders)
+    }
+    catch {
+        throw "Failed to resolve GitHub release '$ReleaseVersion' in $repoName. Make sure the release exists and contains $AssetName, or run with -PythonMode."
+    }
+}
+
+function Install-Standalone {
+    Write-Step "Resolving UnityBridge release"
+    $release = Resolve-GitHubRelease -Repository $Repo -ReleaseVersion $Version
+    $assets = @($release.assets)
+    $asset = $assets | Where-Object { $_.name -eq $AssetName } | Select-Object -First 1
+    if ($null -eq $asset) {
+        $available = ($assets | ForEach-Object { $_.name }) -join ", "
+        if ([string]::IsNullOrWhiteSpace($available)) {
+            $available = "(none)"
+        }
+        throw "Release '$($release.tag_name)' does not contain $AssetName. Available assets: $available. Run with -PythonMode to install from source."
+    }
+
+    Write-Step "Downloading $AssetName from $($release.tag_name)"
+    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
+
+    $tempPath = Join-Path ([System.IO.Path]::GetTempPath()) ("unity-bridge-" + [System.Guid]::NewGuid().ToString("N") + ".exe")
+    $targetPath = Join-Path $InstallDir "unity-bridge.exe"
+    try {
+        Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $tempPath -Headers (Get-GitHubHeaders)
+        Move-Item -LiteralPath $tempPath -Destination $targetPath -Force
+        try { Unblock-File -LiteralPath $targetPath } catch { }
+    }
+    finally {
+        if (Test-Path $tempPath) {
+            Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+
+    $aliasPath = Join-Path $InstallDir "unity_bridge.cmd"
+    $aliasContent = @'
+@echo off
+"%~dp0unity-bridge.exe" %*
+'@
+    Set-Content -LiteralPath $aliasPath -Value $aliasContent -Encoding ASCII
+
+    if (-not $NoPathUpdate) {
+        Add-UserPathEntry $InstallDir
+    }
+    Add-PathEntryForCurrentSession $InstallDir
+
+    Write-Step "Verifying unity-bridge"
+    & $targetPath --help *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw "unity-bridge.exe verification failed."
+    }
+
+    Write-Host ""
+    Write-Host "UnityBridge standalone CLI is installed." -ForegroundColor Green
+    Write-Host "Install dir: $InstallDir"
+    Write-Host "Try: unity-bridge status"
+}
+
+function Test-PythonCandidate {
+    param(
+        [string]$CommandName,
+        [string[]]$PrefixArgs
+    )
+
+    $command = Get-Command $CommandName -ErrorAction SilentlyContinue
+    if ($null -eq $command) {
+        return $false
+    }
+
+    $probeArgs = @($PrefixArgs) + @(
+        "-c",
+        "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)"
+    )
+    & $command.Source @probeArgs *> $null
+    if ($LASTEXITCODE -ne 0) {
+        return $false
+    }
+
+    $script:PythonCommand = $command.Source
+    $script:PythonArgs = @($PrefixArgs)
+    return $true
+}
+
+function Find-Python {
+    if (Test-PythonCandidate "py" @("-3")) {
+        return
+    }
+    if (Test-PythonCandidate "python" @()) {
+        return
+    }
+    if (Test-PythonCandidate "python3" @()) {
+        return
+    }
+
+    throw "Python 3.10 or newer was not found. Install Python, then run this installer again or use standalone mode after a release asset is published."
+}
+
+function Invoke-Python {
+    param([string[]]$Arguments)
+    $allArgs = @($script:PythonArgs) + @($Arguments)
+    & $script:PythonCommand @allArgs
+}
+
 function Get-PythonScriptDirs {
     $script = @'
 import json
@@ -189,37 +286,46 @@ function Find-UnityBridgeScriptDir {
     return $null
 }
 
-Write-Step "Finding Python 3.10+"
-Find-Python
+function Install-PythonPackage {
+    Write-Step "Finding Python 3.10+"
+    Find-Python
 
-Write-Step "Installing UnityBridge"
-Invoke-Python @("-m", "pip", "install", "--upgrade", $PackageSpec)
-if ($LASTEXITCODE -ne 0) {
-    throw "pip install failed."
-}
-
-$scriptDir = Find-UnityBridgeScriptDir
-if (-not [string]::IsNullOrWhiteSpace($scriptDir)) {
-    if (-not $NoPathUpdate) {
-        Add-UserPathEntry $scriptDir
+    Write-Step "Installing UnityBridge Python package"
+    Invoke-Python @("-m", "pip", "install", "--upgrade", $PackageSpec)
+    if ($LASTEXITCODE -ne 0) {
+        throw "pip install failed."
     }
-    Add-PathEntryForCurrentSession $scriptDir
-}
 
-$bridgeCommand = Get-Command "unity-bridge" -ErrorAction SilentlyContinue
-if ($null -eq $bridgeCommand -and -not [string]::IsNullOrWhiteSpace($scriptDir)) {
-    $bridgePath = Join-Path $scriptDir "unity-bridge.exe"
-    if (Test-Path $bridgePath) {
-        $bridgeCommand = Get-Command $bridgePath -ErrorAction SilentlyContinue
+    $scriptDir = Find-UnityBridgeScriptDir
+    if (-not [string]::IsNullOrWhiteSpace($scriptDir)) {
+        if (-not $NoPathUpdate) {
+            Add-UserPathEntry $scriptDir
+        }
+        Add-PathEntryForCurrentSession $scriptDir
     }
+
+    $bridgeCommand = Get-Command "unity-bridge" -ErrorAction SilentlyContinue
+    if ($null -eq $bridgeCommand -and -not [string]::IsNullOrWhiteSpace($scriptDir)) {
+        $bridgePath = Join-Path $scriptDir "unity-bridge.exe"
+        if (Test-Path $bridgePath) {
+            $bridgeCommand = Get-Command $bridgePath -ErrorAction SilentlyContinue
+        }
+    }
+
+    if ($null -ne $bridgeCommand) {
+        Write-Step "Verifying unity-bridge"
+        & $bridgeCommand.Source --help *> $null
+    }
+
+    Write-Host ""
+    Write-Host "UnityBridge Python package is installed." -ForegroundColor Green
+    Write-Host "Try: unity-bridge status"
+    Write-Host "Fallback: python -m unity_bridge status"
 }
 
-if ($null -ne $bridgeCommand) {
-    Write-Step "Verifying unity-bridge"
-    & $bridgeCommand.Source --help *> $null
+if ($PythonMode) {
+    Install-PythonPackage
 }
-
-Write-Host ""
-Write-Host "UnityBridge is installed." -ForegroundColor Green
-Write-Host "Try: unity-bridge status"
-Write-Host "Fallback: python -m unity_bridge status"
+else {
+    Install-Standalone
+}

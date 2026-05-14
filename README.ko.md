@@ -3,10 +3,9 @@
 한국어 | [English](README.md)
 
 UnityBridge는 로컬 HTTP connector를 통해 Unity Editor를 제어하는
-Python-native 클라이언트와 Unity 패키지입니다.
+Python-native 클라이언트, Windows standalone CLI, Unity 패키지입니다.
 
-Python 클라이언트는 별도의 CLI 바이너리를 호출하지 않습니다. 대신 Unity Editor 안에서 실행되는
-connector와 직접 통신합니다.
+CLI는 Unity Editor 안에서 실행되는 connector와 직접 통신합니다.
 
 1. `~/.unity-bridge/instances/*.json` heartbeat 파일을 읽습니다.
 2. 포트, 정확한 프로젝트 경로, 경로 suffix, 현재 작업 경로, 최신 heartbeat를 기준으로 실행 중인 Unity Editor를 선택합니다.
@@ -44,23 +43,42 @@ Edit > Preferences > General > Interaction Mode > No Throttling
 커넥터도 CLI 요청이 들어올 때마다 PlayerLoop 업데이트를 요청합니다. 그래도 가장 안정적인 응답
 시간을 위해 `No Throttling` 설정을 권장합니다.
 
-### 2. Python 클라이언트 설치
+### 2. CLI 설치
+
+권장 Windows 설치는 최신 GitHub Release의 standalone `unity-bridge.exe`를 내려받습니다.
+따라서 대상 PC에 Python이 없어도 됩니다.
+
+```powershell
+irm https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 | iex
+```
+
+특정 릴리스를 설치하려면:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.3
+```
+
+개발용이거나 Python 코드에서 `unity_bridge`를 직접 import해야 한다면 Python 패키지 방식도 사용할 수 있습니다.
 
 ```powershell
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git"
 ```
 
-설치 후에는 Python CLI를 기본 브랜치 기준으로 업데이트할 수 있습니다.
+설치 스크립트도 Python 패키지 모드로 실행할 수 있습니다.
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -PythonMode
+```
+
+설치 후에는 CLI가 업데이트를 확인하고 업데이트할 수 있습니다.
 
 ```powershell
 unity-bridge update --check
 unity-bridge update
-```
-
-PowerShell 설치 스크립트를 바로 실행할 수도 있습니다.
-
-```powershell
-irm https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 | iex
 ```
 
 ```powershell
@@ -74,6 +92,9 @@ PowerShell 스크립트를 직접 실행하고 싶다면 현재 실행에만 Exe
 ```powershell
 powershell -NoProfile -ExecutionPolicy Bypass -File .\install.ps1
 ```
+
+Standalone 설치는 GitHub Release에 `unity-bridge-windows-x64.exe` asset이 있어야 합니다.
+아직 asset이 없다면 `-PythonMode`를 사용하세요.
 
 ### 3. 연결 확인
 
@@ -90,7 +111,7 @@ unity-bridge tools
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.2
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.3
 ```
 
 ## CLI 사용법
