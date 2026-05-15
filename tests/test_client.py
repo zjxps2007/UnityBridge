@@ -965,19 +965,19 @@ class CliTests(unittest.TestCase):
     def test_cli_update_dry_run_json_reports_command(self) -> None:
         stdout = StringIO()
         with redirect_stdout(stdout):
-            exit_code = cli_main(["--json", "update", "--dry-run", "--package-spec", "unity-bridge==0.1.3"])
+            exit_code = cli_main(["--json", "update", "--dry-run", "--package-spec", "unity-bridge==0.1.4"])
 
         payload = json.loads(stdout.getvalue())
         self.assertEqual(exit_code, 0)
         self.assertTrue(payload["ok"])
         self.assertTrue(payload["dry_run"])
-        self.assertEqual(payload["package_spec"], "unity-bridge==0.1.3")
+        self.assertEqual(payload["package_spec"], "unity-bridge==0.1.4")
         self.assertIn("pip", payload["command"])
 
     def test_cli_update_check_json_reports_available_version(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.3"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.3"}',
+            "pyproject.toml": '[project]\nversion = "0.1.4"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.4"}',
         }
 
         with (
@@ -986,7 +986,7 @@ class CliTests(unittest.TestCase):
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
-                exit_code = cli_main(["--json", "update", "--check", "--ref", "v0.1.3"])
+                exit_code = cli_main(["--json", "update", "--check", "--ref", "v0.1.4"])
 
         payload = json.loads(stdout.getvalue())
         self.assertEqual(exit_code, 0)
@@ -995,17 +995,17 @@ class CliTests(unittest.TestCase):
         self.assertTrue(payload["update_available"])
         self.assertEqual(payload["status"], "outdated")
         self.assertEqual(payload["current_version"], "0.1.1")
-        self.assertEqual(payload["latest_version"], "0.1.3")
-        self.assertEqual(payload["target_connector_version"], "0.1.3")
+        self.assertEqual(payload["latest_version"], "0.1.4")
+        self.assertEqual(payload["target_connector_version"], "0.1.4")
 
     def test_cli_update_check_prints_up_to_date(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.3"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.3"}',
+            "pyproject.toml": '[project]\nversion = "0.1.4"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.4"}',
         }
 
         with (
-            patch.object(cli_module, "_current_package_version", return_value="0.1.3"),
+            patch.object(cli_module, "_current_package_version", return_value="0.1.4"),
             patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path: remote_files[path]),
         ):
             stdout = StringIO()
@@ -1015,12 +1015,12 @@ class CliTests(unittest.TestCase):
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn("up to date", output)
-        self.assertIn("Target Unity Connector version: 0.1.3", output)
+        self.assertIn("Target Unity Connector version: 0.1.4", output)
 
     def test_cli_update_check_labels_standalone_build(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.3"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.3"}',
+            "pyproject.toml": '[project]\nversion = "0.1.4"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.4"}',
         }
 
         with (
@@ -1033,22 +1033,42 @@ class CliTests(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
-        self.assertIn("UnityBridge standalone CLI: 0.1.3", output)
+        self.assertIn("UnityBridge standalone CLI: 0.1.4", output)
+        self.assertIn("Standalone asset: unity-bridge-windows-amd64.exe", output)
 
-    def test_cli_standalone_update_dry_run_uses_installer(self) -> None:
+    def test_cli_standalone_update_dry_run_uses_windows_installer(self) -> None:
         with (
             patch.object(cli_module.sys, "frozen", True, create=True),
             patch.object(cli_module.sys, "platform", "win32"),
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
-                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.3"])
+                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.4"])
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn("powershell", output)
         self.assertIn("install.ps1", output)
-        self.assertIn("-Version 'v0.1.3'", output)
+        self.assertIn("-Version 'v0.1.4'", output)
+        self.assertIn("Unity Connector package URL: https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.4", output)
+
+    def test_cli_standalone_update_dry_run_uses_posix_installer(self) -> None:
+        with (
+            patch.object(cli_module.sys, "frozen", True, create=True),
+            patch.object(cli_module.sys, "platform", "darwin"),
+            patch.object(cli_module.platform, "machine", return_value="arm64"),
+        ):
+            stdout = StringIO()
+            with redirect_stdout(stdout):
+                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.4"])
+
+        output = stdout.getvalue()
+        self.assertEqual(exit_code, 0)
+        self.assertIn("sh -c", output)
+        self.assertIn("install.sh", output)
+        self.assertIn("--version", output)
+        self.assertIn("v0.1.4", output)
+        self.assertIn("darwin-arm64", output)
 
 
 if __name__ == "__main__":

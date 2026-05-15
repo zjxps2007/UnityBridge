@@ -5,6 +5,7 @@ import base64
 import importlib.metadata as importlib_metadata
 import json
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -25,8 +26,9 @@ from .client import UnityClient
 
 
 DEFAULT_REPOSITORY_URL = "https://github.com/zjxps2007/UnityBridge.git"
-DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-x64.exe"
-DEFAULT_INSTALL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1"
+DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-amd64.exe"
+DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1"
+DEFAULT_INSTALL_SHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh"
 KNOWN_COMMANDS = {
     "instances",
     "status",
@@ -159,7 +161,7 @@ def build_parser() -> argparse.ArgumentParser:
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
 
     update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge CLI.")
-    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.3, or a branch name.")
+    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.4, or a branch name.")
     update.add_argument("--repo", default=DEFAULT_REPOSITORY_URL, help="Git repository URL.")
     update.add_argument("--package-spec", help="Full pip package spec. Overrides --repo and --ref.")
     update.add_argument("--dry-run", action="store_true", help="Print the pip command without running it.")
@@ -556,22 +558,21 @@ def _run_update(args: argparse.Namespace) -> int:
 def _run_standalone_update(args: argparse.Namespace) -> int:
     if args.package_spec:
         raise DiscoveryError("--package-spec is only supported by Python package installs")
-    if sys.platform != "win32":
-        raise DiscoveryError("standalone self-update is currently only supported on Windows")
 
     version = _standalone_update_version(args.ref)
     command = _standalone_update_command(version, wait_pid=os.getpid())
     connector_ref = "main" if version == "latest" else version
     connector_url = _connector_package_url(args.repo, connector_ref)
+    asset_name = _standalone_asset_name()
     payload = {
         "ok": True,
         "mode": "standalone",
         "dry_run": bool(args.dry_run),
         "command": command,
         "version": version,
-        "asset_name": DEFAULT_WINDOWS_ASSET_NAME,
+        "asset_name": asset_name,
         "connector_url": connector_url,
-        "note": "This updates the standalone Windows executable from GitHub Releases. Update the Unity Connector package separately in Unity Package Manager if needed.",
+        "note": "This updates the standalone executable from GitHub Releases. Update the Unity Connector package separately in Unity Package Manager if needed.",
     }
 
     if args.dry_run:
@@ -583,10 +584,10 @@ def _run_standalone_update(args: argparse.Namespace) -> int:
         print(_format_shell_command(command))
 
     try:
-        subprocess.Popen(
-            command,
-            creationflags=getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0),
-        )
+        popen_kwargs: dict[str, Any] = {}
+        if sys.platform == "win32":
+            popen_kwargs["creationflags"] = getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+        subprocess.Popen(command, **popen_kwargs)
     except OSError as exc:
         payload["ok"] = False
         payload["error"] = str(exc)
@@ -629,6 +630,8 @@ def _run_update_check(args: argparse.Namespace) -> int:
         "update_available": status == "outdated",
         "note": "This checks the installed UnityBridge CLI version. Update the Unity Connector package separately in Unity Package Manager if needed.",
     }
+    if _is_standalone_build():
+        payload["asset_name"] = _standalone_asset_name()
     _print_update_check_payload(payload, json_output=args.json)
     return 0
 
@@ -653,6 +656,8 @@ def _print_update_payload(payload: dict[str, Any], *, json_output: bool) -> None
         print(json.dumps(payload, ensure_ascii=False, indent=2))
         return
     print(_format_shell_command(payload["command"]))
+    if payload.get("asset_name"):
+        print(f"Standalone asset: {payload['asset_name']}")
     print(f"Unity Connector package URL: {payload['connector_url']}")
     print(payload["note"])
 
@@ -675,6 +680,8 @@ def _print_update_check_payload(payload: dict[str, Any], *, json_output: bool) -
         print(f"{label}: {current} (newer than {latest})")
     else:
         print(f"{label}: {current} (latest: {latest})")
+    if payload.get("asset_name"):
+        print(f"Standalone asset: {payload['asset_name']}")
     print(f"Target Unity Connector version: {payload['target_connector_version']}")
     print(f"Unity Connector package URL: {payload['connector_url']}")
     print(payload["note"])
@@ -715,6 +722,12 @@ def _standalone_update_version(ref: str) -> str:
 
 
 def _standalone_update_command(version: str, *, wait_pid: int | None = None) -> list[str]:
+    if sys.platform == "win32":
+        return _standalone_windows_update_command(version, wait_pid=wait_pid)
+    return _standalone_posix_update_command(version, wait_pid=wait_pid)
+
+
+def _standalone_windows_update_command(version: str, *, wait_pid: int | None = None) -> list[str]:
     wait_script = ""
     if wait_pid is not None and wait_pid > 0:
         wait_script = f"try {{ Wait-Process -Id {int(wait_pid)} -Timeout 30 -ErrorAction SilentlyContinue }} catch {{ }}; "
@@ -722,7 +735,7 @@ def _standalone_update_command(version: str, *, wait_pid: int | None = None) -> 
         "$ErrorActionPreference = 'Stop'; "
         + wait_script
         + "$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'; "
-        + f"Invoke-WebRequest -Uri '{DEFAULT_INSTALL_SCRIPT_URL}' -OutFile $script; "
+        + f"Invoke-WebRequest -Uri '{DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL}' -OutFile $script; "
         + f"& $script -Version '{_escape_powershell_single_quoted(version)}'"
     )
     return [
@@ -733,6 +746,60 @@ def _standalone_update_command(version: str, *, wait_pid: int | None = None) -> 
         "-Command",
         "& { " + script + " }",
     ]
+
+
+def _standalone_posix_update_command(version: str, *, wait_pid: int | None = None) -> list[str]:
+    wait_script = ""
+    if wait_pid is not None and wait_pid > 0:
+        wait_script = (
+            f"i=0; while kill -0 {int(wait_pid)} 2>/dev/null && [ $i -lt 30 ]; "
+            "do i=$((i + 1)); sleep 1; done; "
+        )
+    script = (
+        "set -e; "
+        + wait_script
+        + "script=\"${TMPDIR:-/tmp}/unity-bridge-install-$$.sh\"; "
+        + "if command -v curl >/dev/null 2>&1; then "
+        + f"curl -fsSL {_sh_quote(DEFAULT_INSTALL_SHELL_SCRIPT_URL)} -o \"$script\"; "
+        + "elif command -v wget >/dev/null 2>&1; then "
+        + f"wget -qO \"$script\" {_sh_quote(DEFAULT_INSTALL_SHELL_SCRIPT_URL)}; "
+        + "else echo 'curl or wget is required to update UnityBridge.' >&2; exit 1; fi; "
+        + f"sh \"$script\" --version {_sh_quote(version)}; "
+        + "rm -f \"$script\""
+    )
+    return ["sh", "-c", script]
+
+
+def _standalone_asset_name() -> str:
+    os_name = _standalone_os_name()
+    arch_name = _standalone_arch_name()
+    if os_name == "windows" and arch_name == "amd64":
+        return DEFAULT_WINDOWS_ASSET_NAME
+    extension = ".exe" if os_name == "windows" else ""
+    return f"unity-bridge-{os_name}-{arch_name}{extension}"
+
+
+def _standalone_os_name() -> str:
+    if sys.platform == "win32":
+        return "windows"
+    if sys.platform == "darwin":
+        return "darwin"
+    if sys.platform.startswith("linux"):
+        return "linux"
+    raise DiscoveryError(f"unsupported standalone platform: {sys.platform}")
+
+
+def _standalone_arch_name() -> str:
+    machine = platform.machine().lower()
+    if machine in {"x86_64", "amd64"}:
+        return "amd64"
+    if machine in {"arm64", "aarch64"}:
+        return "arm64"
+    raise DiscoveryError(f"unsupported standalone architecture: {machine}")
+
+
+def _sh_quote(value: str) -> str:
+    return "'" + value.replace("'", "'\"'\"'") + "'"
 
 
 def _escape_powershell_single_quoted(value: str) -> str:

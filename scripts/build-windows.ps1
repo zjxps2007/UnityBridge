@@ -1,7 +1,7 @@
 # Build the standalone Windows UnityBridge CLI executable.
 [CmdletBinding()]
 param(
-    [string]$OutputName = "unity-bridge-windows-x64.exe",
+    [string]$OutputName = "unity-bridge-windows-amd64.exe",
     [switch]$SkipDependencyInstall
 )
 
@@ -18,19 +18,8 @@ try {
         if ($LASTEXITCODE -ne 0) { throw "build dependency install failed." }
     }
 
-    python -m PyInstaller `
-        --clean `
-        --noconfirm `
-        --onefile `
-        --name unity-bridge `
-        --paths src `
-        scripts\pyinstaller_entry.py
+    python scripts\build-standalone.py --output-name $OutputName
     if ($LASTEXITCODE -ne 0) { throw "PyInstaller build failed." }
-
-    $source = Join-Path $root "dist\unity-bridge.exe"
-    $target = Join-Path $root "dist\$OutputName"
-    Copy-Item -LiteralPath $source -Destination $target -Force
-    Write-Host "Built $target" -ForegroundColor Green
 }
 finally {
     Pop-Location

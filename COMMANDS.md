@@ -77,16 +77,16 @@ unity-bridge wait-ready --timeout-sec 300
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.3
+unity-bridge update --ref v0.1.4
 unity-bridge update --dry-run
 ```
 
 For Python package installs, `update` reinstalls the CLI package with pip. For
-standalone Windows builds, `update` reruns the release installer and downloads
-the release executable. `--check` compares the installed CLI version with the
-selected Git ref without installing anything. The command prints the Unity
-Connector Git package URL too, but it does not edit a Unity project's
-`Packages/manifest.json` automatically.
+standalone builds, `update` reruns the release installer for the current OS and
+downloads the matching release executable. `--check` compares the installed CLI
+version with the selected Git ref without installing anything. The command
+prints the Unity Connector Git package URL too, but it does not edit a Unity
+project's `Packages/manifest.json` automatically.
 
 ### Asset Refresh
 

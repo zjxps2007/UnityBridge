@@ -4,7 +4,7 @@ param(
     [string]$Repo = "zjxps2007/UnityBridge",
     [string]$Version = "latest",
     [string]$InstallDir = (Join-Path $env:LOCALAPPDATA "UnityBridge\bin"),
-    [string]$AssetName = "unity-bridge-windows-x64.exe",
+    [string]$AssetName = "",
     [string]$PackageSpec = "git+https://github.com/zjxps2007/UnityBridge.git",
     [switch]$PythonMode,
     [switch]$NoPathUpdate
@@ -102,6 +102,19 @@ function Get-GitHubHeaders {
     }
 }
 
+function Get-StandaloneAssetCandidates {
+    if (-not [string]::IsNullOrWhiteSpace($AssetName)) {
+        return @($AssetName)
+    }
+
+    # Prefer the Go/GitHub Actions style architecture name, but keep the old
+    # Windows x64 asset as a fallback so older releases remain installable.
+    return @(
+        "unity-bridge-windows-amd64.exe",
+        "unity-bridge-windows-x64.exe"
+    )
+}
+
 function Resolve-GitHubRelease {
     param(
         [string]$Repository,
@@ -125,7 +138,7 @@ function Resolve-GitHubRelease {
         return Invoke-RestMethod -Uri $url -Headers (Get-GitHubHeaders)
     }
     catch {
-        throw "Failed to resolve GitHub release '$ReleaseVersion' in $repoName. Make sure the release exists and contains $AssetName, or run with -PythonMode."
+        throw "Failed to resolve GitHub release '$ReleaseVersion' in $repoName. Make sure the release exists and contains a Windows standalone asset, or run with -PythonMode."
     }
 }
 
@@ -133,16 +146,24 @@ function Install-Standalone {
     Write-Step "Resolving UnityBridge release"
     $release = Resolve-GitHubRelease -Repository $Repo -ReleaseVersion $Version
     $assets = @($release.assets)
-    $asset = $assets | Where-Object { $_.name -eq $AssetName } | Select-Object -First 1
+    $assetCandidates = Get-StandaloneAssetCandidates
+    $asset = $null
+    foreach ($candidate in $assetCandidates) {
+        $asset = $assets | Where-Object { $_.name -eq $candidate } | Select-Object -First 1
+        if ($null -ne $asset) {
+            break
+        }
+    }
     if ($null -eq $asset) {
         $available = ($assets | ForEach-Object { $_.name }) -join ", "
         if ([string]::IsNullOrWhiteSpace($available)) {
             $available = "(none)"
         }
-        throw "Release '$($release.tag_name)' does not contain $AssetName. Available assets: $available. Run with -PythonMode to install from source."
+        $expected = $assetCandidates -join ", "
+        throw "Release '$($release.tag_name)' does not contain a supported Windows asset. Expected one of: $expected. Available assets: $available. Run with -PythonMode to install from source."
     }
 
-    Write-Step "Downloading $AssetName from $($release.tag_name)"
+    Write-Step "Downloading $($asset.name) from $($release.tag_name)"
     New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
 
     $tempPath = Join-Path ([System.IO.Path]::GetTempPath()) ("unity-bridge-" + [System.Guid]::NewGuid().ToString("N") + ".exe")

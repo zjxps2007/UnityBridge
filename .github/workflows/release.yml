@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Existing release tag to upload the Windows executable to. Leave blank to build an artifact only."
+        description: "Existing release tag to upload standalone executables to. Leave blank to build artifacts only."
         required: false
         default: ""
 
@@ -15,9 +15,23 @@ permissions:
   contents: write
 
 jobs:
-  windows-standalone:
-    name: Build Windows standalone CLI
-    runs-on: windows-latest
+  standalone:
+    name: Build standalone CLI (${{ matrix.asset_name }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            asset_name: unity-bridge-windows-amd64.exe
+          - os: ubuntu-24.04
+            asset_name: unity-bridge-linux-amd64
+          - os: ubuntu-24.04-arm
+            asset_name: unity-bridge-linux-arm64
+          - os: macos-15-intel
+            asset_name: unity-bridge-darwin-amd64
+          - os: macos-15
+            asset_name: unity-bridge-darwin-arm64
 
     steps:
       - name: Checkout
@@ -32,18 +46,17 @@ jobs:
         run: python -m pip install -e ".[build]"
 
       - name: Build executable
-        shell: pwsh
-        run: .\scripts\build-windows.ps1 -SkipDependencyInstall
+        run: python scripts/build-standalone.py --output-name "${{ matrix.asset_name }}"
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4
         with:
-          name: unity-bridge-windows-x64
-          path: dist/unity-bridge-windows-x64.exe
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}
 
       - name: Upload release asset
-        if: startsWith(github.ref, 'refs/tags/') || github.event.inputs.release_tag != ''
+        if: startsWith(github.ref, 'refs/tags/') || (github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag != '')
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event.inputs.release_tag || github.ref_name }}
-          files: dist/unity-bridge-windows-x64.exe
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+          files: dist/${{ matrix.asset_name }}
