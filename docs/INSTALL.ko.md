@@ -59,14 +59,14 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.4
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.5
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.1.4
+sh /tmp/unity-bridge-install.sh --version v0.1.5
 ```
 
 ## 업데이트
@@ -79,6 +79,11 @@ unity-bridge update
 standalone 빌드에서는 `update`가 현재 OS용 릴리스 설치 스크립트를 다시 실행해 맞는 release
 실행 파일을 내려받습니다. Unity Connector용 Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의
 `Packages/manifest.json`은 자동으로 수정하지 않습니다.
+
+일반 CLI 명령에서는 하루에 한 번만 CLI 업데이트를 확인하고, 새 버전이 있을 때만 짧은 알림을
+출력합니다. `--json` 출력과 `update` 명령 자체에서는 이 알림을 건너뜁니다.
+건너뛰려면 `UNITY_BRIDGE_SKIP_UPDATE_CHECK=1` 환경변수를 설정하거나 `--no-update-check`를
+붙이세요.
 
 ## Release asset
 
@@ -100,7 +105,7 @@ Windows 설치 스크립트는 이전 릴리스를 위해 `unity-bridge-windows-
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.4
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.5
 ```
 
 ## 로컬 설치 스크립트

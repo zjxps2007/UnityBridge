@@ -5,6 +5,7 @@ import os
 import sys
 import threading
 import unittest
+from contextlib import redirect_stderr
 from contextlib import redirect_stdout
 from http.server import BaseHTTPRequestHandler
 from http.server import HTTPServer
@@ -692,6 +693,13 @@ class AdapterTests(unittest.TestCase):
 
 
 class CliTests(unittest.TestCase):
+    def setUp(self) -> None:
+        self._update_check_env = patch.dict(os.environ, {"UNITY_BRIDGE_SKIP_UPDATE_CHECK": "1"})
+        self._update_check_env.start()
+
+    def tearDown(self) -> None:
+        self._update_check_env.stop()
+
     def test_cli_console_command_sends_adapter_request(self) -> None:
         response_body = json.dumps({"success": True, "message": "Retrieved 0 entries.", "data": []}).encode("utf-8")
         with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
@@ -965,28 +973,28 @@ class CliTests(unittest.TestCase):
     def test_cli_update_dry_run_json_reports_command(self) -> None:
         stdout = StringIO()
         with redirect_stdout(stdout):
-            exit_code = cli_main(["--json", "update", "--dry-run", "--package-spec", "unity-bridge==0.1.4"])
+            exit_code = cli_main(["--json", "update", "--dry-run", "--package-spec", "unity-bridge==0.1.5"])
 
         payload = json.loads(stdout.getvalue())
         self.assertEqual(exit_code, 0)
         self.assertTrue(payload["ok"])
         self.assertTrue(payload["dry_run"])
-        self.assertEqual(payload["package_spec"], "unity-bridge==0.1.4")
+        self.assertEqual(payload["package_spec"], "unity-bridge==0.1.5")
         self.assertIn("pip", payload["command"])
 
     def test_cli_update_check_json_reports_available_version(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.4"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.4"}',
+            "pyproject.toml": '[project]\nversion = "0.1.5"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.5"}',
         }
 
         with (
             patch.object(cli_module, "_current_package_version", return_value="0.1.1"),
-            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path: remote_files[path]),
+            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path, **kwargs: remote_files[path]),
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
-                exit_code = cli_main(["--json", "update", "--check", "--ref", "v0.1.4"])
+                exit_code = cli_main(["--json", "update", "--check", "--ref", "v0.1.5"])
 
         payload = json.loads(stdout.getvalue())
         self.assertEqual(exit_code, 0)
@@ -995,18 +1003,18 @@ class CliTests(unittest.TestCase):
         self.assertTrue(payload["update_available"])
         self.assertEqual(payload["status"], "outdated")
         self.assertEqual(payload["current_version"], "0.1.1")
-        self.assertEqual(payload["latest_version"], "0.1.4")
-        self.assertEqual(payload["target_connector_version"], "0.1.4")
+        self.assertEqual(payload["latest_version"], "0.1.5")
+        self.assertEqual(payload["target_connector_version"], "0.1.5")
 
     def test_cli_update_check_prints_up_to_date(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.4"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.4"}',
+            "pyproject.toml": '[project]\nversion = "0.1.5"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.5"}',
         }
 
         with (
-            patch.object(cli_module, "_current_package_version", return_value="0.1.4"),
-            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path: remote_files[path]),
+            patch.object(cli_module, "_current_package_version", return_value="0.1.5"),
+            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path, **kwargs: remote_files[path]),
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
@@ -1015,17 +1023,17 @@ class CliTests(unittest.TestCase):
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn("up to date", output)
-        self.assertIn("Target Unity Connector version: 0.1.4", output)
+        self.assertIn("Target Unity Connector version: 0.1.5", output)
 
     def test_cli_update_check_labels_standalone_build(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.4"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.4"}',
+            "pyproject.toml": '[project]\nversion = "0.1.5"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.5"}',
         }
 
         with (
             patch.object(cli_module.sys, "frozen", True, create=True),
-            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path: remote_files[path]),
+            patch.object(cli_module, "_read_remote_repository_file", side_effect=lambda repo, ref, path, **kwargs: remote_files[path]),
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
@@ -1033,8 +1041,78 @@ class CliTests(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
-        self.assertIn("UnityBridge standalone CLI: 0.1.4", output)
+        self.assertIn("UnityBridge standalone CLI: 0.1.5", output)
         self.assertIn("Standalone asset: unity-bridge-windows-amd64.exe", output)
+
+    def test_cli_auto_update_notice_prints_when_update_is_available(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp) / "instances"
+            cache_path = Path(tmp) / "update-check.json"
+            directory.mkdir()
+            write_instance(directory, "game", port=8090, pid=0)
+
+            stdout = StringIO()
+            stderr = StringIO()
+            with (
+                patch.dict(os.environ, {"UNITY_BRIDGE_SKIP_UPDATE_CHECK": ""}),
+                patch.object(cli_module, "_current_package_version", return_value="0.1.4"),
+                patch.object(cli_module, "_remote_python_version", return_value="0.1.5"),
+                patch.object(cli_module, "_update_check_cache_path", return_value=cache_path),
+                redirect_stdout(stdout),
+                redirect_stderr(stderr),
+            ):
+                exit_code = cli_main(["--instances-dir", str(directory), "status"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("UnityBridge update available: 0.1.4 -> 0.1.5", stderr.getvalue())
+            self.assertTrue(cache_path.exists())
+
+    def test_cli_auto_update_notice_skips_json_output(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=8090, pid=0)
+
+            with (
+                patch.dict(os.environ, {"UNITY_BRIDGE_SKIP_UPDATE_CHECK": ""}),
+                patch.object(cli_module, "_remote_python_version", side_effect=AssertionError("should not check")),
+                redirect_stdout(StringIO()),
+            ):
+                exit_code = cli_main(["--json", "--instances-dir", str(directory), "status"])
+
+            self.assertEqual(exit_code, 0)
+
+    def test_cli_auto_update_notice_can_be_skipped_by_option(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=8090, pid=0)
+
+            with (
+                patch.dict(os.environ, {"UNITY_BRIDGE_SKIP_UPDATE_CHECK": ""}),
+                patch.object(cli_module, "_remote_python_version", side_effect=AssertionError("should not check")),
+                redirect_stdout(StringIO()),
+            ):
+                exit_code = cli_main(["--no-update-check", "--instances-dir", str(directory), "status"])
+
+            self.assertEqual(exit_code, 0)
+
+    def test_cli_auto_update_notice_respects_cache(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp) / "instances"
+            cache_path = Path(tmp) / "update-check.json"
+            directory.mkdir()
+            write_instance(directory, "game", port=8090, pid=0)
+            cache_path.write_text(json.dumps({"checked_at": 1_000.0}), encoding="utf-8")
+
+            with (
+                patch.dict(os.environ, {"UNITY_BRIDGE_SKIP_UPDATE_CHECK": ""}),
+                patch.object(cli_module.time, "time", return_value=1_001.0),
+                patch.object(cli_module, "_remote_python_version", side_effect=AssertionError("should not check")),
+                patch.object(cli_module, "_update_check_cache_path", return_value=cache_path),
+                redirect_stdout(StringIO()),
+            ):
+                exit_code = cli_main(["--instances-dir", str(directory), "status"])
+
+            self.assertEqual(exit_code, 0)
 
     def test_cli_standalone_update_dry_run_uses_windows_installer(self) -> None:
         with (
@@ -1043,14 +1121,14 @@ class CliTests(unittest.TestCase):
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
-                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.4"])
+                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.5"])
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn("powershell", output)
         self.assertIn("install.ps1", output)
-        self.assertIn("-Version 'v0.1.4'", output)
-        self.assertIn("Unity Connector package URL: https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.4", output)
+        self.assertIn("-Version 'v0.1.5'", output)
+        self.assertIn("Unity Connector package URL: https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.5", output)
 
     def test_cli_standalone_update_dry_run_uses_posix_installer(self) -> None:
         with (
@@ -1060,14 +1138,14 @@ class CliTests(unittest.TestCase):
         ):
             stdout = StringIO()
             with redirect_stdout(stdout):
-                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.4"])
+                exit_code = cli_main(["update", "--dry-run", "--ref", "v0.1.5"])
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn("sh -c", output)
         self.assertIn("install.sh", output)
         self.assertIn("--version", output)
-        self.assertIn("v0.1.4", output)
+        self.assertIn("v0.1.5", output)
         self.assertIn("darwin-arm64", output)
 
 

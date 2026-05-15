@@ -1,6 +1,6 @@
 # UnityBridge Commands
 
-[한국어](COMMANDS.ko.md) | English | [README](../README.md)
+[?쒓뎅??(COMMANDS.ko.md) | English | [README](../README.md)
 
 This document lists the commands currently available in the `unity-bridge` CLI.
 
@@ -31,6 +31,7 @@ unity-bridge --json console --count 20
 | `--timeout-ms MS` | HTTP request timeout. Default: `120000`. |
 | `--instances-dir PATH` | Use a heartbeat directory other than `~/.unity-bridge/instances`. |
 | `--json` | Print JSON output for other programs. |
+| `--no-update-check` | Skip the automatic daily update notice for this run. |
 
 `--project` checks exact project paths, whether the supplied path is inside a
 project, and path-segment suffixes such as `UnityProjects/MyGame` or `MyGame`.
@@ -77,7 +78,7 @@ unity-bridge wait-ready --timeout-sec 300
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.4
+unity-bridge update --ref v0.1.5
 unity-bridge update --dry-run
 ```
 
@@ -87,6 +88,11 @@ downloads the matching release executable. `--check` compares the installed CLI
 version with the selected Git ref without installing anything. The command
 prints the Unity Connector Git package URL too, but it does not edit a Unity
 project's `Packages/manifest.json` automatically.
+
+For normal CLI commands, UnityBridge checks for a CLI update at most once per
+day and prints a short notice only when a newer version is available. The notice
+is skipped for `--json` output and for the `update` command itself. Set
+`UNITY_BRIDGE_SKIP_UPDATE_CHECK=1` or pass `--no-update-check` to skip it.
 
 ### Asset Refresh
 

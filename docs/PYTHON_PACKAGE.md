@@ -1,6 +1,6 @@
 # UnityBridge Python Package Mode
 
-[한국어](PYTHON_PACKAGE.ko.md) | English | [README](../README.md)
+[?쒓뎅??(PYTHON_PACKAGE.ko.md) | English | [README](../README.md)
 
 Python package mode is for development and Python programs that need to import
 `unity_bridge` directly. For normal CLI use, the standalone installer is
@@ -29,7 +29,7 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 Install a specific tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.1.4"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.1.5"
 ```
 
 ## Install With The Installer
@@ -112,5 +112,5 @@ Unity project's `Packages/manifest.json` automatically.
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.1.4
+unity-bridge update --ref v0.1.5
 ```

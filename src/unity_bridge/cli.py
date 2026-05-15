@@ -9,6 +9,7 @@ import platform
 import re
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 import urllib.error
@@ -29,6 +30,8 @@ DEFAULT_REPOSITORY_URL = "https://github.com/zjxps2007/UnityBridge.git"
 DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-amd64.exe"
 DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1"
 DEFAULT_INSTALL_SHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh"
+AUTO_UPDATE_CHECK_INTERVAL_SECONDS = 24 * 60 * 60
+AUTO_UPDATE_CHECK_TIMEOUT_SECONDS = 2
 KNOWN_COMMANDS = {
     "instances",
     "status",
@@ -53,7 +56,7 @@ GLOBAL_VALUE_OPTIONS = {
     "--timeout-ms": "timeout_ms",
     "--instances-dir": "instances_dir",
 }
-GLOBAL_BOOL_OPTIONS = {"--json": "json"}
+GLOBAL_BOOL_OPTIONS = {"--json": "json", "--no-update-check": "no_update_check"}
 
 
 def add_common_options(
@@ -68,6 +71,8 @@ def add_common_options(
     parser.add_argument("--port", type=int, default=default, help="Select Unity instance by port.")
     parser.add_argument("--timeout-ms", type=int, default=timeout_default, help="HTTP timeout in milliseconds.")
     parser.add_argument("--instances-dir", default=default, help="Override ~/.unity-bridge/instances.")
+    no_update_default = argparse.SUPPRESS if suppress_defaults else False
+    parser.add_argument("--no-update-check", action="store_true", default=no_update_default, help="Skip the automatic daily update notice.")
     if json_option:
         json_default = argparse.SUPPRESS if suppress_defaults else False
         parser.add_argument("--json", action="store_true", default=json_default, help="Print JSON output.")
@@ -161,7 +166,7 @@ def build_parser() -> argparse.ArgumentParser:
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
 
     update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge CLI.")
-    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.4, or a branch name.")
+    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.5, or a branch name.")
     update.add_argument("--repo", default=DEFAULT_REPOSITORY_URL, help="Git repository URL.")
     update.add_argument("--package-spec", help="Full pip package spec. Overrides --repo and --ref.")
     update.add_argument("--dry-run", action="store_true", help="Print the pip command without running it.")
@@ -175,6 +180,7 @@ def main(argv: list[str] | None = None) -> int:
         return _main_direct_tool(argv)
 
     args = build_parser().parse_args(argv)
+    _maybe_print_update_notice(args)
     client = UnityClient(
         project=getattr(args, "project", None),
         port=getattr(args, "port", None),
@@ -359,6 +365,7 @@ def _parse_direct_tool_args(argv: list[str]) -> dict[str, Any]:
         "timeout_ms": 120_000,
         "instances_dir": None,
         "json": False,
+        "no_update_check": False,
         "params": {},
     }
     positional: list[Any] = []
@@ -636,6 +643,82 @@ def _run_update_check(args: argparse.Namespace) -> int:
     return 0
 
 
+def _maybe_print_update_notice(args: argparse.Namespace) -> None:
+    if not _should_auto_update_check(args):
+        return
+
+    cache_path = _update_check_cache_path()
+    now = time.time()
+    if not _auto_update_check_due(cache_path, now=now):
+        return
+
+    payload: dict[str, Any] = {"checked_at": now}
+    try:
+        current_version = _current_package_version()
+        latest_version = _remote_python_version(
+            DEFAULT_REPOSITORY_URL,
+            "main",
+            timeout_sec=AUTO_UPDATE_CHECK_TIMEOUT_SECONDS,
+        )
+        status = _version_status(current_version, latest_version)
+        payload.update(
+            {
+                "current_version": current_version,
+                "latest_version": latest_version,
+                "status": status,
+            }
+        )
+        if status == "outdated":
+            print(
+                f"UnityBridge update available: {current_version} -> {latest_version}. Run: unity-bridge update",
+                file=sys.stderr,
+            )
+    except Exception as exc:  # noqa: BLE001 - update notices must never break the requested command.
+        payload["error"] = str(exc)
+    finally:
+        _write_update_check_cache(cache_path, payload)
+
+
+def _should_auto_update_check(args: argparse.Namespace) -> bool:
+    if getattr(args, "command", "") == "update":
+        return False
+    if getattr(args, "json", False):
+        return False
+    if getattr(args, "no_update_check", False):
+        return False
+    return not _env_flag_enabled("UNITY_BRIDGE_SKIP_UPDATE_CHECK")
+
+
+def _env_flag_enabled(name: str) -> bool:
+    value = os.environ.get(name, "").strip().lower()
+    return value in {"1", "true", "yes", "on"}
+
+
+def _update_check_cache_path() -> Path:
+    return Path.home() / ".unity-bridge" / "update-check.json"
+
+
+def _auto_update_check_due(path: Path, *, now: float) -> bool:
+    try:
+        payload = json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return True
+    if not isinstance(payload, dict):
+        return True
+    checked_at = payload.get("checked_at")
+    if not isinstance(checked_at, (int, float)):
+        return True
+    return now - float(checked_at) >= AUTO_UPDATE_CHECK_INTERVAL_SECONDS
+
+
+def _write_update_check_cache(path: Path, payload: dict[str, Any]) -> None:
+    try:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    except OSError:
+        pass
+
+
 def _git_package_spec(repo: str, ref: str) -> str:
     repo = repo.strip()
     ref = ref.strip()
@@ -806,12 +889,19 @@ def _escape_powershell_single_quoted(value: str) -> str:
     return value.replace("'", "''")
 
 
-def _remote_python_version(repo: str, ref: str) -> str:
-    return _parse_pyproject_version(_read_remote_repository_file(repo, ref, "pyproject.toml"))
+def _remote_python_version(repo: str, ref: str, *, timeout_sec: float = 10) -> str:
+    return _parse_pyproject_version(
+        _read_remote_repository_file(repo, ref, "pyproject.toml", timeout_sec=timeout_sec)
+    )
 
 
-def _remote_connector_version(repo: str, ref: str) -> str:
-    text = _read_remote_repository_file(repo, ref, "unity-bridge-connector/package.json")
+def _remote_connector_version(repo: str, ref: str, *, timeout_sec: float = 10) -> str:
+    text = _read_remote_repository_file(
+        repo,
+        ref,
+        "unity-bridge-connector/package.json",
+        timeout_sec=timeout_sec,
+    )
     try:
         value = json.loads(text).get("version")
     except json.JSONDecodeError as exc:
@@ -821,7 +911,7 @@ def _remote_connector_version(repo: str, ref: str) -> str:
     return value
 
 
-def _read_remote_repository_file(repo: str, ref: str, path: str) -> str:
+def _read_remote_repository_file(repo: str, ref: str, path: str, *, timeout_sec: float = 10) -> str:
     owner, name = _parse_github_repo(repo)
     encoded_path = urllib.parse.quote(path, safe="/")
     encoded_ref = urllib.parse.quote(ref or "main", safe="")
@@ -834,7 +924,7 @@ def _read_remote_repository_file(repo: str, ref: str, path: str) -> str:
         },
     )
     try:
-        with urllib.request.urlopen(request, timeout=10) as response:
+        with urllib.request.urlopen(request, timeout=timeout_sec) as response:
             body = response.read()
             content_type = response.headers.get("Content-Type", "")
     except urllib.error.HTTPError as exc:

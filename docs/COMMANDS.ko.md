@@ -31,6 +31,7 @@ unity-bridge --json console --count 20
 | `--timeout-ms MS` | HTTP 요청 타임아웃입니다. 기본값은 `120000`입니다. |
 | `--instances-dir PATH` | 기본 `~/.unity-bridge/instances` 대신 다른 heartbeat 폴더를 사용합니다. |
 | `--json` | 결과를 JSON으로 출력합니다. 다른 프로그램이 파싱할 때 사용합니다. |
+| `--no-update-check` | 이번 실행에서 자동 일일 업데이트 알림을 건너뜁니다. |
 
 `--project`는 정확한 프로젝트 경로, 입력 경로가 프로젝트 내부인지 여부, `UnityProjects/MyGame`이나
 `MyGame` 같은 경로 세그먼트 suffix를 확인합니다. `Game`이 `GamePrototype`에 매칭되는 식의 부분
@@ -75,7 +76,7 @@ unity-bridge wait-ready --timeout-sec 300
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.4
+unity-bridge update --ref v0.1.5
 unity-bridge update --dry-run
 ```
 
@@ -84,6 +85,11 @@ Python 패키지 설치에서는 `update`가 pip로 CLI 패키지를 다시 설�
 아무것도 설치하지 않고 설치된 CLI 버전과 선택한 Git ref의 버전을 비교합니다. Unity Connector용
 Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/manifest.json`은 자동으로 수정하지
 않습니다.
+
+일반 CLI 명령에서는 하루에 한 번만 CLI 업데이트를 확인하고, 새 버전이 있을 때만 짧은 알림을
+출력합니다. `--json` 출력과 `update` 명령 자체에서는 이 알림을 건너뜁니다.
+건너뛰려면 `UNITY_BRIDGE_SKIP_UPDATE_CHECK=1` 환경변수를 설정하거나 `--no-update-check`를
+붙이세요.
 
 ### 에셋 새로고침
 

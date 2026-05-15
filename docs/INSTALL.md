@@ -1,6 +1,6 @@
 # UnityBridge Installation
 
-[한국어](INSTALL.ko.md) | English | [README](../README.md)
+[?쒓뎅??(INSTALL.ko.md) | English | [README](../README.md)
 
 This document covers standalone CLI installation, Unity package version pinning,
 updates, and release assets. Python package mode is documented separately in
@@ -60,14 +60,14 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.4
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.5
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.1.4
+sh /tmp/unity-bridge-install.sh --version v0.1.5
 ```
 
 ## Update
@@ -81,6 +81,11 @@ For standalone builds, `update` reruns the release installer for the current OS
 and downloads the matching release executable. The command also prints the Unity
 Connector Git package URL, but it does not edit a Unity project's
 `Packages/manifest.json` automatically.
+
+Normal CLI commands check for a CLI update at most once per day and print a
+short notice only when a newer version is available. The notice is skipped for
+`--json` output and for the `update` command itself. Set
+`UNITY_BRIDGE_SKIP_UPDATE_CHECK=1` or pass `--no-update-check` to skip it.
 
 ## Release Assets
 
@@ -103,7 +108,7 @@ asset for previous releases.
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.4
+https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.5
 ```
 
 ## Local Installer
