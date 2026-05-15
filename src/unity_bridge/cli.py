@@ -199,6 +199,15 @@ def main(argv: list[str] | None = None) -> int:
             _print(instance, json_output=args.json)
             return 0
 
+        if args.command == "update":
+            return _run_update(args)
+
+        if args.command == "wait-ready":
+            instance = client.wait_for_ready(timeout_sec=args.timeout_sec)
+            _print(instance, json_output=args.json)
+            return 0
+
+        _warn_for_selected_connector_version(client, json_output=args.json)
         adapter = UnityBridgeAdapter(client=client)
 
         if args.command == "tools":
@@ -307,14 +316,6 @@ def main(argv: list[str] | None = None) -> int:
             _print(response, json_output=args.json)
             return 0 if response.success else 1
 
-        if args.command == "wait-ready":
-            instance = client.wait_for_ready(timeout_sec=args.timeout_sec)
-            _print(instance, json_output=args.json)
-            return 0
-
-        if args.command == "update":
-            return _run_update(args)
-
     except UnityBridgeError as exc:
         if args.json:
             print(json.dumps({"ok": False, "error": str(exc)}, ensure_ascii=False, indent=2), file=sys.stderr)
@@ -340,7 +341,9 @@ def _main_direct_tool(argv: list[str]) -> int:
             timeout_ms=parsed["timeout_ms"],
             instances_dir=parsed["instances_dir"],
         )
-        response = client.call(parsed["command"], parsed["params"])
+        instance = client.discover_instance()
+        _print_connector_version_warning(instance, json_output=parsed["json"])
+        response = client.call(parsed["command"], parsed["params"], instance=instance)
         _print(response, json_output=parsed["json"])
         return 0 if response.success else 1
     except UnityBridgeError as exc:
@@ -1055,6 +1058,46 @@ def _print_instance(instance: Instance) -> None:
     print(f" Connector: {instance.connector_version or 'unknown'}")
     print(f" PID: {instance.pid}")
     print(f" Heartbeat age: {age_label}")
+    _print_connector_version_warning(instance, json_output=False)
+
+
+def _warn_for_selected_connector_version(client: UnityClient, *, json_output: bool) -> None:
+    instance = client.discover_instance()
+    _print_connector_version_warning(instance, json_output=json_output)
+
+
+def _print_connector_version_warning(instance: Instance, *, json_output: bool) -> None:
+    if json_output:
+        return
+    warning = _connector_version_warning(instance)
+    if warning:
+        print(warning, file=sys.stderr)
+
+
+def _connector_version_warning(instance: Instance) -> str | None:
+    connector_version = (instance.connector_version or "").strip()
+    if not connector_version or connector_version.lower() == "unknown":
+        return None
+
+    cli_version = __version__
+    if not cli_version or cli_version == "unknown":
+        return None
+
+    connector_key = _version_key(connector_version)
+    cli_key = _version_key(cli_version)
+    versions_differ = (
+        connector_key != cli_key
+        if connector_key is not None and cli_key is not None
+        else connector_version != cli_version
+    )
+    if not versions_differ:
+        return None
+
+    return (
+        f"WARNING: Unity Connector version {connector_version} differs from "
+        f"UnityBridge CLI version {cli_version}. Update the Unity package if "
+        "commands behave unexpectedly."
+    )
 
 
 def _to_jsonable(value: Any) -> Any:

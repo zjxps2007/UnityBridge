@@ -45,7 +45,7 @@ def write_instance(directory: Path, name: str, **overrides: object) -> Path:
         "port": 8090,
         "pid": 1234,
         "unityVersion": "6000.0.0f1",
-        "connectorVersion": "0.1.0",
+        "connectorVersion": cli_module.__version__,
         "timestamp": 1_700_000_000_000,
         "compileErrors": False,
     }
@@ -699,6 +699,55 @@ class CliTests(unittest.TestCase):
 
     def tearDown(self) -> None:
         self._update_check_env.stop()
+
+    def test_cli_status_warns_when_connector_version_differs(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=8090, pid=0, connectorVersion="0.1.2")
+
+            stdout = StringIO()
+            stderr = StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                exit_code = cli_main(["--instances-dir", str(directory), "status"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("Connector: 0.1.2", stdout.getvalue())
+            self.assertIn(
+                f"WARNING: Unity Connector version 0.1.2 differs from UnityBridge CLI version {cli_module.__version__}",
+                stderr.getvalue(),
+            )
+
+    def test_cli_status_json_suppresses_connector_version_warning(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=8090, pid=0, connectorVersion="0.1.2")
+
+            stdout = StringIO()
+            stderr = StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                exit_code = cli_main(["--json", "--instances-dir", str(directory), "status"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual("", stderr.getvalue())
+            self.assertEqual(json.loads(stdout.getvalue())["connectorVersion"], "0.1.2")
+
+    def test_cli_command_warns_when_connector_version_differs(self) -> None:
+        response_body = json.dumps({"success": True, "message": "Retrieved 0 entries.", "data": []}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, pid=0, connectorVersion="0.1.2")
+
+            stdout = StringIO()
+            stderr = StringIO()
+            with redirect_stdout(stdout), redirect_stderr(stderr):
+                exit_code = cli_main(["--instances-dir", str(directory), "console"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertIn("Retrieved 0 entries.", stdout.getvalue())
+            self.assertIn(
+                f"WARNING: Unity Connector version 0.1.2 differs from UnityBridge CLI version {cli_module.__version__}",
+                stderr.getvalue(),
+            )
 
     def test_cli_console_command_sends_adapter_request(self) -> None:
         response_body = json.dumps({"success": True, "message": "Retrieved 0 entries.", "data": []}).encode("utf-8")
