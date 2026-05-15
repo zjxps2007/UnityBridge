@@ -43,8 +43,15 @@ unity-bridge status
 unity-bridge tools
 ```
 
-백그라운드 응답성을 위한 권장 Editor 설정은
-[docs/INSTALL.ko.md](docs/INSTALL.ko.md#권장-editor-설정)에 정리했습니다.
+### 권장 Editor 설정
+
+백그라운드 응답성을 더 안정적으로 유지하려면 아래 설정을 권장합니다.
+
+```text
+Edit > Preferences > General > Interaction Mode > No Throttling
+```
+
+자세한 설명은 [docs/INSTALL.ko.md](docs/INSTALL.ko.md#권장-editor-설정)에 정리했습니다.
 
 ## 기본 명령어
 
