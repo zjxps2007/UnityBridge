@@ -17,8 +17,11 @@ Unity Editor에서 `Window > Package Manager > + > Add package from git URL...`�
 아래 URL을 붙여넣습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
+
+이 URL은 `main` 브랜치를 기준으로 설치합니다. 이후 새 버전이 `main`에 올라오면
+Package Manager의 `Update` 버튼으로 갱신할 수 있습니다.
 
 ### 2. CLI 설치
 

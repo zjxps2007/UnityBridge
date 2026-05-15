@@ -11,8 +11,12 @@ Unity Editor에서 `Window > Package Manager > + > Add package from git URL...`�
 아래 URL을 붙여넣습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
+
+이 URL은 `main` 브랜치를 기준으로 설치합니다. 이후 새 버전이 `main`에 올라오면
+Package Manager의 `Update` 버튼으로 최신 커밋을 받을 수 있습니다. 특정 버전에 고정하고
+싶다면 아래의 [버전 고정](#버전-고정) 방식을 사용하세요.
 
 Connector는 Unity Editor가 열릴 때 자동으로 시작됩니다. 실행 중에는
 `~/.unity-bridge/instances/` 아래에 heartbeat 파일을 기록합니다. CLI는 이 파일을 읽어
@@ -105,7 +109,7 @@ Windows 설치 스크립트는 이전 릴리스를 위해 `unity-bridge-windows-
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.5
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.5
 ```
 
 ## 로컬 설치 스크립트

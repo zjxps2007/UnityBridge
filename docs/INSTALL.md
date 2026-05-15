@@ -1,6 +1,6 @@
 # UnityBridge Installation
 
-[?쒓뎅??(INSTALL.ko.md) | English | [README](../README.md)
+[한국어](INSTALL.ko.md) | English | [README](../README.md)
 
 This document covers standalone CLI installation, Unity package version pinning,
 updates, and release assets. Python package mode is documented separately in
@@ -12,8 +12,13 @@ In Unity Editor, open `Window > Package Manager > + > Add package from git URL..
 and paste:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
+
+This URL follows the `main` branch. When newer versions land on `main`, use the
+Package Manager `Update` button to fetch the latest connector commit. If you
+want to pin a specific release, use the [version pinning](#version-pinning)
+format below.
 
 The connector starts automatically when the Unity Editor opens. It writes
 heartbeat files under `~/.unity-bridge/instances/`, then the CLI can discover
@@ -108,7 +113,7 @@ asset for previous releases.
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector#v0.1.5
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.5
 ```
 
 ## Local Installer

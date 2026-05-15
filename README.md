@@ -17,8 +17,11 @@ In Unity Editor, open `Window > Package Manager > + > Add package from git URL..
 and paste:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=unity-bridge-connector
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
+
+This URL follows the `main` branch. When newer versions land on `main`, use the
+Package Manager `Update` button to fetch the latest connector commit.
 
 ### 2. Install The CLI
 
