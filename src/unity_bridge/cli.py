@@ -166,7 +166,7 @@ def build_parser() -> argparse.ArgumentParser:
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
 
     update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge CLI.")
-    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.5, or a branch name.")
+    update.add_argument("--ref", default="main", help="Git ref to install, for example main, v0.1.6, or a branch name.")
     update.add_argument("--repo", default=DEFAULT_REPOSITORY_URL, help="Git repository URL.")
     update.add_argument("--package-spec", help="Full pip package spec. Overrides --repo and --ref.")
     update.add_argument("--dry-run", action="store_true", help="Print the pip command without running it.")

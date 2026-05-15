@@ -28,7 +28,7 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 특정 tag를 설치하려면:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.1.5"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.1.6"
 ```
 
 ## 설치 스크립트로 Python 패키지 모드 설치
@@ -110,5 +110,5 @@ Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/man
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.1.5
+unity-bridge update --ref v0.1.6
 ```

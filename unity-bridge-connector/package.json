@@ -1,6 +1,6 @@
 {
   "name": "com.zjxps2007.unity-bridge-connector",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "displayName": "UnityBridge Connector",
   "description": "Local HTTP bridge package for UnityBridge.",
   "unity": "6000.0",

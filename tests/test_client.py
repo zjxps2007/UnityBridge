@@ -1076,8 +1076,8 @@ class CliTests(unittest.TestCase):
 
     def test_cli_update_check_labels_standalone_build(self) -> None:
         remote_files = {
-            "pyproject.toml": '[project]\nversion = "0.1.5"\n',
-            "unity-bridge-connector/package.json": '{"version":"0.1.5"}',
+            "pyproject.toml": '[project]\nversion = "0.1.6"\n',
+            "unity-bridge-connector/package.json": '{"version":"0.1.6"}',
         }
 
         with (
@@ -1090,7 +1090,7 @@ class CliTests(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
-        self.assertIn("UnityBridge standalone CLI: 0.1.5", output)
+        self.assertIn("UnityBridge standalone CLI: 0.1.6", output)
         self.assertIn("Standalone asset: unity-bridge-windows-amd64.exe", output)
 
     def test_cli_auto_update_notice_prints_when_update_is_available(self) -> None:
