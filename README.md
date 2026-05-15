@@ -45,9 +45,9 @@ unity-bridge tools
 
 ## Documentation
 
-- [INSTALL.md](INSTALL.md): standalone installation, version pinning, updates, and release assets.
-- [COMMANDS.md](COMMANDS.md): CLI commands, common options, custom tool calls.
-- [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md): Python package mode for development and agent integrations.
+- [docs/INSTALL.md](docs/INSTALL.md): standalone installation, version pinning, updates, and release assets.
+- [docs/COMMANDS.md](docs/COMMANDS.md): CLI commands, common options, custom tool calls.
+- [docs/PYTHON_PACKAGE.md](docs/PYTHON_PACKAGE.md): Python package mode for development and agent integrations.
 
 ## License
 

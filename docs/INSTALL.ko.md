@@ -1,6 +1,6 @@
 # UnityBridge 설치
 
-한국어 | [English](INSTALL.md)
+한국어 | [English](INSTALL.md) | [README](../README.ko.md)
 
 이 문서는 standalone CLI 설치, Unity 패키지 버전 고정, 업데이트, release asset을 다룹니다.
 Python 패키지 모드는 [PYTHON_PACKAGE.ko.md](PYTHON_PACKAGE.ko.md)에 따로 정리했습니다.

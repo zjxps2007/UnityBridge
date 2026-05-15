@@ -45,9 +45,9 @@ unity-bridge tools
 
 ## 문서
 
-- [INSTALL.ko.md](INSTALL.ko.md): standalone 설치, 버전 고정, 업데이트, release asset.
-- [COMMANDS.ko.md](COMMANDS.ko.md): CLI 명령어, 공통 옵션, custom tool 호출.
-- [PYTHON_PACKAGE.ko.md](PYTHON_PACKAGE.ko.md): 개발 및 Agent 통합용 Python 패키지 모드.
+- [docs/INSTALL.ko.md](docs/INSTALL.ko.md): standalone 설치, 버전 고정, 업데이트, release asset.
+- [docs/COMMANDS.ko.md](docs/COMMANDS.ko.md): CLI 명령어, 공통 옵션, custom tool 호출.
+- [docs/PYTHON_PACKAGE.ko.md](docs/PYTHON_PACKAGE.ko.md): 개발 및 Agent 통합용 Python 패키지 모드.
 
 ## 라이선스
 

@@ -1,6 +1,6 @@
 # UnityBridge Installation
 
-[한국어](INSTALL.ko.md) | English
+[한국어](INSTALL.ko.md) | English | [README](../README.md)
 
 This document covers standalone CLI installation, Unity package version pinning,
 updates, and release assets. Python package mode is documented separately in

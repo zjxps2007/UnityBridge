@@ -1,6 +1,6 @@
 # UnityBridge Python 패키지 모드
 
-한국어 | [English](PYTHON_PACKAGE.md)
+한국어 | [English](PYTHON_PACKAGE.md) | [README](../README.ko.md)
 
 Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/Agent 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.

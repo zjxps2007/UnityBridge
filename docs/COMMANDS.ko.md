@@ -1,6 +1,6 @@
 # UnityBridge 명령어
 
-한국어 | [English](COMMANDS.md)
+한국어 | [English](COMMANDS.md) | [README](../README.ko.md)
 
 이 문서는 `unity-bridge` CLI에서 지금 사용할 수 있는 명령어를 정리합니다.
 
