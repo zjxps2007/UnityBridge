@@ -43,6 +43,47 @@ unity-bridge status
 unity-bridge tools
 ```
 
+## Essential Commands
+
+```powershell
+unity-bridge instances
+unity-bridge status
+unity-bridge tools
+```
+
+```powershell
+unity-bridge console --count 50
+unity-bridge refresh --path Assets/Scripts/Player.cs --wait
+unity-bridge test --mode EditMode
+```
+
+```powershell
+unity-bridge editor play --wait
+unity-bridge editor stop --wait
+unity-bridge exec --file .\query.cs
+```
+
+Use `--json` when another program or agent should parse the output:
+
+```powershell
+unity-bridge --json status
+unity-bridge --json console --count 20
+```
+
+Custom Unity-side tools can be called directly by name:
+
+```powershell
+unity-bridge my_custom_tool --key value
+unity-bridge call my_custom_tool --params '{"key":"value"}'
+```
+
+Update the CLI:
+
+```powershell
+unity-bridge update --check
+unity-bridge update
+```
+
 ## Documentation
 
 - [docs/INSTALL.md](docs/INSTALL.md): standalone installation, version pinning, updates, and release assets.

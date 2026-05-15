@@ -43,6 +43,47 @@ unity-bridge status
 unity-bridge tools
 ```
 
+## 기본 명령어
+
+```powershell
+unity-bridge instances
+unity-bridge status
+unity-bridge tools
+```
+
+```powershell
+unity-bridge console --count 50
+unity-bridge refresh --path Assets/Scripts/Player.cs --wait
+unity-bridge test --mode EditMode
+```
+
+```powershell
+unity-bridge editor play --wait
+unity-bridge editor stop --wait
+unity-bridge exec --file .\query.cs
+```
+
+다른 프로그램이나 Agent가 결과를 파싱해야 할 때는 `--json`을 붙입니다.
+
+```powershell
+unity-bridge --json status
+unity-bridge --json console --count 20
+```
+
+Unity 쪽 custom tool은 이름으로 직접 호출할 수 있습니다.
+
+```powershell
+unity-bridge my_custom_tool --key value
+unity-bridge call my_custom_tool --params '{"key":"value"}'
+```
+
+CLI 업데이트:
+
+```powershell
+unity-bridge update --check
+unity-bridge update
+```
+
 ## 문서
 
 - [docs/INSTALL.ko.md](docs/INSTALL.ko.md): standalone 설치, 버전 고정, 업데이트, release asset.
