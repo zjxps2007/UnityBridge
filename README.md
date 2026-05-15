@@ -43,13 +43,8 @@ unity-bridge status
 unity-bridge tools
 ```
 
-### Recommended Editor Setting
-
-For more reliable background responsiveness, set:
-
-```text
-Edit > Preferences > General > Interaction Mode > No Throttling
-```
+Recommended Editor setting for background responsiveness is covered in
+[docs/INSTALL.md](docs/INSTALL.md#recommended-editor-setting).
 
 ## Essential Commands
 
