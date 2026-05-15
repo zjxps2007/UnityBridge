@@ -2,14 +2,14 @@
 
 한국어 | [English](PYTHON_PACKAGE.md) | [README](../README.ko.md)
 
-Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/Agent 통합용
+Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/프로그램 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.
 
 ## 언제 사용하나
 
 Python 패키지 모드는 이런 경우에 사용합니다.
 
-- Executor나 Agent 프로세스가 UnityBridge를 내부 Python API처럼 호출해야 할 때
+- Python 프로그램이 UnityBridge를 내부 API처럼 호출해야 할 때
 - shell 문자열 파싱 없이 Unity 호출과 다른 Python 로직을 함께 조합해야 할 때
 - UnityBridge 자체를 개발하거나 테스트할 때
 
@@ -80,8 +80,8 @@ play = bridge.editor_play(wait=True)
 
 `refresh_assets()`에 경로를 넘기지 않으면 Unity 전체 에셋 새로고침을 실행합니다.
 `paths`를 넘기면 해당 asset path만 import하며, Unity 프로젝트 내부의 절대 경로는 connector가
-Unity asset path로 정규화합니다. Agent 워크플로에서 refresh/import 이후 안정적인 Unity `ready`
-heartbeat를 기다려야 한다면 `wait=True`를 사용하세요. 대기형 adapter 작업은 프로젝트 경로
+Unity asset path로 정규화합니다. refresh/import 이후 안정적인 Unity `ready` heartbeat를
+기다려야 한다면 `wait=True`를 사용하세요. 대기형 adapter 작업은 프로젝트 경로
 기준으로 Unity를 다시 찾기 때문에, 도메인 리로드로 connector 포트가 바뀌어도 따라갈 수 있습니다.
 
 ## Raw client 사용

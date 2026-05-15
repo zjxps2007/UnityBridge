@@ -30,12 +30,12 @@ unity-bridge --json console --count 20
 | `--port PORT` | 포트 번호로 Unity 인스턴스를 선택합니다. |
 | `--timeout-ms MS` | HTTP 요청 타임아웃입니다. 기본값은 `120000`입니다. |
 | `--instances-dir PATH` | 기본 `~/.unity-bridge/instances` 대신 다른 heartbeat 폴더를 사용합니다. |
-| `--json` | 결과를 JSON으로 출력합니다. 에이전트가 파싱할 때 사용합니다. |
+| `--json` | 결과를 JSON으로 출력합니다. 다른 프로그램이 파싱할 때 사용합니다. |
 
 `--project`는 정확한 프로젝트 경로, 입력 경로가 프로젝트 내부인지 여부, `UnityProjects/MyGame`이나
 `MyGame` 같은 경로 세그먼트 suffix를 확인합니다. `Game`이 `GamePrototype`에 매칭되는 식의 부분
 문자열 자동 선택은 하지 않습니다. suffix가 여러 Unity 인스턴스에 동시에 매칭되면 임의 선택하지 않고
-에러를 반환합니다. Agent 통합에서는 전체 프로젝트 경로나 `--port` 사용을 권장합니다.
+에러를 반환합니다. 자동화 연동에서는 전체 프로젝트 경로나 `--port` 사용을 권장합니다.
 
 ## 명령어 목록
 
@@ -102,7 +102,7 @@ unity-bridge refresh --compile request
 `Assets/...`, `Packages/...`, 또는 Unity 프로젝트 내부의 절대 경로를 사용할 수 있으며,
 절대 경로는 import 전에 Unity asset path로 정규화됩니다.
 
-Agent가 refresh/import 이후에만 다음 작업을 이어가야 한다면 `--wait`를 사용하세요. 이 옵션은
+refresh/import 이후에만 다음 작업을 이어가야 한다면 `--wait`를 사용하세요. 이 옵션은
 Unity가 refresh/import를 관측한 뒤 안정적인 `ready` heartbeat로 돌아올 때까지 기다려서, 명령이
 반환된 직후 시작되는 compile 또는 domain reload와의 race를 줄입니다.
 
@@ -173,7 +173,7 @@ unity-bridge reserialize Assets/Scenes/Main.unity Assets/Scenes/Lobby.unity
 unity-bridge reserialize Assets/Prefabs/Player.prefab --wait
 ```
 
-리시리얼라이즈가 긴 Editor 업데이트를 유발할 수 있고 다음 Agent 단계가 안정적인 Unity 상태를
+리시리얼라이즈가 긴 Editor 업데이트를 유발할 수 있고 다음 단계가 안정적인 Unity 상태를
 필요로 한다면 `--wait`를 사용하세요.
 
 ### Profiler

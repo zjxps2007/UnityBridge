@@ -2,15 +2,15 @@
 
 [한국어](PYTHON_PACKAGE.ko.md) | English | [README](../README.md)
 
-Python package mode is for development and agent integrations that need to
-import `unity_bridge` directly. For normal CLI use, the standalone installer is
+Python package mode is for development and Python programs that need to import
+`unity_bridge` directly. For normal CLI use, the standalone installer is
 recommended because it does not require Python on the target machine.
 
 ## When To Use
 
 Use Python package mode when:
 
-- an Executor or agent process should call UnityBridge as an internal Python API;
+- a Python program should call UnityBridge as an internal API;
 - you need to compose Unity calls with other Python logic without shell parsing;
 - you are developing UnityBridge itself.
 
@@ -81,8 +81,8 @@ play = bridge.editor_play(wait=True)
 
 `refresh_assets()` without paths runs a full Unity asset refresh. Passing
 `paths` imports only those asset paths; absolute paths inside the Unity project
-are normalized by the connector. Use `wait=True` for agent workflows that need
-to wait for a stable Unity `ready` heartbeat after refresh/import. Waited
+are normalized by the connector. Use `wait=True` when the next step needs to
+wait for a stable Unity `ready` heartbeat after refresh/import. Waited
 adapter operations rediscover Unity by project path, so they can follow a
 connector port change caused by domain reload.
 

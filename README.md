@@ -66,7 +66,7 @@ unity-bridge editor stop --wait
 unity-bridge exec --file .\query.cs
 ```
 
-Use `--json` when another program or agent should parse the output:
+Use `--json` when another program should parse the output:
 
 ```powershell
 unity-bridge --json status
@@ -91,7 +91,7 @@ unity-bridge update
 
 - [docs/INSTALL.md](docs/INSTALL.md): standalone installation, version pinning, updates, and release assets.
 - [docs/COMMANDS.md](docs/COMMANDS.md): CLI commands, common options, custom tool calls.
-- [docs/PYTHON_PACKAGE.md](docs/PYTHON_PACKAGE.md): Python package mode for development and agent integrations.
+- [docs/PYTHON_PACKAGE.md](docs/PYTHON_PACKAGE.md): Python package mode for development and direct Python integration.
 
 ## License
 

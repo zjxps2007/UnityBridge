@@ -66,7 +66,7 @@ unity-bridge editor stop --wait
 unity-bridge exec --file .\query.cs
 ```
 
-다른 프로그램이나 Agent가 결과를 파싱해야 할 때는 `--json`을 붙입니다.
+다른 프로그램이 결과를 파싱해야 할 때는 `--json`을 붙입니다.
 
 ```powershell
 unity-bridge --json status
@@ -91,7 +91,7 @@ unity-bridge update
 
 - [docs/INSTALL.ko.md](docs/INSTALL.ko.md): standalone 설치, 버전 고정, 업데이트, release asset.
 - [docs/COMMANDS.ko.md](docs/COMMANDS.ko.md): CLI 명령어, 공통 옵션, custom tool 호출.
-- [docs/PYTHON_PACKAGE.ko.md](docs/PYTHON_PACKAGE.ko.md): 개발 및 Agent 통합용 Python 패키지 모드.
+- [docs/PYTHON_PACKAGE.ko.md](docs/PYTHON_PACKAGE.ko.md): 개발 및 Python 직접 통합용 패키지 모드.
 
 ## 라이선스
 

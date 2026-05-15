@@ -30,13 +30,13 @@ unity-bridge --json console --count 20
 | `--port PORT` | Select a Unity instance by port. |
 | `--timeout-ms MS` | HTTP request timeout. Default: `120000`. |
 | `--instances-dir PATH` | Use a heartbeat directory other than `~/.unity-bridge/instances`. |
-| `--json` | Print JSON output for agents or other programs. |
+| `--json` | Print JSON output for other programs. |
 
 `--project` checks exact project paths, whether the supplied path is inside a
 project, and path-segment suffixes such as `UnityProjects/MyGame` or `MyGame`.
 It does not auto-select substring-only matches, so `Game` will not match
 `GamePrototype`. If a suffix matches multiple Unity instances, UnityBridge
-returns an error instead of choosing one arbitrarily. For agent integrations,
+returns an error instead of choosing one arbitrarily. For automated integrations,
 prefer a full project path or `--port`.
 
 ## Command List
@@ -106,7 +106,7 @@ one or more `--path` values, UnityBridge sends those paths to
 absolute paths inside the Unity project; absolute project paths are normalized
 to Unity asset paths before import.
 
-Use `--wait` when an agent needs to continue only after Unity has observed the
+Use `--wait` when the next step needs to continue only after Unity has observed the
 refresh/import and returned to a stable `ready` heartbeat. This avoids racing a
 compile or domain reload that starts just after the refresh command returns.
 
@@ -179,7 +179,7 @@ unity-bridge reserialize Assets/Prefabs/Player.prefab --wait
 ```
 
 Use `--wait` when reserialization may trigger a long editor update and the next
-agent step needs Unity to be stable before continuing.
+step needs Unity to be stable before continuing.
 
 ### Profiler
 
