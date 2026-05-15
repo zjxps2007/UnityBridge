@@ -43,6 +43,15 @@ unity-bridge status
 unity-bridge tools
 ```
 
+### 권장 Editor 설정
+
+UnityBridge는 Unity Editor 설정을 자동으로 변경하지 않습니다. 백그라운드 응답성을 더 안정적으로
+유지하려면 아래 설정을 직접 적용하는 것을 권장합니다.
+
+```text
+Edit > Preferences > General > Interaction Mode > No Throttling
+```
+
 ## 기본 명령어
 
 ```powershell

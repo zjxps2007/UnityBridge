@@ -43,6 +43,15 @@ unity-bridge status
 unity-bridge tools
 ```
 
+### Recommended Editor Setting
+
+UnityBridge does not automatically change Unity Editor preferences. For more
+reliable background responsiveness, set this manually:
+
+```text
+Edit > Preferences > General > Interaction Mode > No Throttling
+```
+
 ## Essential Commands
 
 ```powershell
