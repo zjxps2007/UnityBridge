@@ -37,7 +37,7 @@ namespace UnityBridgeConnector
         static bool s_Stopping;
         static bool s_RestartPending;
 
-        static readonly ConcurrentQueue<WorkItem> s_Queue = new();
+        static readonly ConcurrentQueue<WorkItem> s_Queue = new ConcurrentQueue<WorkItem>();
 
         struct WorkItem
         {

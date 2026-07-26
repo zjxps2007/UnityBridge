@@ -13,7 +13,7 @@ namespace UnityBridgeConnector
     /// </summary>
     public static class CommandRouter
     {
-        static readonly SemaphoreSlim s_Lock = new(1, 1);
+        static readonly SemaphoreSlim s_Lock = new SemaphoreSlim(1, 1);
 
         public static async Task<object> Dispatch(string command, JObject parameters)
         {

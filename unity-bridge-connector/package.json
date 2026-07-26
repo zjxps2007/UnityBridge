@@ -3,7 +3,7 @@
   "version": "0.1.6",
   "displayName": "UnityBridge Connector",
   "description": "Local HTTP bridge package for UnityBridge.",
-  "unity": "6000.0",
+  "unity": "2020.3",
   "author": {
     "name": "UnityBridge contributors",
     "url": "https://github.com/zjxps2007/UnityBridge"

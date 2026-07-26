@@ -14,6 +14,8 @@ Unity Editor에서 `Window > Package Manager > + > Add package from git URL...`�
 https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
 
+Connector는 Unity 2020.3 LTS 이상부터 Unity 6까지 지원합니다.
+
 이 URL은 `main` 브랜치를 기준으로 설치합니다. 이후 새 버전이 `main`에 올라오면
 Package Manager의 `Update` 버튼으로 최신 커밋을 받을 수 있습니다. 특정 버전에 고정하고
 싶다면 아래의 [버전 고정](#버전-고정) 방식을 사용하세요.
