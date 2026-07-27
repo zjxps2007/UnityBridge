@@ -1,6 +1,6 @@
 # UnityBridge Commands
 
-[?쒓뎅??(COMMANDS.ko.md) | English | [README](../README.md)
+[한국어](COMMANDS.ko.md) | English | [README](../README.md)
 
 This document lists the commands currently available in the `unity-bridge` CLI.
 

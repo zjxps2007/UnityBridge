@@ -1,6 +1,6 @@
 # UnityBridge Python Package Mode
 
-[?쒓뎅??(PYTHON_PACKAGE.ko.md) | English | [README](../README.md)
+[한국어](PYTHON_PACKAGE.ko.md) | English | [README](../README.md)
 
 Python package mode is for development and Python programs that need to import
 `unity_bridge` directly. For normal CLI use, the standalone installer is
