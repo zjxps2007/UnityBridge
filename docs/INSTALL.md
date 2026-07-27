@@ -15,8 +15,7 @@ and paste:
 https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
 
-The connector supports Unity 2020.3 LTS and newer Editor versions, including
-Unity 6.
+The connector supports Unity 2020.3 LTS through Unity 6.
 
 This URL follows the `main` branch. When newer versions land on `main`, use the
 Package Manager `Update` button to fetch the latest connector commit. If you
@@ -68,14 +67,14 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.6
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.0
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.1.6
+sh /tmp/unity-bridge-install.sh --version v0.2.0
 ```
 
 ## Update
@@ -116,7 +115,7 @@ asset for previous releases.
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.6
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.0
 ```
 
 ## Local Installer

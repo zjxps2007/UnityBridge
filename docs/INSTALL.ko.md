@@ -14,7 +14,7 @@ Unity Editor에서 `Window > Package Manager > + > Add package from git URL...`�
 https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
 
-Connector는 Unity 2020.3 LTS 이상부터 Unity 6까지 지원합니다.
+Connector는 Unity 2020.3 LTS부터 Unity 6까지 지원합니다.
 
 이 URL은 `main` 브랜치를 기준으로 설치합니다. 이후 새 버전이 `main`에 올라오면
 Package Manager의 `Update` 버튼으로 최신 커밋을 받을 수 있습니다. 특정 버전에 고정하고
@@ -65,14 +65,14 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.1.6
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.0
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.1.6
+sh /tmp/unity-bridge-install.sh --version v0.2.0
 ```
 
 ## 업데이트
@@ -111,7 +111,7 @@ Windows 설치 스크립트는 이전 릴리스를 위해 `unity-bridge-windows-
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.1.6
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.0
 ```
 
 ## 로컬 설치 스크립트

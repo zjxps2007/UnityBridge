@@ -78,7 +78,7 @@ unity-bridge wait-ready --timeout-sec 300
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.1.6
+unity-bridge update --ref v0.2.0
 unity-bridge update --dry-run
 ```
 

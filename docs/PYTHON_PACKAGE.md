@@ -29,7 +29,7 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 Install a specific tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.1.6"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.0"
 ```
 
 ## Install With The Installer
@@ -112,5 +112,5 @@ Unity project's `Packages/manifest.json` automatically.
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.1.6
+unity-bridge update --ref v0.2.0
 ```

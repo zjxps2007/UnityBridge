@@ -20,8 +20,7 @@ and paste:
 https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
 
-The connector supports Unity 2020.3 LTS and newer Editor versions, including
-Unity 6.
+The connector supports Unity 2020.3 LTS through Unity 6.
 
 This URL follows the `main` branch. When newer versions land on `main`, use the
 Package Manager `Update` button to fetch the latest connector commit.
