@@ -36,6 +36,7 @@ namespace UnityBridgeConnector
         static double s_LastFailureLogTime;
         static bool s_Stopping;
         static bool s_RestartPending;
+        static int s_QueueDrainPosted;
 
         static readonly ConcurrentQueue<WorkItem> s_Queue = new ConcurrentQueue<WorkItem>();
 
@@ -177,13 +178,22 @@ namespace UnityBridgeConnector
 
         static void ForceEditorUpdate()
         {
-            s_MainContext?.Post(_ =>
+            var context = s_MainContext;
+            if (context == null || Interlocked.Exchange(ref s_QueueDrainPosted, 1) != 0)
+                return;
+
+            try
             {
-                try { EditorApplication.QueuePlayerLoopUpdate(); }
-                catch { }
-                try { UnityEditorInternal.InternalEditorUtility.RepaintAllViews(); }
-                catch { }
-            }, null);
+                context.Post(_ =>
+                {
+                    Interlocked.Exchange(ref s_QueueDrainPosted, 0);
+                    ProcessQueue();
+                }, null);
+            }
+            catch
+            {
+                Interlocked.Exchange(ref s_QueueDrainPosted, 0);
+            }
         }
 
         static void ProcessQueue()

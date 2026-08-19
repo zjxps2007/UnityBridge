@@ -80,7 +80,11 @@ class FakeUnityServer:
                 return
 
         self.server = HTTPServer(("127.0.0.1", 0), Handler)
-        self.thread = threading.Thread(target=self.server.serve_forever, daemon=True)
+        self.thread = threading.Thread(
+            target=self.server.serve_forever,
+            kwargs={"poll_interval": 0.01},
+            daemon=True,
+        )
 
     @property
     def port(self) -> int:
@@ -285,6 +289,42 @@ class DiscoveryTests(unittest.TestCase):
 
         self.assertEqual(instance.timestamp, 12)
         self.assertGreaterEqual(calls["count"], 4)
+
+    def test_wait_for_ready_checks_current_state_before_sleeping(self) -> None:
+        ready = Instance(state="ready", project_path="D:/Game", port=8090, pid=1, timestamp=11)
+
+        with patch("unity_bridge.client.time.sleep") as sleep:
+            instance = wait_for_ready(
+                lambda: ready,
+                timeout_sec=1,
+                poll_interval_sec=0.5,
+                after_timestamp=10,
+            )
+
+        self.assertEqual(instance, ready)
+        sleep.assert_not_called()
+
+    def test_wait_for_ready_caps_sleep_to_remaining_timeout(self) -> None:
+        clock = {"now": 0.0}
+        compiling = Instance(state="compiling", project_path="D:/Game", port=8090, pid=1, timestamp=11)
+
+        def advance(seconds: float) -> None:
+            clock["now"] += seconds
+
+        with (
+            patch("unity_bridge.client.time.monotonic", side_effect=lambda: clock["now"]),
+            patch("unity_bridge.client.time.sleep", side_effect=advance) as sleep,
+            self.assertRaises(DiscoveryError),
+        ):
+            wait_for_ready(
+                lambda: compiling,
+                timeout_sec=0.1,
+                poll_interval_sec=1,
+                after_timestamp=10,
+            )
+
+        sleep.assert_called_once()
+        self.assertAlmostEqual(sleep.call_args.args[0], 0.1)
 
 
 class HttpClientTests(unittest.TestCase):
@@ -730,6 +770,34 @@ class CliTests(unittest.TestCase):
             self.assertEqual(exit_code, 0)
             self.assertEqual("", stderr.getvalue())
             self.assertEqual(json.loads(stdout.getvalue())["connectorVersion"], "0.1.2")
+
+    def test_cli_json_command_discovers_instance_once(self) -> None:
+        response_body = json.dumps({"success": True, "message": "ok", "data": []}).encode("utf-8")
+        with TemporaryDirectory() as tmp, FakeUnityServer(response_body) as server:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=server.port, pid=0)
+
+            with patch("unity_bridge.client.scan_instances", wraps=scan_instances) as scan, redirect_stdout(StringIO()):
+                exit_code = cli_main(["--json", "--instances-dir", str(directory), "console"])
+
+            self.assertEqual(exit_code, 0)
+            self.assertEqual(scan.call_count, 1)
+
+    def test_cli_json_conversion_does_not_copy_large_nested_payloads(self) -> None:
+        data = [{"frame": 1, "children": [{"name": "Update"}]}]
+        result = UnityActionResult(
+            tool="profiler",
+            command="profiler",
+            params={"action": "hierarchy"},
+            success=True,
+            message="ok",
+            data=data,
+        )
+
+        payload = cli_module._to_jsonable(result)
+
+        self.assertIs(payload["data"], data)
+        self.assertEqual(payload["params"], {"action": "hierarchy"})
 
     def test_cli_command_warns_when_connector_version_differs(self) -> None:
         response_body = json.dumps({"success": True, "message": "Retrieved 0 entries.", "data": []}).encode("utf-8")

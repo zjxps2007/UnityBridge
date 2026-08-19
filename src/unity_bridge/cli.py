@@ -1062,6 +1062,8 @@ def _print_instance(instance: Instance) -> None:
 
 
 def _warn_for_selected_connector_version(client: UnityClient, *, json_output: bool) -> None:
+    if json_output:
+        return
     instance = client.discover_instance()
     _print_connector_version_warning(instance, json_output=json_output)
 
@@ -1104,9 +1106,21 @@ def _to_jsonable(value: Any) -> Any:
     if isinstance(value, Instance):
         return value.to_dict()
     if isinstance(value, CommandResponse):
-        return value.to_dict()
+        payload = {"success": value.success, "message": value.message}
+        if value.data is not None:
+            payload["data"] = value.data
+        return payload
     if isinstance(value, UnityActionResult):
-        return value.to_dict()
+        payload = {
+            "tool": value.tool,
+            "command": value.command,
+            "params": value.params,
+            "success": value.success,
+            "message": value.message,
+        }
+        if value.data is not None:
+            payload["data"] = value.data
+        return payload
     if isinstance(value, Path):
         return str(value)
     if isinstance(value, list):

@@ -454,23 +454,26 @@ def wait_for_state(
     latest: Instance | None = None
     state_since: float | None = None
     while time.monotonic() < deadline:
-        time.sleep(poll_interval_sec)
         try:
             latest = resolve()
         except DiscoveryError:
             state_since = None
-            continue
-        if after_timestamp and latest.timestamp <= after_timestamp:
-            state_since = None
-            continue
-        if latest.state in wanted:
-            now = time.monotonic()
-            if state_since is None:
-                state_since = now
-            if now - state_since >= stable_sec:
-                return latest
         else:
-            state_since = None
+            if after_timestamp and latest.timestamp <= after_timestamp:
+                state_since = None
+            elif latest.state in wanted:
+                now = time.monotonic()
+                if state_since is None:
+                    state_since = now
+                if now - state_since >= stable_sec:
+                    return latest
+            else:
+                state_since = None
+
+        remaining = deadline - time.monotonic()
+        if remaining <= 0:
+            break
+        time.sleep(min(poll_interval_sec, remaining))
     detail = f" last_state={latest.state}" if latest is not None else ""
     states_label = ", ".join(sorted(wanted))
     raise DiscoveryError(f"timed out waiting for {timeout_label} '{states_label}' ({timeout_sec}s).{detail}")
