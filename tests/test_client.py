@@ -820,6 +820,119 @@ class CliTests(unittest.TestCase):
     def tearDown(self) -> None:
         self._update_check_env.stop()
 
+    def _wait_ready_timeline(
+        self,
+        timeline: list[tuple[float, dict[str, object] | None]],
+        *,
+        timeout_sec: int = 3,
+        port: int | None = None,
+    ) -> tuple[int, str, str, float]:
+        """Run the real CLI/discovery path with heartbeat files and virtual time."""
+        clock = {"now": 0.0}
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+
+            def publish() -> None:
+                payload = next(value for at, value in reversed(timeline) if at <= clock["now"])
+                if payload is None:
+                    (directory / "game.json").unlink(missing_ok=True)
+                else:
+                    write_instance(directory, "game", pid=0, **payload)
+
+            def advance(seconds: float) -> None:
+                clock["now"] += seconds
+                publish()
+
+            publish()
+            args = ["--json", "--instances-dir", str(directory), "wait-ready", "--timeout-sec", str(timeout_sec)]
+            if port is not None:
+                args.extend(["--port", str(port)])
+            stdout = StringIO()
+            stderr = StringIO()
+            with (
+                patch("unity_bridge.client.time.monotonic", side_effect=lambda: clock["now"]),
+                patch("unity_bridge.client.time.sleep", side_effect=advance),
+                redirect_stdout(stdout),
+                redirect_stderr(stderr),
+            ):
+                exit_code = cli_main(args)
+        return exit_code, stdout.getvalue(), stderr.getvalue(), clock["now"]
+
+    def test_cli_wait_ready_does_not_return_before_delayed_compilation(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, {"state": "ready", "timestamp": 10}),
+            (0.1, {"state": "compiling", "timestamp": 11}),
+            (0.8, {"state": "ready", "timestamp": 12}),
+        ])
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertEqual(json.loads(stdout)["timestamp"], 12)
+        self.assertGreaterEqual(elapsed, 1.3)
+
+    def test_cli_wait_ready_requires_a_new_heartbeat_and_stability(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, {"state": "ready", "timestamp": 10}),
+            (0.5, {"state": "ready", "timestamp": 11}),
+            (1.0, {"state": "ready", "timestamp": 12}),
+        ])
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertEqual(json.loads(stdout)["timestamp"], 12)
+        self.assertAlmostEqual(elapsed, 1.0)
+
+    def test_cli_wait_ready_times_out_on_unchanged_ready_heartbeat(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, {"state": "ready", "timestamp": 10}),
+        ], timeout_sec=1)
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("timed out", json.loads(stderr)["error"])
+        self.assertAlmostEqual(elapsed, 1.0)
+
+    def test_cli_wait_ready_resets_stability_when_compilation_restarts(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, {"state": "ready", "timestamp": 10}),
+            (0.5, {"state": "ready", "timestamp": 11}),
+            (0.75, {"state": "compiling", "timestamp": 12}),
+            (1.25, {"state": "ready", "timestamp": 13}),
+            (2.0, {"state": "ready", "timestamp": 14}),
+        ])
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertEqual(json.loads(stdout)["timestamp"], 14)
+        self.assertGreaterEqual(elapsed, 1.75)
+
+    def test_cli_wait_ready_can_wait_for_editor_startup(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, None),
+            (0.2, {"state": "ready", "timestamp": 10}),
+            (0.8, {"state": "ready", "timestamp": 11}),
+            (1.3, {"state": "ready", "timestamp": 12}),
+        ])
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertEqual(json.loads(stdout)["timestamp"], 12)
+        self.assertGreaterEqual(elapsed, 1.3)
+
+    def test_cli_wait_ready_timeout_includes_editor_startup(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, None),
+            (0.2, {"state": "ready", "timestamp": 10}),
+            (0.8, {"state": "ready", "timestamp": 11}),
+        ], timeout_sec=1)
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("timed out", json.loads(stderr)["error"])
+        self.assertAlmostEqual(elapsed, 1.0)
+
+    def test_cli_wait_ready_follows_same_project_after_port_change(self) -> None:
+        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+            (0, {"state": "ready", "timestamp": 10, "port": 8090}),
+            (0.3, None),
+            (0.8, {"state": "ready", "timestamp": 11, "port": 8091}),
+            (1.3, {"state": "ready", "timestamp": 12, "port": 8091}),
+        ], port=8090)
+        self.assertEqual(exit_code, 0, stderr)
+        self.assertEqual(json.loads(stdout)["port"], 8091)
+        self.assertEqual(json.loads(stdout)["projectPath"], "D:/UnityProjects/Game")
+        self.assertGreaterEqual(elapsed, 1.3)
+
     def test_cli_status_warns_when_connector_version_differs(self) -> None:
         with TemporaryDirectory() as tmp:
             directory = Path(tmp)

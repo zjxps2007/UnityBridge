@@ -162,12 +162,25 @@ class UnityBridgeAdapter:
         stable_sec: float = 0.5,
         poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
     ) -> Instance:
-        target = self.client.discover_instance()
+        """Wait for a newer, stable ready heartbeat from the selected project."""
+        target: Instance | None = None
+
+        def resolve_newer_instance() -> Instance:
+            nonlocal target
+            if target is None:
+                # Select inside the wait so editor startup shares the same timeout.
+                target = self.client.discover_instance()
+                instance = target
+            else:
+                instance = self._resolve_same_project(target)
+            if instance.timestamp <= target.timestamp:
+                raise DiscoveryError("waiting for a newer Unity heartbeat")
+            return instance
+
         return wait_for_ready(
-            lambda: self._resolve_same_project(target),
+            resolve_newer_instance,
             timeout_sec=timeout_sec,
             poll_interval_sec=poll_interval_sec,
-            after_timestamp=target.timestamp,
             stable_sec=stable_sec,
         )
 

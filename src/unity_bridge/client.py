@@ -182,6 +182,11 @@ class UnityClient:
         after_timestamp: int = 0,
         stable_sec: float = 0,
     ) -> Instance:
+        """Wait for the observed state; defaults may accept an existing ready file.
+
+        Use UnityBridgeAdapter.wait_for_ready() for a fresh, stable heartbeat,
+        or refresh_assets(wait=True) to request work and wait for readiness.
+        """
         return wait_for_ready(
             self.status,
             timeout_sec=timeout_sec,

@@ -57,7 +57,7 @@ prefer a full project path or `--port`.
 | `unity-bridge screenshot` | Save a Scene/Game view screenshot. |
 | `unity-bridge exec` | Execute arbitrary C# code inside the Unity Editor. |
 | `unity-bridge call` | Send a raw connector command name and JSON params. |
-| `unity-bridge wait-ready` | Wait until Unity reaches the ready state. |
+| `unity-bridge wait-ready` | Wait for a newer heartbeat and stable ready state. |
 | `unity-bridge update` | Update the installed UnityBridge CLI package or standalone executable. |
 | `unity-bridge <tool-name>` | Treat unknown command names as connector/custom tool names and call them directly. |
 
@@ -71,6 +71,17 @@ unity-bridge status
 unity-bridge tools
 unity-bridge wait-ready --timeout-sec 300
 ```
+
+`wait-ready` selects a Unity project, waits for a heartbeat newer than the first
+one it observed, and requires `ready` to remain observed for at least 0.5 seconds.
+An unchanged old `ready` file cannot complete the wait. Editor startup is included
+in `--timeout-sec`, and the wait follows the same project if its port changes.
+Even an idle editor needs time to publish a new heartbeat and pass the stability
+check. Use `status` for an immediate snapshot.
+
+After editing scripts, use `unity-bridge refresh --compile request --wait` to
+request refresh/compilation and wait for readiness. Standalone `wait-ready` does
+not request compilation or guarantee that an unrelated task will not start later.
 
 ### Update
 

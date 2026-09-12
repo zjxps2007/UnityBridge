@@ -55,7 +55,7 @@ unity-bridge --json console --count 20
 | `unity-bridge screenshot` | Scene/Game 뷰 스크린샷을 저장합니다. |
 | `unity-bridge exec` | Unity Editor 안에서 임의 C# 코드를 실행합니다. |
 | `unity-bridge call` | connector command 이름과 JSON params를 직접 보내는 raw 호출입니다. |
-| `unity-bridge wait-ready` | Unity가 ready 상태가 될 때까지 대기합니다. |
+| `unity-bridge wait-ready` | 새로운 heartbeat와 안정적인 ready 상태를 확인할 때까지 대기합니다. |
 | `unity-bridge update` | 설치된 UnityBridge CLI 패키지 또는 standalone 실행 파일을 업데이트합니다. |
 | `unity-bridge <tool-name>` | 목록에 없는 명령어는 connector/custom tool 이름으로 보고 직접 호출합니다. |
 
@@ -69,6 +69,16 @@ unity-bridge status
 unity-bridge tools
 unity-bridge wait-ready --timeout-sec 300
 ```
+
+`wait-ready`는 Unity 프로젝트를 선택한 뒤 처음 읽은 것보다 새로운 heartbeat를 기다리고,
+`ready`가 최소 0.5초 동안 관측되어야 완료됩니다. 갱신되지 않은 이전 `ready` 파일만으로는
+완료되지 않습니다. 에디터 시작을 기다리는 시간도 `--timeout-sec`에 포함되며, 포트가 바뀌어도
+같은 프로젝트를 따라갑니다. 이미 대기 중인 에디터도 새 heartbeat와 안정화 확인에 시간이
+필요합니다. 현재 상태만 즉시 확인하려면 `status`를 사용하세요.
+
+스크립트를 수정한 뒤에는 `unity-bridge refresh --compile request --wait`로 새로고침과
+컴파일을 요청하고 준비 완료를 기다리세요. 단독 `wait-ready`는 컴파일을 요청하지 않으며,
+별개의 작업이 나중에 시작되지 않는다는 보장도 하지 않습니다.
 
 ### 업데이트
 
