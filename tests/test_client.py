@@ -121,6 +121,86 @@ class DiscoveryTests(unittest.TestCase):
             self.assertTrue(alive.exists())
             self.assertFalse(dead.exists())
 
+    def test_discovery_recovers_from_temporary_heartbeat_access_conflict(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path = write_instance(directory, "game", pid=111)
+            payload = path.read_text(encoding="utf-8")
+
+            with patch.object(Path, "read_text", side_effect=[PermissionError(), payload]):
+                instance = discover_instance(
+                    project="D:/UnityProjects/Game",
+                    instances_dir=directory,
+                    process_checker=lambda pid: False,
+                )
+
+            self.assertEqual(instance.pid, 111)
+            self.assertEqual(instance.port, 8090)
+            self.assertTrue(path.exists())
+
+    def test_scan_skips_permanently_inaccessible_file_after_bounded_retries(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            blocked = write_instance(directory, "blocked", pid=111)
+            write_instance(directory, "readable", pid=222, port=8091)
+            read_text = Path.read_text
+            attempts = 0
+
+            def read(path: Path, *args: object, **kwargs: object) -> str:
+                nonlocal attempts
+                if path == blocked:
+                    attempts += 1
+                    if attempts > 5:
+                        raise AssertionError("Heartbeat access retries must be bounded")
+                    raise PermissionError("Access is permanently denied")
+                return read_text(path, *args, **kwargs)
+
+            with patch.object(Path, "read_text", read), patch("unity_bridge.client.time.sleep") as sleep:
+                instances = scan_instances(
+                    instances_dir=directory,
+                    process_checker=lambda pid: False,
+                )
+
+            self.assertEqual([instance.pid for instance in instances], [222])
+            self.assertTrue(blocked.exists())
+            self.assertLessEqual(sum(call.args[0] for call in sleep.call_args_list), 0.04)
+
+    def test_scan_does_not_wait_for_readable_or_malformed_heartbeats(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", pid=111)
+            (directory / "broken.json").write_text("{", encoding="utf-8")
+
+            with patch("unity_bridge.client.time.sleep") as sleep:
+                instances = scan_instances(
+                    instances_dir=directory,
+                    process_checker=lambda pid: False,
+                )
+
+            self.assertEqual([instance.pid for instance in instances], [111])
+            sleep.assert_not_called()
+
+    def test_discovery_recovers_when_heartbeat_is_temporarily_missing_from_listing(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            path = write_instance(directory, "game", pid=111)
+
+            with patch.object(Path, "iterdir", side_effect=[iter(()), iter((path,))]):
+                instance = discover_instance(
+                    project="D:/UnityProjects/Game",
+                    instances_dir=directory,
+                    process_checker=lambda pid: False,
+                )
+
+            self.assertEqual(instance.pid, 111)
+
+    def test_discovery_stops_retrying_when_no_editor_is_running(self) -> None:
+        with TemporaryDirectory() as tmp, patch("unity_bridge.client.time.sleep") as sleep:
+            with self.assertRaises(DiscoveryError):
+                discover_instance(instances_dir=Path(tmp))
+
+            sleep.assert_called_once_with(0.01)
+
     def test_find_by_port_selects_most_recent_even_if_stopped(self) -> None:
         with TemporaryDirectory() as tmp:
             directory = Path(tmp)

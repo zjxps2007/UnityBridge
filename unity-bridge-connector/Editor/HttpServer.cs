@@ -49,6 +49,9 @@ namespace UnityBridgeConnector
 
         static HttpServer()
         {
+            // Import workers load editor assemblies but must not expose a command server.
+            if (AssetDatabase.IsAssetImportWorkerProcess()) return;
+
             s_MainContext = SynchronizationContext.Current;
             Start();
             EditorApplication.quitting += Stop;

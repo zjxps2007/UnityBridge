@@ -210,6 +210,20 @@ def default_instances_dir() -> Path:
     return Path.home() / ".unity-bridge" / "instances"
 
 
+def _read_instance_text(path: Path) -> str:
+    # Windows can briefly deny reads while Unity replaces the heartbeat file.
+    # Allow four 10 ms waits for access conflicts; normal reads never sleep.
+    retries_left = 4
+    while True:
+        try:
+            return path.read_text(encoding="utf-8")
+        except PermissionError:
+            if retries_left == 0:
+                raise
+            retries_left -= 1
+            time.sleep(0.01)
+
+
 def scan_instances(
     *,
     instances_dir: str | Path | None = None,
@@ -226,7 +240,7 @@ def scan_instances(
         if path.is_dir() or path.suffix.lower() != ".json":
             continue
         try:
-            raw = json.loads(path.read_text(encoding="utf-8"))
+            raw = json.loads(_read_instance_text(path))
             if not isinstance(raw, dict):
                 continue
             instance = Instance.from_dict(raw)
@@ -276,6 +290,32 @@ def find_active_by_port(
 
 
 def discover_instance(
+    project: str | Path | None = None,
+    port: int | None = None,
+    *,
+    instances_dir: str | Path | None = None,
+    cwd: str | Path | None = None,
+    process_checker: ProcessDeadChecker | None = None,
+) -> Instance:
+    retry = True
+    while True:
+        try:
+            return _discover_instance_once(
+                project=project,
+                port=port,
+                instances_dir=instances_dir,
+                cwd=cwd,
+                process_checker=process_checker,
+            )
+        except DiscoveryError:
+            if not retry:
+                raise
+            # A replacement can also briefly omit the heartbeat from directory enumeration.
+            retry = False
+            time.sleep(0.01)
+
+
+def _discover_instance_once(
     project: str | Path | None = None,
     port: int | None = None,
     *,

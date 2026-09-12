@@ -28,6 +28,9 @@ namespace UnityBridgeConnector
 
         static Heartbeat()
         {
+            // Only the main editor owns this project's instance file and lifecycle events.
+            if (AssetDatabase.IsAssetImportWorkerProcess()) return;
+
             EditorApplication.update += Tick;
             EditorApplication.quitting += Cleanup;
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
@@ -165,6 +168,9 @@ namespace UnityBridgeConnector
 
         static void Write()
         {
+            // Public state/cleanup methods can also be called directly from import code.
+            if (AssetDatabase.IsAssetImportWorkerProcess()) return;
+
             var projectPath = GetProjectPath();
             var status = new
             {
