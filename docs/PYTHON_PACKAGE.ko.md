@@ -102,8 +102,10 @@ print(result.success, result.message, result.data)
 ```
 
 `UnityClient.wait_for_ready()`는 낮은 수준의 상태 대기 API로, 기본값에서는 기존 `ready`
-heartbeat를 읽고 즉시 반환할 수 있습니다. 새로운 heartbeat와 0.5초 동안의 준비 상태를
-확인하려면 `UnityBridgeAdapter.wait_for_ready()`를 사용하세요. 스크립트를 변경한 뒤에는
+heartbeat를 읽고 즉시 반환할 수 있습니다. 고정 안정화 대기 없이 에디터의 현재 상태를
+직접 확인하려면 `UnityBridgeAdapter.wait_for_ready()`를 사용하세요. 별도의 안정화 시간이
+필요한 작업에서만 선택 인자 `stable_sec`를 지정하세요. 직접 확인 기능을 쓰려면 Python CLI와
+Unity Connector를 함께 업데이트해야 합니다. 스크립트를 변경한 뒤에는
 `bridge.refresh_assets(compile="request", wait=True)`로 작업을 요청하고 준비 완료를
 기다리세요. 직접 동기화 조건을 지정할 때는 낮은 수준의 `after_timestamp`, `stable_sec`
 인자를 사용할 수 있습니다.

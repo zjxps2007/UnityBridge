@@ -171,11 +171,24 @@ namespace UnityBridgeConnector
             // Public state/cleanup methods can also be called directly from import code.
             if (AssetDatabase.IsAssetImportWorkerProcess()) return;
 
-            var projectPath = GetProjectPath();
-            var status = new
+            try
+            {
+                Directory.CreateDirectory(s_Dir);
+                AtomicFile.WriteAllText(GetFilePath(), JsonConvert.SerializeObject(CaptureState()));
+            }
+            catch
+            {
+            }
+        }
+
+        // Called on the editor main thread. Pending refresh/compile/play transitions
+        // remain visible even before Unity's corresponding busy flag becomes true.
+        internal static object CaptureState()
+        {
+            return new
             {
                 state = s_ForcedState ?? GetState(),
-                projectPath,
+                projectPath = GetProjectPath(),
                 port = HttpServer.Port,
                 pid = System.Diagnostics.Process.GetCurrentProcess().Id,
                 unityVersion = Application.unityVersion,
@@ -183,15 +196,6 @@ namespace UnityBridgeConnector
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 compileErrors = EditorUtility.scriptCompilationFailed,
             };
-
-            try
-            {
-                Directory.CreateDirectory(s_Dir);
-                AtomicFile.WriteAllText(GetFilePath(), JsonConvert.SerializeObject(status));
-            }
-            catch
-            {
-            }
         }
 
         static string GetConnectorVersion()

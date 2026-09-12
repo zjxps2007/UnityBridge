@@ -33,6 +33,13 @@ namespace UnityBridgeConnector
             if (command == "list")
                 return new SuccessResponse("Available tools", ToolDiscovery.GetToolSchemas());
 
+            if (command == "get_editor_state")
+                return new SuccessResponse("Current editor state", new
+                {
+                    requestId = parameters?["request_id"]?.ToString(),
+                    instance = Heartbeat.CaptureState(),
+                });
+
             var handler = ToolDiscovery.FindHandler(command);
             if (handler == null)
                 return new ErrorResponse($"Unknown command: {command}");

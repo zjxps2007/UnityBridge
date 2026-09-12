@@ -105,7 +105,9 @@ print(result.success, result.message, result.data)
 
 `UnityClient.wait_for_ready()` is a low-level state wait: its defaults may return
 an existing `ready` heartbeat immediately. Use `UnityBridgeAdapter.wait_for_ready()`
-to require a newer heartbeat and 0.5 seconds of observed readiness. After changing
+to confirm the live editor state without a fixed settling delay. Set its optional
+`stable_sec` only when your workflow needs an extra stability window. Live checks
+require an updated Unity Connector as well as the Python CLI. After changing
 scripts, use `bridge.refresh_assets(compile="request", wait=True)` to request the
 work and wait for readiness. The low-level `after_timestamp` and `stable_sec`
 arguments remain available for custom synchronization.

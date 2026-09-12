@@ -162,7 +162,7 @@ def build_parser() -> argparse.ArgumentParser:
     call.add_argument("unity_command", help="Unity Connector command name, for example list or console.")
     call.add_argument("--params", default="{}", help="JSON object passed as command params.")
 
-    wait_ready = sub.add_parser("wait-ready", parents=[parent], help="Wait for a newer heartbeat and 0.5 seconds of stable ready state.")
+    wait_ready = sub.add_parser("wait-ready", parents=[parent], help="Confirm readiness with the Unity Editor; no fixed settling delay.")
     wait_ready.add_argument("--timeout-sec", type=int, default=300, help="Ready wait timeout in seconds.")
 
     update = sub.add_parser("update", parents=[parent], help="Update the UnityBridge CLI.")

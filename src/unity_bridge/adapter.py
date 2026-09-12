@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import time
+import uuid
 from dataclasses import asdict
 from dataclasses import dataclass
 from pathlib import Path
@@ -15,6 +16,7 @@ from .client import DiscoveryError
 from .client import Instance
 from .client import ProcessDeadChecker
 from .client import UnityConnectionError
+from .client import UnityBridgeError
 from .client import UnityClient
 from .client import discover_instance
 from .client import wait_for_ready
@@ -159,26 +161,63 @@ class UnityBridgeAdapter:
         self,
         *,
         timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
-        stable_sec: float = 0.5,
+        stable_sec: float = 0,
         poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
     ) -> Instance:
-        """Wait for a newer, stable ready heartbeat from the selected project."""
+        """Confirm readiness with the editor; no settling delay unless requested."""
+        deadline = time.monotonic() + timeout_sec
         target: Instance | None = None
 
-        def resolve_newer_instance() -> Instance:
+        def resolve_live_instance() -> Instance:
             nonlocal target
             if target is None:
-                # Select inside the wait so editor startup shares the same timeout.
                 target = self.client.discover_instance()
                 instance = target
             else:
                 instance = self._resolve_same_project(target)
-            if instance.timestamp <= target.timestamp:
-                raise DiscoveryError("waiting for a newer Unity heartbeat")
-            return instance
+
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise DiscoveryError("timed out waiting for live Unity state")
+            request_id = uuid.uuid4().hex
+            try:
+                response = self.client.call(
+                    "get_editor_state",
+                    {"request_id": request_id},
+                    instance=instance,
+                    timeout_ms=max(1, min(self.client.timeout_ms, int(remaining * 1000))),
+                )
+            except UnityConnectionError as exc:
+                # A reload may close the connection or move the project's port.
+                raise DiscoveryError(str(exc)) from exc
+            if time.monotonic() >= deadline:
+                raise DiscoveryError("timed out waiting for live Unity state")
+            if response.completion_unknown:
+                raise DiscoveryError("Unity closed the connection before confirming readiness")
+            if not response.success:
+                if response.message == "Unknown command: get_editor_state":
+                    raise UnityBridgeError(
+                        "This Unity Connector does not support live readiness checks. "
+                        "Update the Unity Connector package together with the Python CLI."
+                    )
+                raise UnityBridgeError(f"Unity readiness check failed: {response.message}")
+            data = response.data
+            if not isinstance(data, dict) or data.get("requestId") != request_id or not isinstance(data.get("instance"), dict):
+                raise UnityBridgeError("Unity returned an invalid live readiness response")
+            try:
+                live = Instance.from_dict(data["instance"])
+            except (TypeError, ValueError) as exc:
+                raise UnityBridgeError("Unity returned an invalid live readiness state") from exc
+            if not live.state or live.timestamp <= 0 or not live.project_path:
+                raise UnityBridgeError("Unity returned an incomplete live readiness state")
+            if Path(live.project_path) != Path(target.project_path):
+                raise UnityBridgeError("Unity readiness response belongs to a different project")
+            if live.port != instance.port or (instance.pid > 0 and live.pid != instance.pid):
+                raise DiscoveryError("Unity instance changed while checking readiness")
+            return live
 
         return wait_for_ready(
-            resolve_newer_instance,
+            resolve_live_instance,
             timeout_sec=timeout_sec,
             poll_interval_sec=poll_interval_sec,
             stable_sec=stable_sec,

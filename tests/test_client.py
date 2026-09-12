@@ -25,6 +25,7 @@ from unity_bridge import Instance
 from unity_bridge import UnityActionResult
 from unity_bridge import UnityBridgeAdapter
 from unity_bridge import UnityClient
+from unity_bridge import UnityConnectionError
 from unity_bridge import discover_instance
 from unity_bridge import find_active_by_port
 from unity_bridge import find_by_port
@@ -465,6 +466,50 @@ class HttpClientTests(unittest.TestCase):
 
 
 class AdapterTests(unittest.TestCase):
+    def test_live_ready_preserves_explicit_stability_and_resets_on_busy(self) -> None:
+        clock = {"now": 0.0}
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", pid=0)
+            adapter = UnityBridgeAdapter(instances_dir=directory)
+
+            def query(instance: Instance, command: str, params: dict[str, object], *, timeout_ms: int) -> CommandResponse:
+                state = instance.to_dict()
+                state["state"] = "compiling" if 0.1 <= clock["now"] < 0.3 else "ready"
+                return CommandResponse(True, "state", {"requestId": params["request_id"], "instance": state})
+
+            def advance(seconds: float) -> None:
+                clock["now"] += seconds
+
+            with (
+                patch("unity_bridge.client.send_command", side_effect=query),
+                patch("unity_bridge.client.time.monotonic", side_effect=lambda: clock["now"]),
+                patch("unity_bridge.client.time.sleep", side_effect=advance),
+            ):
+                result = adapter.wait_for_ready(timeout_sec=2, stable_sec=0.2, poll_interval_sec=0.1)
+            self.assertEqual(result.state, "ready")
+            self.assertGreaterEqual(clock["now"], 0.5)
+            self.assertLess(clock["now"], 0.7)
+
+    def test_live_ready_does_not_accept_response_after_deadline(self) -> None:
+        clock = {"now": 0.0}
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", pid=0)
+            adapter = UnityBridgeAdapter(instances_dir=directory)
+
+            def delayed(instance: Instance, command: str, params: dict[str, object], *, timeout_ms: int) -> CommandResponse:
+                self.assertLessEqual(timeout_ms, 1000)
+                clock["now"] = 1.1
+                return CommandResponse(True, "state", {"requestId": params["request_id"], "instance": instance.to_dict()})
+
+            with (
+                patch("unity_bridge.client.send_command", side_effect=delayed),
+                patch("unity_bridge.client.time.monotonic", side_effect=lambda: clock["now"]),
+                self.assertRaises(DiscoveryError),
+            ):
+                adapter.wait_for_ready(timeout_sec=1)
+
     def test_adapter_refresh_assets_sends_paths_payload(self) -> None:
         response_body = json.dumps(
             {
@@ -823,12 +868,14 @@ class CliTests(unittest.TestCase):
     def _wait_ready_timeline(
         self,
         timeline: list[tuple[float, dict[str, object] | None]],
+        live_timeline: list[tuple[float, dict[str, object] | CommandResponse | Exception]],
         *,
         timeout_sec: int = 3,
         port: int | None = None,
-    ) -> tuple[int, str, str, float]:
-        """Run the real CLI/discovery path with heartbeat files and virtual time."""
+    ) -> tuple[int, str, str, float, list[dict[str, object]]]:
+        """Exercise CLI/discovery with independent file and live editor states."""
         clock = {"now": 0.0}
+        calls: list[dict[str, object]] = []
         with TemporaryDirectory() as tmp:
             directory = Path(tmp)
 
@@ -843,6 +890,21 @@ class CliTests(unittest.TestCase):
                 clock["now"] += seconds
                 publish()
 
+            def query(instance: Instance, command: str, params: dict[str, object], *, timeout_ms: int) -> CommandResponse:
+                self.assertEqual(command, "get_editor_state")
+                self.assertTrue(params["request_id"])
+                calls.append({"at": clock["now"], "port": instance.port, "timeout_ms": timeout_ms})
+                value = next(value for at, value in reversed(live_timeline) if at <= clock["now"])
+                if isinstance(value, Exception):
+                    raise value
+                if isinstance(value, CommandResponse):
+                    return value
+                state = instance.to_dict()
+                state.update(value)
+                return CommandResponse(True, "Current editor state", {
+                    "requestId": params["request_id"], "instance": state,
+                })
+
             publish()
             args = ["--json", "--instances-dir", str(directory), "wait-ready", "--timeout-sec", str(timeout_sec)]
             if port is not None:
@@ -852,86 +914,120 @@ class CliTests(unittest.TestCase):
             with (
                 patch("unity_bridge.client.time.monotonic", side_effect=lambda: clock["now"]),
                 patch("unity_bridge.client.time.sleep", side_effect=advance),
+                patch("unity_bridge.client.send_command", side_effect=query),
                 redirect_stdout(stdout),
                 redirect_stderr(stderr),
             ):
                 exit_code = cli_main(args)
-        return exit_code, stdout.getvalue(), stderr.getvalue(), clock["now"]
+        return exit_code, stdout.getvalue(), stderr.getvalue(), clock["now"], calls
 
-    def test_cli_wait_ready_does_not_return_before_delayed_compilation(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+    def test_cli_wait_ready_checks_live_state_instead_of_old_ready_file(self) -> None:
+        exit_code, stdout, stderr, elapsed, calls = self._wait_ready_timeline([
             (0, {"state": "ready", "timestamp": 10}),
-            (0.1, {"state": "compiling", "timestamp": 11}),
+        ], [
+            (0, {"state": "compiling", "timestamp": 11}),
             (0.8, {"state": "ready", "timestamp": 12}),
         ])
         self.assertEqual(exit_code, 0, stderr)
         self.assertEqual(json.loads(stdout)["timestamp"], 12)
-        self.assertGreaterEqual(elapsed, 1.3)
+        self.assertAlmostEqual(elapsed, 1.0)
+        self.assertEqual(len(calls), 3)
 
-    def test_cli_wait_ready_requires_a_new_heartbeat_and_stability(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+    def test_cli_wait_ready_has_no_settling_delay_after_live_confirmation(self) -> None:
+        exit_code, stdout, stderr, elapsed, calls = self._wait_ready_timeline([
             (0, {"state": "ready", "timestamp": 10}),
-            (0.5, {"state": "ready", "timestamp": 11}),
-            (1.0, {"state": "ready", "timestamp": 12}),
+        ], [
+            (0, {"state": "ready", "timestamp": 20}),
         ])
         self.assertEqual(exit_code, 0, stderr)
-        self.assertEqual(json.loads(stdout)["timestamp"], 12)
-        self.assertAlmostEqual(elapsed, 1.0)
+        self.assertEqual(json.loads(stdout)["timestamp"], 20)
+        self.assertEqual(elapsed, 0)
+        self.assertEqual(len(calls), 1)
 
-    def test_cli_wait_ready_times_out_on_unchanged_ready_heartbeat(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+    def test_cli_wait_ready_cannot_succeed_from_file_without_live_response(self) -> None:
+        exit_code, stdout, stderr, elapsed, calls = self._wait_ready_timeline([
             (0, {"state": "ready", "timestamp": 10}),
+        ], [
+            (0, UnityConnectionError("editor unavailable")),
         ], timeout_sec=1)
         self.assertEqual(exit_code, 1)
         self.assertEqual(stdout, "")
         self.assertIn("timed out", json.loads(stderr)["error"])
         self.assertAlmostEqual(elapsed, 1.0)
+        self.assertTrue(calls)
 
-    def test_cli_wait_ready_resets_stability_when_compilation_restarts(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+    def test_cli_wait_ready_does_not_accept_unknown_completion(self) -> None:
+        exit_code, stdout, stderr, elapsed, calls = self._wait_ready_timeline([
             (0, {"state": "ready", "timestamp": 10}),
-            (0.5, {"state": "ready", "timestamp": 11}),
-            (0.75, {"state": "compiling", "timestamp": 12}),
-            (1.25, {"state": "ready", "timestamp": 13}),
-            (2.0, {"state": "ready", "timestamp": 14}),
+        ], [
+            (0, CommandResponse(True, "connection closed", {"completion": "unknown"})),
+            (0.5, {"state": "ready", "timestamp": 20}),
         ])
         self.assertEqual(exit_code, 0, stderr)
-        self.assertEqual(json.loads(stdout)["timestamp"], 14)
-        self.assertGreaterEqual(elapsed, 1.75)
+        self.assertEqual(json.loads(stdout)["timestamp"], 20)
+        self.assertAlmostEqual(elapsed, 0.5)
+        self.assertEqual(len(calls), 2)
+
+    def test_cli_wait_ready_requires_matching_live_response(self) -> None:
+        invalid = [
+            CommandResponse(True, "cached", {"requestId": "old", "instance": {"state": "ready"}}),
+            {"state": "ready", "projectPath": "D:/DifferentProject"},
+            {"state": "ready", "timestamp": 0},
+        ]
+        for live in invalid:
+            with self.subTest(live=live):
+                exit_code, stdout, stderr, elapsed, _ = self._wait_ready_timeline([
+                    (0, {"state": "ready", "timestamp": 10}),
+                ], [(0, live)])
+                self.assertEqual(exit_code, 1)
+                self.assertEqual(stdout, "")
+                self.assertFalse(json.loads(stderr)["ok"])
+                self.assertEqual(elapsed, 0)
+
+    def test_cli_wait_ready_reports_unsupported_connector_without_file_fallback(self) -> None:
+        exit_code, stdout, stderr, elapsed, _ = self._wait_ready_timeline([
+            (0, {"state": "ready", "timestamp": 10}),
+        ], [(0, CommandResponse(False, "Unknown command: get_editor_state"))])
+        self.assertEqual(exit_code, 1)
+        self.assertEqual(stdout, "")
+        self.assertIn("Update the Unity Connector", json.loads(stderr)["error"])
+        self.assertEqual(elapsed, 0)
 
     def test_cli_wait_ready_can_wait_for_editor_startup(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+        exit_code, stdout, stderr, elapsed, _ = self._wait_ready_timeline([
             (0, None),
             (0.2, {"state": "ready", "timestamp": 10}),
-            (0.8, {"state": "ready", "timestamp": 11}),
-            (1.3, {"state": "ready", "timestamp": 12}),
-        ])
+        ], [(0, {"state": "ready", "timestamp": 20})])
         self.assertEqual(exit_code, 0, stderr)
-        self.assertEqual(json.loads(stdout)["timestamp"], 12)
-        self.assertGreaterEqual(elapsed, 1.3)
+        self.assertEqual(json.loads(stdout)["timestamp"], 20)
+        self.assertGreaterEqual(elapsed, 0.2)
+        self.assertLess(elapsed, 1.0)
 
     def test_cli_wait_ready_timeout_includes_editor_startup(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+        exit_code, stdout, stderr, elapsed, calls = self._wait_ready_timeline([
             (0, None),
             (0.2, {"state": "ready", "timestamp": 10}),
-            (0.8, {"state": "ready", "timestamp": 11}),
-        ], timeout_sec=1)
+        ], [(0, {"state": "compiling", "timestamp": 20})], timeout_sec=1)
         self.assertEqual(exit_code, 1)
         self.assertEqual(stdout, "")
         self.assertIn("timed out", json.loads(stderr)["error"])
         self.assertAlmostEqual(elapsed, 1.0)
+        for call in calls:
+            self.assertLessEqual(call["timeout_ms"], (1.0 - call["at"]) * 1000)
 
     def test_cli_wait_ready_follows_same_project_after_port_change(self) -> None:
-        exit_code, stdout, stderr, elapsed = self._wait_ready_timeline([
+        exit_code, stdout, stderr, elapsed, calls = self._wait_ready_timeline([
             (0, {"state": "ready", "timestamp": 10, "port": 8090}),
-            (0.3, None),
-            (0.8, {"state": "ready", "timestamp": 11, "port": 8091}),
-            (1.3, {"state": "ready", "timestamp": 12, "port": 8091}),
+            (0.5, {"state": "ready", "timestamp": 11, "port": 8091}),
+        ], [
+            (0, UnityConnectionError("domain reload")),
+            (0.5, {"state": "ready", "timestamp": 20, "port": 8091}),
         ], port=8090)
         self.assertEqual(exit_code, 0, stderr)
         self.assertEqual(json.loads(stdout)["port"], 8091)
         self.assertEqual(json.loads(stdout)["projectPath"], "D:/UnityProjects/Game")
-        self.assertGreaterEqual(elapsed, 1.3)
+        self.assertAlmostEqual(elapsed, 0.5)
+        self.assertEqual([call["port"] for call in calls], [8090, 8091])
 
     def test_cli_status_warns_when_connector_version_differs(self) -> None:
         with TemporaryDirectory() as tmp:

@@ -184,7 +184,7 @@ class UnityClient:
     ) -> Instance:
         """Wait for the observed state; defaults may accept an existing ready file.
 
-        Use UnityBridgeAdapter.wait_for_ready() for a fresh, stable heartbeat,
+        Use UnityBridgeAdapter.wait_for_ready() to confirm state with the editor,
         or refresh_assets(wait=True) to request work and wait for readiness.
         """
         return wait_for_ready(
