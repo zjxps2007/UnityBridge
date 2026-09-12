@@ -66,14 +66,14 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.0
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.1
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.0
+sh /tmp/unity-bridge-install.sh --version v0.2.1
 ```
 
 ## 업데이트
@@ -118,7 +118,7 @@ Windows 설치 스크립트는 이전 릴리스를 위해 `unity-bridge-windows-
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.0
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.1
 ```
 
 ## 로컬 설치 스크립트

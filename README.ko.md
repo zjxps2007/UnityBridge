@@ -113,6 +113,7 @@ unity-bridge update
 
 ## 문서
 
+- [릴리스 노트](docs/RELEASE_NOTES.md): 현재 릴리스의 변경 사항, 업데이트 요구 사항, 검증 결과.
 - [docs/INSTALL.ko.md](docs/INSTALL.ko.md): standalone 설치, 버전 고정, 업데이트, release asset.
 - [docs/COMMANDS.ko.md](docs/COMMANDS.ko.md): CLI 명령어, 공통 옵션, custom tool 호출.
 - [docs/PYTHON_PACKAGE.ko.md](docs/PYTHON_PACKAGE.ko.md): 개발 및 Python 직접 통합용 패키지 모드.

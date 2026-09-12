@@ -28,7 +28,7 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 특정 tag를 설치하려면:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.0"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.1"
 ```
 
 ## 브랜치에서 설치
@@ -55,7 +55,7 @@ https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/
 ```
 
 브랜치가 갱신되면 CLI 설치 명령을 다시 실행하고 Unity 패키지도 업데이트하세요. 브랜치의
-여러 커밋이 같은 패키지 버전을 사용할 수 있으므로 `--version`만으로는 설치된 커밋을
+여러 커밋이 같은 패키지 버전을 사용할 수 있으므로 버전 번호만으로는 설치된 커밋을
 구분할 수 없습니다. `python -m pip freeze`(macOS/Linux에서는 `python3`)와 Unity 프로젝트의
 `Packages/packages-lock.json`에서 Git 참조와 리비전을 확인하세요. standalone 설치기는
 이 브랜치를 선택하는 대신 릴리스 파일을 내려받습니다.
@@ -148,5 +148,5 @@ Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/man
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.2.0
+unity-bridge update --ref v0.2.1
 ```

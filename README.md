@@ -113,6 +113,7 @@ unity-bridge update
 
 ## Documentation
 
+- [Release notes](docs/RELEASE_NOTES.md): changes, upgrade requirements, and validation for the current release.
 - [docs/INSTALL.md](docs/INSTALL.md): standalone installation, version pinning, updates, and release assets.
 - [docs/COMMANDS.md](docs/COMMANDS.md): CLI commands, common options, custom tool calls.
 - [docs/PYTHON_PACKAGE.md](docs/PYTHON_PACKAGE.md): Python package mode for development and direct Python integration.

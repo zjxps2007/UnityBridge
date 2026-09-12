@@ -29,7 +29,7 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 Install a specific tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.0"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.1"
 ```
 
 ## Install From A Branch
@@ -56,8 +56,8 @@ https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/
 ```
 
 Repeat the CLI install command and update the Unity package when the branch
-changes. Branch commits can share a package version, so `--version` alone does
-not identify the installed commit. Check `python -m pip freeze` (`python3` on
+changes. Branch commits can share a package version, so the version number alone
+does not identify the installed commit. Check `python -m pip freeze` (`python3` on
 macOS/Linux) and the Unity project's `Packages/packages-lock.json` for Git refs
 and revisions. The standalone installer downloads release assets rather than
 selecting this branch.
@@ -151,5 +151,5 @@ Unity project's `Packages/manifest.json` automatically.
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.2.0
+unity-bridge update --ref v0.2.1
 ```

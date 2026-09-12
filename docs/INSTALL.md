@@ -69,14 +69,14 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.0
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.1
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.0
+sh /tmp/unity-bridge-install.sh --version v0.2.1
 ```
 
 ## Update
@@ -123,7 +123,7 @@ asset for previous releases.
 After tags are published, append the tag to the Unity package URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.0
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.1
 ```
 
 ## Local Installer

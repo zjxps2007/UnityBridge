@@ -1447,7 +1447,7 @@ class CliTests(unittest.TestCase):
 
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
-        self.assertIn("UnityBridge standalone CLI: 0.2.0", output)
+        self.assertIn(f"UnityBridge standalone CLI: {cli_module.__version__}", output)
         self.assertIn("Standalone asset: unity-bridge-windows-amd64.exe", output)
 
     def test_cli_auto_update_notice_prints_when_update_is_available(self) -> None:

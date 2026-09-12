@@ -93,7 +93,7 @@ not request compilation or guarantee that an unrelated task will not start later
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.2.0
+unity-bridge update --ref v0.2.1
 unity-bridge update --dry-run
 ```
 
