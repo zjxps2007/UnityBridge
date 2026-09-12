@@ -32,6 +32,36 @@ Install a specific tag:
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.0"
 ```
 
+## Install From A Branch
+
+To test changes before a release, install the Python CLI and Unity Connector from
+the same Git branch. For example, use the performance branch as follows.
+
+Windows PowerShell:
+
+```powershell
+python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/performance-improvements"
+```
+
+macOS/Linux, in the Python environment you use for UnityBridge:
+
+```sh
+python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/performance-improvements"
+```
+
+In Unity Package Manager, use the matching Git URL:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/performance-improvements
+```
+
+Repeat the CLI install command and update the Unity package when the branch
+changes. Branch commits can share a package version, so `--version` alone does
+not identify the installed commit. Check `python -m pip freeze` (`python3` on
+macOS/Linux) and the Unity project's `Packages/packages-lock.json` for Git refs
+and revisions. The standalone installer downloads release assets rather than
+selecting this branch.
+
 ## Install With The Installer
 
 Windows PowerShell:

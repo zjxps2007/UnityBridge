@@ -38,8 +38,9 @@ Unity API 작업을 Editor 메인 스레드에서 디스패치하므로, Editor�
 Edit > Preferences > General > Interaction Mode > No Throttling
 ```
 
-커넥터도 CLI 요청이 들어올 때마다 PlayerLoop 업데이트를 요청합니다. 그래도 안정적인 응답 시간을
-위해 `No Throttling` 설정을 권장합니다.
+커넥터는 CLI 요청이 들어오면 Editor 메인 스레드에 큐 처리를 요청하고, 겹치는 깨우기 요청을
+하나로 모읍니다. 정기적인 Editor 업데이트 루프도 큐를 처리합니다. 안정적인 응답 시간을 위해
+`No Throttling` 설정을 권장합니다.
 
 ## Standalone CLI
 
@@ -85,6 +86,12 @@ unity-bridge update
 standalone 빌드에서는 `update`가 현재 OS용 릴리스 설치 스크립트를 다시 실행해 맞는 release
 실행 파일을 내려받습니다. Unity Connector용 Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의
 `Packages/manifest.json`은 자동으로 수정하지 않습니다.
+
+실시간 `wait-ready` 확인을 사용하려면 CLI와 Unity Connector를 함께 업데이트하세요.
+구형 Connector는 저장된 `ready` heartbeat로 대신 성공하지 않고 업데이트 안내 오류를
+반환합니다. 미출시 브랜치를 시험하려면 [브랜치에서 설치](PYTHON_PACKAGE.ko.md#브랜치에서-설치)를
+따라 두 구성 요소를 같은 Git 브랜치에서 설치하세요. standalone 설치기는 릴리스 파일을
+내려받습니다.
 
 일반 CLI 명령에서는 하루에 한 번만 CLI 업데이트를 확인하고, 새 버전이 있을 때만 짧은 알림을
 출력합니다. `--json` 출력과 `update` 명령 자체에서는 이 알림을 건너뜁니다.

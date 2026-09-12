@@ -40,8 +40,10 @@ For the most reliable background responsiveness, set:
 Edit > Preferences > General > Interaction Mode > No Throttling
 ```
 
-The connector also requests PlayerLoop updates whenever a CLI request arrives,
-but `No Throttling` is still recommended for stable response times.
+When CLI requests arrive, the connector posts queue processing to the Editor
+main thread and coalesces overlapping wake-ups. The regular Editor update loop
+also drains the queue. `No Throttling` is still recommended for stable response
+times.
 
 ## Standalone CLI
 
@@ -88,6 +90,12 @@ For standalone builds, `update` reruns the release installer for the current OS
 and downloads the matching release executable. The command also prints the Unity
 Connector Git package URL, but it does not edit a Unity project's
 `Packages/manifest.json` automatically.
+
+Update the CLI and Unity Connector together for live `wait-ready` checks. An
+older Connector returns an update error instead of accepting a saved `ready`
+heartbeat. To test an unreleased branch, follow
+[Install From A Branch](PYTHON_PACKAGE.md#install-from-a-branch) and use the same
+Git branch for both components; the standalone installer downloads release assets.
 
 Normal CLI commands check for a CLI update at most once per day and print a
 short notice only when a newer version is available. The notice is skipped for

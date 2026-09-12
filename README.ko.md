@@ -63,14 +63,26 @@ Edit > Preferences > General > Interaction Mode > No Throttling
 ```powershell
 unity-bridge instances
 unity-bridge status
+unity-bridge wait-ready --timeout-sec 300
 unity-bridge tools
 ```
 
+`status`는 저장된 heartbeat를 읽고, `wait-ready`는 Editor에 현재 상태를 직접 확인해
+고정 0.5초 안정화 대기 없이 `ready` 응답을 받으면 완료됩니다. 직접 상태 확인을 쓰려면
+CLI와 Unity Connector를 함께 업데이트하세요. 브랜치 빌드는
+[Python 패키지 모드](docs/PYTHON_PACKAGE.ko.md#브랜치에서-설치)의 안내에 따라
+두 구성 요소를 같은 브랜치에서 설치합니다. 스크립트를 수정한 뒤에는 컴파일을 요청하고
+완료를 기다리세요.
+
 ```powershell
 unity-bridge console --count 50
-unity-bridge refresh --path Assets/Scripts/Player.cs --wait
+unity-bridge refresh --path Assets/Scripts/Player.cs --compile request --wait
 unity-bridge test --mode EditMode
 ```
+
+단독 `wait-ready`는 컴파일을 요청하지 않으며, Editor 응답 이후 시작되는 별도 작업까지
+기다리지 않습니다. 준비 확인과 새로고침 옵션은 [CLI 명령어](docs/COMMANDS.ko.md)를
+확인하세요.
 
 ```powershell
 unity-bridge editor play --wait

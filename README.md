@@ -63,14 +63,26 @@ More details are covered in [docs/INSTALL.md](docs/INSTALL.md#recommended-editor
 ```powershell
 unity-bridge instances
 unity-bridge status
+unity-bridge wait-ready --timeout-sec 300
 unity-bridge tools
 ```
 
+`status` reads the saved heartbeat; `wait-ready` confirms the current state with
+the Editor and returns on `ready` without a fixed 0.5-second settling delay.
+Update both the CLI and Unity Connector to use live readiness checks. For branch
+builds, install both from the same branch as described in
+[Python package mode](docs/PYTHON_PACKAGE.md#install-from-a-branch).
+After editing scripts, request compilation and wait for completion:
+
 ```powershell
 unity-bridge console --count 50
-unity-bridge refresh --path Assets/Scripts/Player.cs --wait
+unity-bridge refresh --path Assets/Scripts/Player.cs --compile request --wait
 unity-bridge test --mode EditMode
 ```
+
+Standalone `wait-ready` does not request compilation or wait for unrelated work
+that starts after the Editor responds. See [CLI commands](docs/COMMANDS.md) for
+the readiness and refresh options.
 
 ```powershell
 unity-bridge editor play --wait
