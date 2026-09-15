@@ -2,8 +2,10 @@
 from __future__ import annotations
 
 import platform
+import re
 import sys
 from pathlib import Path
+from urllib.parse import quote
 
 from ..client import DiscoveryError
 
@@ -37,6 +39,7 @@ def standalone_update_command(version: str, *, wait_pid: int | None = None) -> l
 
 
 def _standalone_windows_update_command(version: str, *, wait_pid: int | None = None) -> list[str]:
+    installer_url = _installer_script_url(DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL, version)
     wait_script = ""
     if wait_pid is not None and wait_pid > 0:
         wait_script = f"try {{ Wait-Process -Id {int(wait_pid)} -Timeout 30 -ErrorAction SilentlyContinue }} catch {{ }}; "
@@ -44,7 +47,7 @@ def _standalone_windows_update_command(version: str, *, wait_pid: int | None = N
         "$ErrorActionPreference = 'Stop'; "
         + wait_script
         + "$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'; "
-        + f"Invoke-WebRequest -Uri '{DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL}' -OutFile $script; "
+        + f"Invoke-WebRequest -Uri '{installer_url}' -OutFile $script; "
         + f"& $script -Version '{_escape_powershell_single_quoted(version)}' "
         + f"-InstallDir '{_escape_powershell_single_quoted(str(Path(sys.executable).parent))}' -NoPathUpdate"
     )
@@ -59,6 +62,7 @@ def _standalone_windows_update_command(version: str, *, wait_pid: int | None = N
 
 
 def _standalone_posix_update_command(version: str, *, wait_pid: int | None = None) -> list[str]:
+    installer_url = _installer_script_url(DEFAULT_INSTALL_SHELL_SCRIPT_URL, version)
     wait_script = ""
     if wait_pid is not None and wait_pid > 0:
         wait_script = (
@@ -70,15 +74,22 @@ def _standalone_posix_update_command(version: str, *, wait_pid: int | None = Non
         + wait_script
         + "script=\"${TMPDIR:-/tmp}/unity-bridge-install-$$.sh\"; "
         + "if command -v curl >/dev/null 2>&1; then "
-        + f"curl -fsSL {_sh_quote(DEFAULT_INSTALL_SHELL_SCRIPT_URL)} -o \"$script\"; "
+        + f"curl -fsSL {_sh_quote(installer_url)} -o \"$script\"; "
         + "elif command -v wget >/dev/null 2>&1; then "
-        + f"wget -qO \"$script\" {_sh_quote(DEFAULT_INSTALL_SHELL_SCRIPT_URL)}; "
+        + f"wget -qO \"$script\" {_sh_quote(installer_url)}; "
         + "else echo 'curl or wget is required to update UnityBridge.' >&2; exit 1; fi; "
         + f"sh \"$script\" --version {_sh_quote(version)} "
         + f"--install-dir {_sh_quote(str(Path(sys.executable).parent))} --no-path-update; "
         + "rm -f \"$script\""
     )
     return ["sh", "-c", script]
+
+
+def _installer_script_url(default_url: str, version: str) -> str:
+    # An unmerged prerelease can use a bundle format main's installer cannot read.
+    if re.fullmatch(r"v?\d+\.\d+\.\d+-[0-9A-Za-z.-]+(?:\+[0-9A-Za-z.-]+)?", version):
+        return default_url.replace("/main/", f"/{quote(version, safe='')}/")
+    return default_url
 
 
 def standalone_asset_name() -> str:

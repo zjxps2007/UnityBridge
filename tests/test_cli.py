@@ -287,6 +287,16 @@ class CliTests(unittest.TestCase):
                 stderr.getvalue(),
             )
 
+    def test_cli_status_accepts_equivalent_prerelease_spellings(self) -> None:
+        with TemporaryDirectory() as tmp:
+            directory = Path(tmp)
+            write_instance(directory, "game", port=8090, pid=0, connectorVersion="0.2.2-rc.1")
+            stderr = StringIO()
+            with patch.object(cli_output, "__version__", "0.2.2rc1"), redirect_stdout(StringIO()), redirect_stderr(stderr):
+                code = cli_main(["--instances-dir", str(directory), "status"])
+            self.assertEqual(code, 0)
+            self.assertEqual(stderr.getvalue(), "")
+
     def test_cli_status_json_suppresses_connector_version_warning(self) -> None:
         with TemporaryDirectory() as tmp:
             directory = Path(tmp)
@@ -653,6 +663,20 @@ class CliTests(unittest.TestCase):
         self.assertEqual(payload["latest_version"], "0.1.5")
         self.assertEqual(payload["target_connector_version"], "0.1.5")
 
+    def test_cli_update_check_offers_final_release_to_rc_installs(self) -> None:
+        for current in ["0.2.2-rc.1", "0.2.2rc1"]:
+            with self.subTest(current=current), \
+                    patch.object(cli_updates, "_current_package_version", return_value=current), \
+                    patch.object(cli_updates, "_remote_python_version", return_value="0.2.2"), \
+                    patch.object(cli_updates, "_remote_connector_version", return_value="0.2.2"):
+                stdout = StringIO()
+                with redirect_stdout(stdout):
+                    code = cli_main(["--json", "update", "--check"])
+                payload = json.loads(stdout.getvalue())
+                self.assertEqual(code, 0)
+                self.assertEqual(payload["status"], "outdated")
+                self.assertTrue(payload["update_available"])
+
     def test_cli_update_check_prints_up_to_date(self) -> None:
         remote_files = {
             "pyproject.toml": '[project]\nversion = "0.1.5"\n',
@@ -680,6 +704,8 @@ class CliTests(unittest.TestCase):
 
         with (
             patch.object(cli_standalone.sys, "frozen", True, create=True),
+            patch.object(cli_standalone.sys, "platform", "win32"),
+            patch.object(cli_standalone.platform, "machine", return_value="AMD64"),
             patch.object(cli_updates, "_read_remote_repository_file", side_effect=lambda repo, ref, path, **kwargs: remote_files[path]),
         ):
             stdout = StringIO()
@@ -794,6 +820,28 @@ class CliTests(unittest.TestCase):
         self.assertIn("--version", output)
         self.assertIn("v0.1.5", output)
         self.assertIn("darwin-arm64", output)
+
+    def test_standalone_prerelease_update_uses_the_tagged_installer(self) -> None:
+        for platform_name, script_name in [("win32", "install.ps1"), ("linux", "install.sh")]:
+            with self.subTest(platform=platform_name), \
+                    patch.object(cli_standalone.sys, "frozen", True, create=True), \
+                    patch.object(cli_standalone.sys, "platform", platform_name), \
+                    patch.object(cli_standalone.platform, "machine", return_value="AMD64"):
+                stdout = StringIO()
+                with redirect_stdout(stdout):
+                    code = cli_main(["--json", "update", "--dry-run", "--ref", "refs/tags/v0.2.2-rc.1"])
+                payload = json.loads(stdout.getvalue())
+                self.assertEqual(code, 0)
+                self.assertEqual(payload["version"], "v0.2.2-rc.1")
+                self.assertIn(f"https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.1/{script_name}", payload["command"][-1])
+
+    def test_standalone_stable_updates_keep_the_default_installer(self) -> None:
+        for version in ["latest", "v0.2.1"]:
+            with self.subTest(version=version):
+                windows = cli_standalone._standalone_windows_update_command(version)[-1]
+                posix = cli_standalone._standalone_posix_update_command(version)[-1]
+                self.assertIn(cli_standalone.DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL, windows)
+                self.assertIn(cli_standalone.DEFAULT_INSTALL_SHELL_SCRIPT_URL, posix)
 
     def test_standalone_update_keeps_custom_install_directory(self) -> None:
         custom = Path("custom install's directory") / "unity-bridge.exe"

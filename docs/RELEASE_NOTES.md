@@ -1,54 +1,55 @@
-# Unreleased
+# UnityBridge v0.2.2-rc.1
 
-- Build standalone CLI archives using PyInstaller one-folder mode. Install the runtime once, retaining the existing command path and support for older single-file release assets.
-- Validate staged downloads before replacing the installed command. Give each build a separate runtime directory so updates do not overlay libraries used by an older process. Preserve custom installation paths during self-update.
-- Use Unity TypeCache for initial tool discovery, with reflection fallback for runtime-loaded assemblies. Generate parameter schemas only on a tool-list request and retain handler/schema caches for subsequent requests.
-- Keep dynamic tool discovery, duplicate-handler selection, domain-reload invalidation, and live readiness checks. No fixed readiness delay is added or removed by this change.
-- Split CLI argument parsing, command dispatch, output, update handling, installer commands, and version parsing into internal modules. Preserve the public entry point and command contracts, centralize output/error handling, and document module ownership and regression checks.
-
-# UnityBridge v0.2.1
+This is an opt-in prerelease from `codex/faster-startup` for testing startup improvements and the CLI refactor before merging into `main`.
 
 ## Changes
 
-- `wait-ready` now asks the Unity Editor for its current state on the main thread. A ready response completes immediately without a fixed 0.5-second settling delay. Saved heartbeat files are used for discovery, not as proof of readiness.
-- Preserve pending refresh, compilation, and Play Mode transitions. Readiness checks recover from interrupted connections and port changes within the overall timeout, and reject mismatched or unconfirmed responses.
-- Cache Unity tool discovery and reuse reflected handlers instead of scanning assemblies for every command. Coalesce main-thread wake-ups and avoid redundant CLI JSON conversions and discovery work.
-- Prevent asset import workers from publishing bridge instances. Retry transient heartbeat file access failures during discovery.
-- Update English and Korean READMEs, command references, and installation guides.
+- Standalone releases now contain the executable and its runtime in a ZIP or tar.gz bundle. Installation extracts the runtime once; each command no longer unpacks a single-file executable. Keep the runtime folder beside the executable.
+- Installers validate staged downloads before replacing the command, preserve custom installation paths, and give each build a separate runtime directory. Older single-file releases remain installable.
+- Unity tool discovery uses TypeCache with a reflection fallback for runtime-loaded assemblies. Parameter schemas are generated on the first tool-list request, then cached. Dynamic tools, duplicate-handler selection, and domain reload remain supported.
+- Split CLI argument parsing, dispatch, output, updates, installer commands, and version parsing into focused internal modules while preserving public commands and request contracts.
+- Correct prerelease version comparisons: Python's `0.2.2rc1` and Unity's `0.2.2-rc.1` are equivalent, and final `0.2.2` sorts after its RCs. Explicit prerelease self-updates use the installer from the requested tag.
+- The release workflow marks prerelease tags appropriately, preserves the latest stable release, and publishes only after all five platform bundles pass validation.
 
-## Upgrade both components
+## Install both components
 
-Update the CLI and Unity Connector together to **0.2.1**. An older Connector does not support live readiness checks and returns an update error. The CLI updater does not change the Unity project's package automatically.
+Use the installer **from this tag**, including when upgrading from v0.2.1. The v0.2.1 updater downloads the older installer from `main`, which does not support these bundles.
 
-For an existing standalone CLI installation:
+Windows PowerShell:
 
-```text
-unity-bridge update --ref v0.2.1
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.1/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2-rc.1
 ```
 
-In Unity Package Manager, use:
+macOS/Linux:
 
-```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.1
+```sh
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.1/install.sh -o /tmp/unity-bridge-install-rc.sh
+sh /tmp/unity-bridge-install-rc.sh --version v0.2.2-rc.1
 ```
 
-After changing scripts, request the work explicitly:
+Unity Package Manager Git URL:
 
 ```text
-unity-bridge refresh --compile request --wait
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2-rc.1
 ```
 
-Standalone `wait-ready` does not request compilation or predict unrelated work that starts after the Editor responds.
+Confirm the CLI with `unity-bridge update --check --ref v0.2.2-rc.1`. Default installation and plain `unity-bridge update` select the stable release, so the latter can replace this RC with v0.2.1. To return both components to v0.2.1, run `unity-bridge update --ref v0.2.1` and change the Connector URL to `#v0.2.1`.
 
-## Validation
+## Validation and scope
 
-- 73 Python tests passed.
-- Core changes were validated in native Unity 2021.3.19f1 and 6000.3.13f1: actual compilation and domain reload, stale heartbeat rejection, and compatibility errors for an older Connector.
-- The release workflow builds and runs each executable on its matching platform, verifies its reported CLI and Connector versions, and publishes only after all five assets are ready: Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon.
+- 94 Python tests passed locally, including installer migration, rejected-download recovery, command contracts, and prerelease ordering.
+- The startup implementation and CLI refactor were validated in native Unity 2021.3.19f1 and 6000.3.13f1, including dynamic tool discovery, duplicate handlers, compilation, and domain reload.
+- Release CI builds and runs the archived executable on Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon. Publication waits for all five builds.
+- Earlier Windows measurements using the same local Python/PyInstaller toolchain showed substantially lower process-start cost than v0.2.0/v0.2.1. Those measurements are not an A/B benchmark of these official release binaries or the full Codex response. Unity workload, Editor throttling, and machine state still affect response time.
+- The live readiness behavior from v0.2.1 remains: no fixed 0.5-second settling delay. After editing scripts, use `refresh --compile request --wait` to request compilation and wait for it.
 
-## 한국어 요약
+## 한국어 안내
 
-- 고정 0.5초 대기 없이 Unity Editor의 실제 응답으로 준비 완료를 확인합니다. 컴파일·리로드 중에는 계속 기다리며, 오래된 상태 파일만으로 성공하지 않습니다.
-- 도구 탐색 캐시, 요청 처리, CLI JSON 출력을 개선하고 import worker의 잘못된 인스턴스 등록을 방지했습니다.
-- **CLI와 Unity Connector를 모두 0.2.1로 업데이트해야 합니다.** 위의 CLI 업데이트 명령과 Unity Package Manager URL을 함께 사용하세요.
-- 스크립트 수정 후에는 `refresh --compile request --wait`로 컴파일 요청과 완료 대기를 연결하세요.
+- `codex/faster-startup`의 시작 속도 개선과 CLI 리팩토링을 시험하는 프리릴리스입니다.
+- **위의 태그 전용 설치 명령을 사용하고 CLI와 Unity Connector를 모두 `0.2.2-rc.1`로 맞추세요.** v0.2.1의 기존 업데이터로는 새 압축 번들을 직접 설치할 수 없습니다.
+- 실행 파일과 런타임은 설치할 때 한 번 압축을 풀며, 이후 명령을 실행할 때 다시 풀지 않습니다. 실행 파일 옆의 런타임 폴더를 유지하세요.
+- 기본 설치는 정식 릴리스를 선택합니다. 이번 배포는 `main` 병합을 포함하지 않습니다.
+- 설치와 정식 버전 복귀 방법은 [한국어 설치 안내](https://github.com/zjxps2007/UnityBridge/blob/v0.2.2-rc.1/docs/INSTALL.ko.md#프리릴리스)를 참고하세요.

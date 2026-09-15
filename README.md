@@ -14,6 +14,9 @@ unpacked once during installation. Keep the runtime folder beside the executable
 The installer also supports the single-file assets used by v0.2.1 and older releases.
 See [installation and updates](docs/INSTALL.md#standalone-cli).
 
+To try the startup improvements before they reach `main`, install
+[v0.2.2-rc.1](docs/INSTALL.md#prerelease). The quick start below installs the stable release.
+
 ## Quick Start
 
 ### 1. Install The Unity Package

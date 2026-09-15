@@ -14,6 +14,9 @@ on:
 permissions:
   contents: write
 
+env:
+  RELEASE_REF: ${{ github.event.inputs.release_tag || github.ref_name }}
+
 jobs:
   standalone:
     name: Build standalone CLI (${{ matrix.asset_name }})
@@ -36,6 +39,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -55,7 +60,7 @@ jobs:
         shell: python
         env:
           ASSET_NAME: ${{ matrix.asset_name }}
-          BUILD_REF: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+          BUILD_REF: ${{ env.RELEASE_REF }}
         run: |
           import json
           import os
@@ -78,6 +83,7 @@ jobs:
           result = json.loads(run("--json", "update", "--check", "--ref", os.environ["BUILD_REF"]))
           assert result["mode"] == "standalone", result
           assert result["current_version"] == __version__, result
+          assert result["latest_version"] == __version__, result
           assert result["target_connector_version"] == __version__, result
           print(f"Verified {os.environ['ASSET_NAME']}: standalone CLI and Connector {__version__}")
 
@@ -95,6 +101,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_REF }}
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -111,7 +119,11 @@ jobs:
       - name: Verify complete asset set
         shell: python
         run: |
+          import os
+          import tomllib
           from pathlib import Path
+          version = tomllib.loads(Path("pyproject.toml").read_text(encoding="utf-8"))["project"]["version"]
+          assert os.environ["RELEASE_REF"] == f"v{version}", "Release tag must match the package version"
           expected = {
               "unity-bridge-windows-amd64.zip",
               "unity-bridge-linux-amd64.tar.gz",
@@ -127,7 +139,9 @@ jobs:
       - name: Publish release assets and notes
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.release_tag || github.ref_name }}
+          tag_name: ${{ env.RELEASE_REF }}
+          prerelease: ${{ contains(env.RELEASE_REF, '-') }}
+          make_latest: ${{ contains(env.RELEASE_REF, '-') && 'false' || 'legacy' }}
           body_path: docs/RELEASE_NOTES.md
           fail_on_unmatched_files: true
           files: dist/*

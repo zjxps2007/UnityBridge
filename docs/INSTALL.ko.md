@@ -85,6 +85,43 @@ curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.
 sh /tmp/unity-bridge-install.sh --version v0.2.1
 ```
 
+## 프리릴리스
+
+`v0.2.2-rc.1`은 `codex/faster-startup`의 시작 속도 개선과 CLI 리팩토링을 포함합니다.
+프리릴리스는 버전을 직접 지정해야 설치되며, 기본 설치 명령은 최신 정식 릴리스를 선택합니다.
+CLI와 Connector를 같은 태그로 설치하세요.
+
+**프리릴리스 태그의 설치 스크립트**를 사용하세요. v0.2.1의 설치기와 업데이터는
+기존 단일 실행 파일 형식을 사용하므로 이번 압축 번들을 직접 설치할 수 없습니다.
+
+Windows PowerShell:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.1/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2-rc.1
+```
+
+macOS/Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.1/install.sh -o /tmp/unity-bridge-install-rc.sh
+sh /tmp/unity-bridge-install-rc.sh --version v0.2.2-rc.1
+```
+
+Unity Package Manager Git URL:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2-rc.1
+```
+
+`unity-bridge update --check --ref v0.2.2-rc.1`로 설치 버전을 확인할 수 있습니다.
+Python 패키지 정보에 표시되는 `0.2.2rc1`과 `0.2.2-rc.1`은 같은 버전입니다.
+이번 RC부터는 `update --ref`로 프리릴리스를 지정하면 해당 태그의 설치기를 사용합니다.
+버전 지정 없는 `unity-bridge update`는 정식 릴리스를 선택하므로 더 오래된 정식 버전으로
+바뀔 수 있습니다. 두 구성 요소를 v0.2.1로 되돌리려면 `unity-bridge update --ref v0.2.1`을
+실행하고 Connector URL도 `#v0.2.1`로 변경하세요.
+
 ## 업데이트
 
 ```powershell
