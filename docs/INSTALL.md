@@ -47,8 +47,19 @@ times.
 
 ## Standalone CLI
 
-The recommended installation downloads a standalone `unity-bridge` executable
+The recommended installation downloads a standalone `unity-bridge` bundle
 from the latest GitHub Release, so Python is not required on the target machine.
+New builds use PyInstaller's one-folder layout: the installer unpacks the archive
+once instead of extracting the runtime on every command. v0.2.1 and older releases
+still use a single executable; the installer falls back to those assets.
+
+The command stays at the same installation path. Keep its adjacent
+`_unity_bridge_runtime_<build-id>` directory; copying only the executable will not
+work. Updates verify the downloaded bundle before replacing the command and keep
+older runtime directories for commands still running against them. Once all
+UnityBridge CLI processes are closed, obsolete runtime directories can be removed;
+keep the directory belonging to the currently installed build. The `update` command
+preserves a custom installation directory.
 
 Windows PowerShell:
 
@@ -108,15 +119,17 @@ Standalone installation requires the GitHub Release to contain the matching
 asset for your platform:
 
 ```text
-unity-bridge-windows-amd64.exe
-unity-bridge-linux-amd64
-unity-bridge-linux-arm64
-unity-bridge-darwin-amd64
-unity-bridge-darwin-arm64
+unity-bridge-windows-amd64.zip
+unity-bridge-linux-amd64.tar.gz
+unity-bridge-linux-arm64.tar.gz
+unity-bridge-darwin-amd64.tar.gz
+unity-bridge-darwin-arm64.tar.gz
 ```
 
-Windows installers also fall back to the older `unity-bridge-windows-x64.exe`
-asset for previous releases.
+Archives contain a `unity-bridge/` folder. For manual installation, extract the
+whole folder and run the executable inside it. The installers prefer archives and
+fall back to previous single-file assets (`.exe` on Windows, no extension on
+macOS/Linux). Windows also supports the old `unity-bridge-windows-x64.exe` name.
 
 ## Version Pinning
 

@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: "Existing release tag to upload standalone executables to. Leave blank to build artifacts only."
+        description: "Existing release tag to upload standalone bundles to. Leave blank to build artifacts only."
         required: false
         default: ""
 
@@ -23,15 +23,15 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            asset_name: unity-bridge-windows-amd64.exe
+            asset_name: unity-bridge-windows-amd64.zip
           - os: ubuntu-24.04
-            asset_name: unity-bridge-linux-amd64
+            asset_name: unity-bridge-linux-amd64.tar.gz
           - os: ubuntu-24.04-arm
-            asset_name: unity-bridge-linux-arm64
+            asset_name: unity-bridge-linux-arm64.tar.gz
           - os: macos-15-intel
-            asset_name: unity-bridge-darwin-amd64
+            asset_name: unity-bridge-darwin-amd64.tar.gz
           - os: macos-15
-            asset_name: unity-bridge-darwin-arm64
+            asset_name: unity-bridge-darwin-arm64.tar.gz
 
     steps:
       - name: Checkout
@@ -45,10 +45,13 @@ jobs:
       - name: Install package and build dependencies
         run: python -m pip install -e ".[build]"
 
-      - name: Build executable
+      - name: Test clients and installers
+        run: python -m unittest discover -s tests
+
+      - name: Build standalone bundle
         run: python scripts/build-standalone.py --output-name "${{ matrix.asset_name }}"
 
-      - name: Verify executable
+      - name: Verify archived executable
         shell: python
         env:
           ASSET_NAME: ${{ matrix.asset_name }}
@@ -57,11 +60,16 @@ jobs:
           import json
           import os
           import subprocess
+          import shutil
           import tempfile
           from pathlib import Path
           from unity_bridge import __version__
 
-          executable = str((Path("dist") / os.environ["ASSET_NAME"]).resolve())
+          archive = Path("dist") / os.environ["ASSET_NAME"]
+          unpacked = Path("build/release-smoke")
+          shutil.unpack_archive(archive, unpacked)
+          executable_name = "unity-bridge.exe" if os.name == "nt" else "unity-bridge"
+          executable = str((unpacked / "unity-bridge" / executable_name).resolve())
           def run(*args):
               return subprocess.run([executable, *args], check=True, capture_output=True, text=True, timeout=60).stdout
           assert "wait-ready" in run("--help")
@@ -93,7 +101,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Download verified executables
+      - name: Download verified bundles
         uses: actions/download-artifact@v4
         with:
           pattern: unity-bridge-*
@@ -105,16 +113,16 @@ jobs:
         run: |
           from pathlib import Path
           expected = {
-              "unity-bridge-windows-amd64.exe",
-              "unity-bridge-linux-amd64",
-              "unity-bridge-linux-arm64",
-              "unity-bridge-darwin-amd64",
-              "unity-bridge-darwin-arm64",
+              "unity-bridge-windows-amd64.zip",
+              "unity-bridge-linux-amd64.tar.gz",
+              "unity-bridge-linux-arm64.tar.gz",
+              "unity-bridge-darwin-amd64.tar.gz",
+              "unity-bridge-darwin-arm64.tar.gz",
           }
           assets = list(Path("dist").iterdir())
           assert {path.name for path in assets} == expected, assets
           assert all(path.is_file() and path.stat().st_size > 0 for path in assets)
-          print("Verified all five release executables")
+          print("Verified all five release bundles")
 
       - name: Publish release assets and notes
         uses: softprops/action-gh-release@v2

@@ -210,30 +210,86 @@ install_python_package() {
 }
 
 install_standalone() {
+    legacy_asset=""
     if [ -z "$ASSET_NAME" ]; then
-        ASSET_NAME="$(asset_for_current_platform)"
+        legacy_asset="$(asset_for_current_platform)"
+        ASSET_NAME="${legacy_asset}.tar.gz"
     fi
 
     if [ "$VERSION" = "latest" ] || [ -z "$VERSION" ]; then
-        url="https://github.com/${REPO}/releases/latest/download/${ASSET_NAME}"
+        base_url="https://github.com/${REPO}/releases/latest/download"
     else
-        url="https://github.com/${REPO}/releases/download/${VERSION}/${ASSET_NAME}"
+        base_url="https://github.com/${REPO}/releases/download/${VERSION}"
     fi
 
     step "Downloading ${ASSET_NAME}"
     mkdir -p "$INSTALL_DIR"
-    temp_file="$(mktemp "${TMPDIR:-/tmp}/unity-bridge.XXXXXX")"
-    trap 'rm -f "$temp_file"' EXIT INT TERM
-    download "$url" "$temp_file"
+    INSTALL_DIR="$(cd "$INSTALL_DIR" && pwd -P)"
+    stage="$(mktemp -d "${INSTALL_DIR}/.unity-bridge-stage.XXXXXX")"
+    trap 'rm -rf "$stage"' EXIT
+    trap 'exit 1' INT TERM
+    temp_file="${stage}/download"
+    if ! download "${base_url}/${ASSET_NAME}" "$temp_file"; then
+        if [ -z "$legacy_asset" ]; then
+            echo "Failed to download ${ASSET_NAME}." >&2
+            exit 1
+        fi
+        ASSET_NAME="$legacy_asset"
+        step "Trying legacy release asset ${ASSET_NAME}"
+        download "${base_url}/${ASSET_NAME}" "$temp_file"
+    fi
 
-    target="${INSTALL_DIR}/unity-bridge"
-    mv "$temp_file" "$target"
-    chmod +x "$target"
-    trap - EXIT INT TERM
+    runtime=""
+    case "$ASSET_NAME" in
+        *.tar.gz)
+            tar -tzf "$temp_file" > "${stage}/entries"
+            if grep -Eq '(^/|(^|/)\.\.(/|$))' "${stage}/entries" ||
+                grep -Ev '^unity-bridge(/|$)' "${stage}/entries" | grep -q .; then
+                echo "Invalid standalone archive paths." >&2
+                exit 1
+            fi
+            tar -xzf "$temp_file" -C "$stage"
+            candidate="${stage}/unity-bridge/unity-bridge"
+            set -- "${stage}/unity-bridge"/_unity_bridge_runtime_*
+            if [ "$#" -ne 1 ] || [ ! -d "$1" ] || [ ! -f "$candidate" ]; then
+                echo "Invalid standalone bundle layout." >&2
+                exit 1
+            fi
+            runtime="$1"
+            runtime_name="$(basename "$runtime")"
+            if ! printf '%s\n' "$runtime_name" | grep -Eq '^_unity_bridge_runtime_[0-9a-f]{32}$'; then
+                echo "Invalid runtime directory name." >&2
+                exit 1
+            fi
+            ;;
+        *)
+            candidate="${stage}/unity-bridge-candidate"
+            mv "$temp_file" "$candidate"
+            ;;
+    esac
+    chmod +x "$candidate"
 
     if [ "$(uname -s)" = "Darwin" ] && command -v xattr >/dev/null 2>&1; then
-        xattr -d com.apple.quarantine "$target" >/dev/null 2>&1 || true
+        xattr -dr com.apple.quarantine "$stage" >/dev/null 2>&1 || true
     fi
+
+    step "Verifying downloaded unity-bridge"
+    "$candidate" --help >/dev/null
+    if [ -n "$runtime" ]; then
+        runtime_target="${INSTALL_DIR}/${runtime_name}"
+        if [ -e "$runtime_target" ]; then
+            # Reinstall the same build without replacing a runtime in active use.
+            if ! diff -qr "$runtime" "$runtime_target" >/dev/null; then
+                echo "Installed runtime is incomplete or modified: $runtime_target. Close UnityBridge processes and remove this runtime folder before reinstalling." >&2
+                exit 1
+            fi
+        else
+            mv "$runtime" "$runtime_target"
+        fi
+    fi
+    target="${INSTALL_DIR}/unity-bridge"
+    # Staging is on the same filesystem: readers see either the old or new file.
+    mv -f "$candidate" "$target"
 
     add_path_entry "$INSTALL_DIR"
     PATH="$INSTALL_DIR:$PATH"

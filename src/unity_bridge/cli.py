@@ -27,7 +27,7 @@ from .client import UnityClient
 
 
 DEFAULT_REPOSITORY_URL = "https://github.com/zjxps2007/UnityBridge.git"
-DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-amd64.exe"
+DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-amd64.zip"
 DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1"
 DEFAULT_INSTALL_SHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh"
 AUTO_UPDATE_CHECK_INTERVAL_SECONDS = 24 * 60 * 60
@@ -582,7 +582,7 @@ def _run_standalone_update(args: argparse.Namespace) -> int:
         "version": version,
         "asset_name": asset_name,
         "connector_url": connector_url,
-        "note": "This updates the standalone executable from GitHub Releases. Update the Unity Connector package separately in Unity Package Manager if needed.",
+        "note": "This installs the standalone bundle from GitHub Releases. Update the Unity Connector package separately in Unity Package Manager if needed.",
     }
 
     if args.dry_run:
@@ -822,7 +822,8 @@ def _standalone_windows_update_command(version: str, *, wait_pid: int | None = N
         + wait_script
         + "$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'; "
         + f"Invoke-WebRequest -Uri '{DEFAULT_INSTALL_POWERSHELL_SCRIPT_URL}' -OutFile $script; "
-        + f"& $script -Version '{_escape_powershell_single_quoted(version)}'"
+        + f"& $script -Version '{_escape_powershell_single_quoted(version)}' "
+        + f"-InstallDir '{_escape_powershell_single_quoted(str(Path(sys.executable).parent))}' -NoPathUpdate"
     )
     return [
         "powershell",
@@ -850,7 +851,8 @@ def _standalone_posix_update_command(version: str, *, wait_pid: int | None = Non
         + "elif command -v wget >/dev/null 2>&1; then "
         + f"wget -qO \"$script\" {_sh_quote(DEFAULT_INSTALL_SHELL_SCRIPT_URL)}; "
         + "else echo 'curl or wget is required to update UnityBridge.' >&2; exit 1; fi; "
-        + f"sh \"$script\" --version {_sh_quote(version)}; "
+        + f"sh \"$script\" --version {_sh_quote(version)} "
+        + f"--install-dir {_sh_quote(str(Path(sys.executable).parent))} --no-path-update; "
         + "rm -f \"$script\""
     )
     return ["sh", "-c", script]
@@ -861,7 +863,7 @@ def _standalone_asset_name() -> str:
     arch_name = _standalone_arch_name()
     if os_name == "windows" and arch_name == "amd64":
         return DEFAULT_WINDOWS_ASSET_NAME
-    extension = ".exe" if os_name == "windows" else ""
+    extension = ".zip" if os_name == "windows" else ".tar.gz"
     return f"unity-bridge-{os_name}-{arch_name}{extension}"
 
 

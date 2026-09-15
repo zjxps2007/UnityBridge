@@ -1,3 +1,10 @@
+# Unreleased
+
+- Build standalone CLI archives using PyInstaller one-folder mode. Install the runtime once, retaining the existing command path and support for older single-file release assets.
+- Validate staged downloads before replacing the installed command. Give each build a separate runtime directory so updates do not overlay libraries used by an older process. Preserve custom installation paths during self-update.
+- Use Unity TypeCache for initial tool discovery, with reflection fallback for runtime-loaded assemblies. Generate parameter schemas only on a tool-list request and retain handler/schema caches for subsequent requests.
+- Keep dynamic tool discovery, duplicate-handler selection, domain-reload invalidation, and live readiness checks. No fixed readiness delay is added or removed by this change.
+
 # UnityBridge v0.2.1
 
 ## Changes

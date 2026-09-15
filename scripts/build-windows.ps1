@@ -1,7 +1,7 @@
 # Build the standalone Windows UnityBridge CLI executable.
 [CmdletBinding()]
 param(
-    [string]$OutputName = "unity-bridge-windows-amd64.exe",
+    [string]$OutputName = "unity-bridge-windows-amd64.zip",
     [switch]$SkipDependencyInstall
 )
 

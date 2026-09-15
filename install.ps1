@@ -102,14 +102,22 @@ function Get-GitHubHeaders {
     }
 }
 
+function Get-FileSha256 {
+    param([string]$Path)
+    $stream = [System.IO.File]::OpenRead($Path)
+    $algorithm = [System.Security.Cryptography.SHA256]::Create()
+    try { return [BitConverter]::ToString($algorithm.ComputeHash($stream)) }
+    finally { $algorithm.Dispose(); $stream.Dispose() }
+}
+
 function Get-StandaloneAssetCandidates {
     if (-not [string]::IsNullOrWhiteSpace($AssetName)) {
         return @($AssetName)
     }
 
-    # Prefer the Go/GitHub Actions style architecture name, but keep the old
-    # Windows x64 asset as a fallback so older releases remain installable.
+    # New releases unpack once at installation. Keep legacy releases installable.
     return @(
+        "unity-bridge-windows-amd64.zip",
         "unity-bridge-windows-amd64.exe",
         "unity-bridge-windows-x64.exe"
     )
@@ -164,19 +172,78 @@ function Install-Standalone {
     }
 
     Write-Step "Downloading $($asset.name) from $($release.tag_name)"
-    New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-
-    $tempPath = Join-Path ([System.IO.Path]::GetTempPath()) ("unity-bridge-" + [System.Guid]::NewGuid().ToString("N") + ".exe")
-    $targetPath = Join-Path $InstallDir "unity-bridge.exe"
+    $installRoot = [System.IO.Path]::GetFullPath($InstallDir)
+    New-Item -ItemType Directory -Force -Path $installRoot | Out-Null
+    $stage = Join-Path $installRoot (".unity-bridge-stage-" + [System.Guid]::NewGuid().ToString("N"))
+    New-Item -ItemType Directory -Path $stage | Out-Null
+    $tempPath = Join-Path $stage "download.zip"
+    $targetPath = Join-Path $installRoot "unity-bridge.exe"
     try {
         Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $tempPath -Headers (Get-GitHubHeaders)
-        Move-Item -LiteralPath $tempPath -Destination $targetPath -Force
-        try { Unblock-File -LiteralPath $targetPath } catch { }
+        $runtime = $null
+        if ($asset.name.EndsWith(".zip", [StringComparison]::OrdinalIgnoreCase)) {
+            $unpack = Join-Path $stage "unpacked"
+            Expand-Archive -LiteralPath $tempPath -DestinationPath $unpack
+            $bundle = Join-Path $unpack "unity-bridge"
+            $candidate = Join-Path $bundle "unity-bridge.exe"
+            $runtimes = @(Get-ChildItem -LiteralPath $bundle -Directory -Filter '_unity_bridge_runtime_*')
+            if ($runtimes.Count -ne 1 -or $runtimes[0].Name -notmatch '^_unity_bridge_runtime_[0-9a-f]{32}$' -or
+                -not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+                throw "Invalid standalone bundle layout."
+            }
+            $runtime = $runtimes[0]
+            Get-ChildItem -LiteralPath $bundle -Recurse -File | Unblock-File
+        }
+        else {
+            $candidate = Join-Path $stage "unity-bridge.exe"
+            Move-Item -LiteralPath $tempPath -Destination $candidate
+            Unblock-File -LiteralPath $candidate
+        }
+
+        Write-Step "Verifying downloaded unity-bridge"
+        & $candidate --help *> $null
+        if ($LASTEXITCODE -ne 0) { throw "Downloaded unity-bridge.exe verification failed; existing installation was preserved." }
+
+        if ($null -ne $runtime) {
+            $runtimeTarget = Join-Path $installRoot $runtime.Name
+            if (Test-Path -LiteralPath $runtimeTarget) {
+                # Reinstalling the same build reuses its immutable runtime only if
+                # every file still matches. Never overlay a partially mixed runtime.
+                $sourceFiles = @(Get-ChildItem -LiteralPath $runtime.FullName -Recurse -File)
+                if (@(Get-ChildItem -LiteralPath $runtimeTarget -Recurse -File).Count -ne $sourceFiles.Count) {
+                    throw "Installed runtime is modified: $runtimeTarget. Close UnityBridge processes and remove this runtime folder before reinstalling."
+                }
+                foreach ($file in $sourceFiles) {
+                    $relative = $file.FullName.Substring($runtime.FullName.Length + 1)
+                    $existing = Join-Path $runtimeTarget $relative
+                    if (-not (Test-Path -LiteralPath $existing -PathType Leaf) -or
+                        (Get-FileSha256 $file.FullName) -ne (Get-FileSha256 $existing)) {
+                        throw "Installed runtime is incomplete or modified: $runtimeTarget. Close UnityBridge processes and remove this runtime folder before reinstalling."
+                    }
+                }
+            }
+            else {
+                foreach ($directory in @($runtime.FullName, $runtimeTarget)) {
+                    if (-not ([System.IO.Path]::GetFullPath($directory)).StartsWith($installRoot.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) {
+                        throw "Refusing to move a runtime outside the installation directory."
+                    }
+                }
+                Move-Item -LiteralPath $runtime.FullName -Destination $runtimeTarget
+            }
+        }
+        if (Test-Path -LiteralPath $targetPath) {
+            [System.IO.File]::Replace($candidate, $targetPath, (Join-Path $stage 'previous.exe'))
+        }
+        else {
+            [System.IO.File]::Move($candidate, $targetPath)
+        }
     }
     finally {
-        if (Test-Path $tempPath) {
-            Remove-Item -LiteralPath $tempPath -Force -ErrorAction SilentlyContinue
+        $stageFullPath = [System.IO.Path]::GetFullPath($stage)
+        if (-not $stageFullPath.StartsWith($installRoot.TrimEnd('\') + '\', [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Refusing to clean a staging path outside the installation directory."
         }
+        Remove-Item -LiteralPath $stageFullPath -Recurse -Force -ErrorAction SilentlyContinue
     }
 
     $aliasPath = Join-Path $InstallDir "unity_bridge.cmd"

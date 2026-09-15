@@ -9,6 +9,10 @@ CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unit
 발견하고, 대상 Editor를 선택한 뒤 `http://127.0.0.1:{port}/command`로 JSON 명령을
 보냅니다.
 
+새 standalone 빌드는 실행 파일과 런타임을 묶은 압축 파일로 배포하며, 설치할 때 한 번
+압축을 풉니다. 실행 파일 옆의 런타임 폴더를 함께 유지하세요. 설치기는 v0.2.1 이하의
+단일 실행 파일도 지원합니다. 자세한 내용은 [설치와 업데이트](docs/INSTALL.ko.md#standalone-cli)를 참고하세요.
+
 ## 빠른 시작
 
 ### 1. Unity 패키지 설치

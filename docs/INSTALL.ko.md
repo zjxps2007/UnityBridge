@@ -44,8 +44,17 @@ Edit > Preferences > General > Interaction Mode > No Throttling
 
 ## Standalone CLI
 
-권장 설치는 최신 GitHub Release의 standalone `unity-bridge` 실행 파일을 내려받습니다.
-따라서 대상 PC에 Python이 없어도 됩니다.
+권장 설치는 최신 GitHub Release의 standalone `unity-bridge` 묶음을 내려받습니다.
+대상 PC에 Python을 따로 설치할 필요는 없습니다.
+새 빌드는 PyInstaller의 폴더 배포 방식을 사용해 설치할 때 한 번 압축을 풉니다.
+매 명령 실행마다 런타임을 다시 풀지 않습니다. v0.2.1 이하의 단일 실행 파일도
+설치기의 이전 형식 지원 경로로 설치할 수 있습니다.
+
+명령의 설치 경로는 유지됩니다. 실행 파일 옆의 `_unity_bridge_runtime_<build-id>`
+폴더도 필요하므로 실행 파일만 따로 옮기지 마세요. 업데이트는 내려받은 묶음을 검증한 뒤
+실행 파일을 교체합니다. 실행 중인 이전 명령을 위해 이전 런타임 폴더는 보관합니다.
+UnityBridge CLI 프로세스를 모두 종료한 뒤 사용하지 않는 런타임 폴더를 정리할 수 있지만,
+현재 설치된 빌드의 폴더는 유지해야 합니다. `update`는 사용자가 지정한 설치 경로도 유지합니다.
 
 Windows PowerShell:
 
@@ -103,15 +112,17 @@ standalone 빌드에서는 `update`가 현재 OS용 릴리스 설치 스크립�
 Standalone 설치는 GitHub Release에 현재 플랫폼과 맞는 asset이 있어야 합니다.
 
 ```text
-unity-bridge-windows-amd64.exe
-unity-bridge-linux-amd64
-unity-bridge-linux-arm64
-unity-bridge-darwin-amd64
-unity-bridge-darwin-arm64
+unity-bridge-windows-amd64.zip
+unity-bridge-linux-amd64.tar.gz
+unity-bridge-linux-arm64.tar.gz
+unity-bridge-darwin-amd64.tar.gz
+unity-bridge-darwin-arm64.tar.gz
 ```
 
-Windows 설치 스크립트는 이전 릴리스를 위해 `unity-bridge-windows-x64.exe` asset도 fallback으로
-지원합니다.
+압축 파일에는 `unity-bridge/` 폴더가 들어 있습니다. 수동 설치 시 폴더 전체를 풀고 그 안의
+실행 파일을 사용하세요. 설치기는 압축 묶음을 우선 선택하고 이전 릴리스의 단일 실행 파일
+(Windows는 `.exe`, macOS/Linux는 확장자 없음)도 지원합니다. Windows의 이전
+`unity-bridge-windows-x64.exe` 이름도 지원합니다.
 
 ## 버전 고정
 

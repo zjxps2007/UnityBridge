@@ -1448,7 +1448,7 @@ class CliTests(unittest.TestCase):
         output = stdout.getvalue()
         self.assertEqual(exit_code, 0)
         self.assertIn(f"UnityBridge standalone CLI: {cli_module.__version__}", output)
-        self.assertIn("Standalone asset: unity-bridge-windows-amd64.exe", output)
+        self.assertIn("Standalone asset: unity-bridge-windows-amd64.zip", output)
 
     def test_cli_auto_update_notice_prints_when_update_is_available(self) -> None:
         with TemporaryDirectory() as tmp:
@@ -1553,6 +1553,27 @@ class CliTests(unittest.TestCase):
         self.assertIn("--version", output)
         self.assertIn("v0.1.5", output)
         self.assertIn("darwin-arm64", output)
+
+    def test_standalone_update_keeps_custom_install_directory(self) -> None:
+        custom = Path("custom install's directory") / "unity-bridge.exe"
+        with patch.object(cli_module.sys, "executable", str(custom)):
+            windows = cli_module._standalone_windows_update_command("v0.2.1")[-1]
+            posix = cli_module._standalone_posix_update_command("v0.2.1")[-1]
+        self.assertIn("-InstallDir 'custom install''s directory' -NoPathUpdate", windows)
+        self.assertIn("--install-dir 'custom install'\"'\"'s directory' --no-path-update", posix)
+
+    def test_standalone_asset_names_use_installable_archives(self) -> None:
+        for platform_name, machine, expected in [
+            ("win32", "AMD64", "unity-bridge-windows-amd64.zip"),
+            ("linux", "x86_64", "unity-bridge-linux-amd64.tar.gz"),
+            ("linux", "aarch64", "unity-bridge-linux-arm64.tar.gz"),
+            ("darwin", "arm64", "unity-bridge-darwin-arm64.tar.gz"),
+            ("darwin", "x86_64", "unity-bridge-darwin-amd64.tar.gz"),
+        ]:
+            with self.subTest(platform=platform_name, machine=machine), \
+                    patch.object(cli_module.sys, "platform", platform_name), \
+                    patch.object(cli_module.platform, "machine", return_value=machine):
+                self.assertEqual(cli_module._standalone_asset_name(), expected)
 
 
 if __name__ == "__main__":

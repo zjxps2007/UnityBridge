@@ -9,6 +9,11 @@ The CLI discovers running Unity Editors through
 `~/.unity-bridge/instances/*.json` heartbeat files, selects the target Editor,
 and sends JSON commands to `http://127.0.0.1:{port}/command`.
 
+New standalone builds ship as an archive containing the executable and its runtime,
+unpacked once during installation. Keep the runtime folder beside the executable.
+The installer also supports the single-file assets used by v0.2.1 and older releases.
+See [installation and updates](docs/INSTALL.md#standalone-cli).
+
 ## Quick Start
 
 ### 1. Install The Unity Package
