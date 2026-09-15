@@ -14,8 +14,9 @@ unpacked once during installation. Keep the runtime folder beside the executable
 The installer also supports the single-file assets used by v0.2.1 and older releases.
 See [installation and updates](docs/INSTALL.md#standalone-cli).
 
-To try the startup improvements before they reach `main`, install
-[v0.2.2-rc.2](docs/INSTALL.md#prerelease). The quick start below installs the stable release.
+The startup improvements and Connector version fix are available in stable
+[v0.2.2](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.2).
+See [upgrading to v0.2.2](docs/INSTALL.md#upgrade-to-v022) to update both components.
 
 ## Quick Start
 

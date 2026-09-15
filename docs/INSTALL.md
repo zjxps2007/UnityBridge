@@ -90,47 +90,47 @@ curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.
 sh /tmp/unity-bridge-install.sh --version v0.2.1
 ```
 
-## Prerelease
+## Upgrade To v0.2.2
 
-`v0.2.2-rc.2` contains the startup improvements and CLI refactoring on
-`codex/faster-startup`. Prereleases are opt-in; the default installer continues to
-select the latest stable release. Install the CLI and Connector from the same tag.
+v0.2.2 is the stable release of the startup improvements, CLI refactoring, and
+Connector version fix tested in RC2. Update both the CLI and Unity package.
 
-RC2 fixes RC1 reporting `Connector: 0.2.1` even with the RC1 package installed.
-If your CLI is already on RC1, run `unity-bridge update --ref v0.2.2-rc.2` and
-update the Unity Package Manager URL below. After Unity finishes compiling,
-`unity-bridge status` should report `Connector: 0.2.2-rc.2`.
-
-Use the installer **from the prerelease tag**. The installer and updater in v0.2.1
-use the older single-file release format and cannot install these bundles directly.
+If the CLI is on RC1 or RC2, run `unity-bridge update --ref v0.2.2`.
+For v0.2.1 or earlier, rerun the installer from the new tag because older
+updaters expect the single-file release format.
 
 Windows PowerShell:
 
 ```powershell
-$script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.2/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2-rc.2
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.2/install.sh -o /tmp/unity-bridge-install-rc.sh
-sh /tmp/unity-bridge-install-rc.sh --version v0.2.2-rc.2
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.2
 ```
 
 Unity Package Manager Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2-rc.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2
 ```
 
-Check the installed CLI against this tag with `unity-bridge update --check --ref v0.2.2-rc.2`.
-Python package metadata may display `0.2.2rc2`; this is the same version as
-`0.2.2-rc.2`. From v0.2.2-rc.1 onward, an explicit prerelease `update --ref` uses that
-tag's installer. Plain `unity-bridge update` selects the stable release, so it can
-replace a newer RC with an older stable version. To return both components to
-v0.2.1, use `unity-bridge update --ref v0.2.1` and change the Connector URL to `#v0.2.1`.
+After Unity finishes compiling, `unity-bridge status` should report
+`Connector: 0.2.2`. Use `unity-bridge update --check --ref v0.2.2` to verify the
+CLI version. CLI updates do not edit the Unity project's package reference.
+
+## Prerelease
+
+Prereleases remain opt-in. Use an explicit tag such as `v0.2.2-rc.2` with that
+tag's installer and the same Connector Git URL suffix. Default installation
+and plain `unity-bridge update` select the latest stable release, now v0.2.2.
+RC1's stale Connector version is fixed in RC2 and v0.2.2. For older prerelease
+instructions, see the [RC2 installation guide](https://github.com/zjxps2007/UnityBridge/blob/v0.2.2-rc.2/docs/INSTALL.md#prerelease).
 
 ## Update
 

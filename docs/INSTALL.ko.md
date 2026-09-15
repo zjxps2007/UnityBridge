@@ -85,47 +85,47 @@ curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.
 sh /tmp/unity-bridge-install.sh --version v0.2.1
 ```
 
-## 프리릴리스
+## v0.2.2로 업그레이드
 
-`v0.2.2-rc.2`에는 `codex/faster-startup`의 시작 속도 개선과 CLI 리팩토링이 포함됩니다.
-프리릴리스는 버전을 직접 지정해야 설치되며, 기본 설치 명령은 최신 정식 릴리스를 선택합니다.
-CLI와 Connector를 같은 태그로 설치하세요.
+v0.2.2는 RC2에서 검증한 시작 속도 개선, CLI 리팩토링, Connector 버전 표시 수정을
+포함하는 정식 릴리스입니다. CLI와 Unity 패키지를 함께 업데이트하세요.
 
-RC2는 RC1 패키지를 설치해도 `Connector: 0.2.1`로 표시되던 문제를 수정합니다.
-CLI가 이미 RC1이면 `unity-bridge update --ref v0.2.2-rc.2`를 실행하고,
-Unity Package Manager URL도 아래의 RC2 태그로 변경하세요. Unity 컴파일이 끝나면
-`unity-bridge status`에 `Connector: 0.2.2-rc.2`가 표시되어야 합니다.
-
-**프리릴리스 태그의 설치 스크립트**를 사용하세요. v0.2.1의 설치기와 업데이터는
-기존 단일 실행 파일 형식을 사용하므로 이번 압축 번들을 직접 설치할 수 없습니다.
+CLI가 RC1 또는 RC2이면 `unity-bridge update --ref v0.2.2`를 실행합니다.
+v0.2.1 이하의 업데이터는 단일 실행 파일 형식을 기대하므로, 새 태그의 설치기를
+다시 실행하세요.
 
 Windows PowerShell:
 
 ```powershell
-$script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.2/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2-rc.2
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.2/install.sh -o /tmp/unity-bridge-install-rc.sh
-sh /tmp/unity-bridge-install-rc.sh --version v0.2.2-rc.2
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.2
 ```
 
 Unity Package Manager Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2-rc.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2
 ```
 
-`unity-bridge update --check --ref v0.2.2-rc.2`로 설치 버전을 확인할 수 있습니다.
-Python 패키지 정보에 표시되는 `0.2.2rc2`와 `0.2.2-rc.2`는 같은 버전입니다.
-v0.2.2-rc.1부터는 `update --ref`로 프리릴리스를 지정하면 해당 태그의 설치기를 사용합니다.
-버전 지정 없는 `unity-bridge update`는 정식 릴리스를 선택하므로 더 오래된 정식 버전으로
-바뀔 수 있습니다. 두 구성 요소를 v0.2.1로 되돌리려면 `unity-bridge update --ref v0.2.1`을
-실행하고 Connector URL도 `#v0.2.1`로 변경하세요.
+Unity 컴파일이 끝나면 `unity-bridge status`에 `Connector: 0.2.2`가 표시되어야 합니다.
+`unity-bridge update --check --ref v0.2.2`로 CLI 버전도 확인합니다.
+CLI 업데이트는 Unity 프로젝트의 패키지 참조를 자동으로 변경하지 않습니다.
+
+## 프리릴리스
+
+프리릴리스는 `v0.2.2-rc.2`처럼 태그를 직접 지정해야 설치됩니다. 해당 태그의
+설치기를 사용하고 Connector URL에도 같은 태그를 지정하세요. 기본 설치와
+버전 지정 없는 `unity-bridge update`는 최신 정식 릴리스인 v0.2.2를 선택합니다.
+RC1의 Connector 버전 표시 문제는 RC2와 v0.2.2에서 수정됐습니다.
+이전 프리릴리스 설치 방법은 [RC2 설치 안내](https://github.com/zjxps2007/UnityBridge/blob/v0.2.2-rc.2/docs/INSTALL.ko.md#프리릴리스)를 참고하세요.
 
 ## 업데이트
 

@@ -1,63 +1,80 @@
-# UnityBridge v0.2.2-rc.2
+# UnityBridge v0.2.2
 
-This prerelease fixes the Connector version reported by `unity-bridge status`. In RC1, the Unity package manifest said `0.2.2-rc.1`, but a separate runtime constant still reported `0.2.1`. RC2 reads the installed package metadata and reports `0.2.2-rc.2`.
+This stable release includes the startup improvements, CLI refactoring, and
+Connector version fix validated in v0.2.2-rc.2. CLI and Unity Connector versions
+are both `0.2.2`.
 
 ## Changes
 
-- Remove the duplicated C# version constant. Resolve the version from the installed Unity package and cache it until a package registration change or domain reload. Source copied outside a UPM package reports `unknown`.
-- Extend native validation to install the Connector as an embedded UPM package and compare JSON `status`, live `wait-ready`, and the human-readable `Connector:` line with the package version, before and after domain reload.
-- Clarify that release CI's remote version check validates the Connector manifest; actual runtime reporting is checked separately in Unity.
-- Include the startup improvements and CLI refactoring from [RC1](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.2-rc.1): install-once runtime bundles, cached tool discovery, lazy parameter schemas, and focused CLI modules. No fixed readiness delay is introduced.
+- Standalone runtimes are unpacked once during installation, avoiding repeated
+  extraction each time a command starts. Installers, updates, and release CI
+  support these bundles while retaining support for older single-file assets.
+- Defer Unity tool parameter schemas until they are requested, cache discovery,
+  and preserve dynamically loaded tools and the existing handler/schema contract.
+- Split CLI argument parsing, command routing, output, and update/version handling
+  into focused internal modules while preserving command syntax and JSON output.
+- Read the running Connector version from Unity package metadata. This fixes RC1
+  reporting `Connector: 0.2.1` despite its newer package manifest. Cache the version
+  until package registration changes or a domain reload.
+- Keep the existing 0.5-second periodic heartbeat interval. Heartbeat publication
+  changes are being developed separately and are not part of this release.
 
 ## Upgrade both components
 
-If the CLI is already on RC1:
+From an RC1/RC2 standalone CLI:
 
 ```text
-unity-bridge update --ref v0.2.2-rc.2
+unity-bridge update --ref v0.2.2
 ```
 
-Also change the Unity Package Manager Git URL to:
+Also set the Unity Package Manager Git URL to:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2-rc.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2
 ```
 
-After Unity finishes importing and compiling, run `unity-bridge status`. It should show `Connector: 0.2.2-rc.2`. The CLI updater does not update the Unity project's package automatically.
+After Unity finishes importing and compiling, `unity-bridge status` should show
+`Connector: 0.2.2`. The CLI updater does not update the Unity project's package
+automatically. Verify the CLI with `unity-bridge update --check --ref v0.2.2`.
 
-For a fresh installation or an upgrade from v0.2.1, use this tag's installer. The installer on `main` still uses the older single-file release format.
+For a fresh installation or an upgrade from v0.2.1 or earlier, rerun the new
+installer. Older updaters expect the previous single-file release format.
 
 Windows PowerShell:
 
 ```powershell
-$script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.2/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2-rc.2
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2-rc.2/install.sh -o /tmp/unity-bridge-install-rc.sh
-sh /tmp/unity-bridge-install-rc.sh --version v0.2.2-rc.2
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.2
 ```
 
-Verify the CLI with `unity-bridge update --check --ref v0.2.2-rc.2`. Python metadata may display the equivalent version `0.2.2rc2`.
-
-Default installation and plain `unity-bridge update` select the latest stable release. To return both components to v0.2.1, run `unity-bridge update --ref v0.2.1` and change the Connector URL to `#v0.2.1`.
+The installed executable needs its adjacent `_unity_bridge_runtime_<build-id>`
+folder. Keep them together. Default installation selects the latest stable release.
 
 ## Validation
 
-- 94 Python tests passed locally.
-- Native Unity 2021.3.19f1 and 6000.3.13f1 checks verify the package version in `status` and live readiness responses, including after compilation/domain reload, plus tool discovery and execution regressions.
-- The new native check was also run against the original RC1 package and correctly rejected its stale `0.2.1` runtime version.
-- Release CI builds and runs the archived executable on Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon. Publication waits for all five builds.
+- 94 Python regression tests cover CLI requests, discovery, adapters, updates,
+  and offline installer fixtures.
+- Native Unity 2021.3.19f1 and 6000.3.13f1 validation checks JSON `status`, live
+  readiness, and the human-readable Connector version before and after a real
+  compilation/domain reload, plus tool discovery and C# execution.
+- Release CI builds and exercises the archived executables on Windows x64,
+  Linux x64/ARM64, and macOS Intel/Apple Silicon. Publication waits for all five.
 
 ## 한국어 안내
 
-- RC1을 설치해도 `Connector: 0.2.1`로 표시되던 버그를 수정했습니다. 이제 Unity에 설치된 패키지 정보에서 버전을 읽습니다.
-- **CLI와 Unity Connector를 모두 `0.2.2-rc.2`로 업데이트하세요.** CLI 업데이트만으로 Unity 프로젝트의 Connector가 바뀌지는 않습니다.
-- CLI가 RC1이면 `unity-bridge update --ref v0.2.2-rc.2`를 실행하고, 위의 Unity Package Manager URL도 RC2 태그로 변경하세요.
-- Unity 컴파일 완료 후 `unity-bridge status`에서 `Connector: 0.2.2-rc.2`를 확인할 수 있습니다.
-- 기본 설치는 정식 릴리스를 선택합니다. 이번 프리릴리스 배포에는 `main` 병합이 포함되지 않습니다.
-- 자세한 설치·복귀 방법은 [한국어 설치 안내](https://github.com/zjxps2007/UnityBridge/blob/v0.2.2-rc.2/docs/INSTALL.ko.md#프리릴리스)를 참고하세요.
+- v0.2.2 정식 릴리스에는 설치 시 한 번만 런타임을 푸는 배포 방식, 도구 탐색 개선,
+  CLI 리팩토링, Connector 버전 표시 수정이 포함됩니다.
+- CLI와 Unity Connector를 모두 `0.2.2`로 업데이트하세요. Unity 컴파일 완료 후
+  `unity-bridge status`에서 `Connector: 0.2.2`를 확인할 수 있습니다.
+- RC1/RC2 CLI는 `unity-bridge update --ref v0.2.2`로 업데이트합니다.
+  v0.2.1 이하에서는 위의 새 설치기를 다시 실행하세요.
+- Heartbeat 정기 갱신은 기존 0.5초를 유지합니다. 상태 반영 개선은 별도 브랜치에서
+  진행하며 이번 정식 릴리스에는 포함되지 않습니다.
