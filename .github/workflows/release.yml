@@ -66,6 +66,7 @@ jobs:
           import os
           import subprocess
           import shutil
+          import sys
           import tempfile
           from pathlib import Path
           from unity_bridge import __version__
@@ -76,7 +77,12 @@ jobs:
           executable_name = "unity-bridge.exe" if os.name == "nt" else "unity-bridge"
           executable = str((unpacked / "unity-bridge" / executable_name).resolve())
           def run(*args):
-              return subprocess.run([executable, *args], check=True, capture_output=True, text=True, timeout=60).stdout
+              result = subprocess.run([executable, *args], capture_output=True, text=True, timeout=60)
+              if result.returncode:
+                  print(result.stdout)
+                  print(result.stderr, file=sys.stderr)
+                  result.check_returncode()
+              return result.stdout
           assert "wait-ready" in run("--help")
           with tempfile.TemporaryDirectory() as instances:
               assert json.loads(run("--json", "--no-update-check", "--instances-dir", instances, "instances")) == []
