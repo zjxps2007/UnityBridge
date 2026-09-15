@@ -1,57 +1,44 @@
-# Unreleased
+# UnityBridge v0.2.3-rc.1
 
-- Keep periodic heartbeat publication at 0.5 seconds, about two writes per second
-  while state is unchanged. The earlier 0.1-second experiment is not adopted.
-- Publish server startup and pause/resume events immediately. Changes in state,
-  compile errors, or port detected on an Editor update bypass the interval.
-- Preserve refresh/compile/play readiness guards and atomic file replacement.
-  Event writes reset the periodic clock, and failed writes remain rate-limited.
-- Add optional Unity heartbeat audits for cadence, write cost, and pause/resume
-  status. This branch improves state freshness without raising the regular write
-  rate. It does not make whole-command latency or game-frame performance claims.
-
-한국어: 평상시 Heartbeat 갱신은 0.5초를 유지하고 상태 변화는 즉시 반영합니다.
-이 변경은 `codex/heartbeat-state-updates` 브랜치에서 진행하며, 아래 v0.2.2 정식
-배포본에는 포함되지 않습니다.
-
-# UnityBridge v0.2.2
-
-This stable release includes the startup improvements, CLI refactoring, and
-Connector version fix validated in v0.2.2-rc.2. CLI and Unity Connector versions
-are both `0.2.2`.
+This prerelease from `codex/heartbeat-state-updates` improves how quickly saved
+Heartbeat state reflects changes in the Unity Editor. CLI and Unity Connector
+versions are both `0.2.3-rc.1`. The latest stable release remains v0.2.2.
 
 ## Changes
 
-- Standalone runtimes are unpacked once during installation, avoiding repeated
-  extraction each time a command starts. Installers, updates, and release CI
-  support these bundles while retaining support for older single-file assets.
-- Defer Unity tool parameter schemas until they are requested, cache discovery,
-  and preserve dynamically loaded tools and the existing handler/schema contract.
-- Split CLI argument parsing, command routing, output, and update/version handling
-  into focused internal modules while preserving command syntax and JSON output.
-- Read the running Connector version from Unity package metadata. This fixes RC1
-  reporting `Connector: 0.2.1` despite its newer package manifest. Cache the version
-  until package registration changes or a domain reload.
-- Keep the existing 0.5-second periodic heartbeat interval. Heartbeat publication
-  changes are being developed separately and are not part of this release.
+- Publish server startup and pause/resume events immediately. Changes in state,
+  compile errors, or port detected on an Editor update bypass the periodic interval.
+- Keep regular Heartbeat publication at 0.5 seconds, about two writes per second
+  while state is unchanged. Event writes reset the periodic clock to avoid a
+  redundant scheduled write immediately afterward.
+- Preserve refresh/compile/play readiness guards and atomic file replacement.
+  Failed writes record their attempt time so unchanged state does not trigger
+  filesystem retries every Editor update.
+- Add optional native Unity audits for publication cadence, write cost, and
+  pause/resume state visibility.
+
+The improvement is fresher state at transitions. An unchanged Editor retains
+the usual `Heartbeat age` range. Event writes and per-update state checks have a
+cost; these changes do not establish lower whole-command latency or better game
+frame performance. Busy or throttled Editors can still delay publication.
 
 ## Upgrade both components
 
-From an RC1/RC2 standalone CLI:
+From a v0.2.2 standalone CLI or a v0.2.2 release candidate:
 
 ```text
-unity-bridge update --ref v0.2.2
+unity-bridge update --ref v0.2.3-rc.1
 ```
 
 Also set the Unity Package Manager Git URL to:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.1
 ```
 
 After Unity finishes importing and compiling, `unity-bridge status` should show
-`Connector: 0.2.2`. The CLI updater does not update the Unity project's package
-automatically. Verify the CLI with `unity-bridge update --check --ref v0.2.2`.
+`Connector: 0.2.3-rc.1`. The CLI updater does not update the Unity project's package
+automatically. Verify the CLI with `unity-bridge update --check --ref v0.2.3-rc.1`.
 
 For a fresh installation or an upgrade from v0.2.1 or earlier, rerun the new
 installer. Older updaters expect the previous single-file release format.
@@ -60,19 +47,20 @@ Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.1
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.2
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.1
 ```
 
 The installed executable needs its adjacent `_unity_bridge_runtime_<build-id>`
-folder. Keep them together. Default installation selects the latest stable release.
+folder. Keep them together. Default installation and updates select the latest
+stable release; select the tag explicitly to try this prerelease.
 
 ## Validation
 
@@ -80,17 +68,19 @@ folder. Keep them together. Default installation selects the latest stable relea
   and offline installer fixtures.
 - Native Unity 2021.3.19f1 and 6000.3.13f1 validation checks JSON `status`, live
   readiness, and the human-readable Connector version before and after a real
-  compilation/domain reload, plus tool discovery and C# execution.
+  compilation/domain reload, plus tool discovery, C# execution, and pause/resume
+  Heartbeat publication. These are empty-project batch-mode checks.
 - Release CI builds and exercises the archived executables on Windows x64,
   Linux x64/ARM64, and macOS Intel/Apple Silicon. Publication waits for all five.
 
 ## 한국어 안내
 
-- v0.2.2 정식 릴리스에는 설치 시 한 번만 런타임을 푸는 배포 방식, 도구 탐색 개선,
-  CLI 리팩토링, Connector 버전 표시 수정이 포함됩니다.
-- CLI와 Unity Connector를 모두 `0.2.2`로 업데이트하세요. Unity 컴파일 완료 후
-  `unity-bridge status`에서 `Connector: 0.2.2`를 확인할 수 있습니다.
-- RC1/RC2 CLI는 `unity-bridge update --ref v0.2.2`로 업데이트합니다.
-  v0.2.1 이하에서는 위의 새 설치기를 다시 실행하세요.
-- Heartbeat 정기 갱신은 기존 0.5초를 유지합니다. 상태 반영 개선은 별도 브랜치에서
-  진행하며 이번 정식 릴리스에는 포함되지 않습니다.
+- v0.2.3-rc.1은 Heartbeat 상태 반영 개선을 담은 프리릴리스입니다.
+  서버 시작과 일시정지·재개 이벤트를 바로 기록하고, 감지한 상태 변화도 정기 갱신을
+  기다리지 않습니다. 평상시 기록은 기존 0.5초 간격을 유지합니다.
+- CLI와 Unity Connector를 모두 `0.2.3-rc.1`로 맞추세요. Unity 컴파일 완료 후
+  `unity-bridge status`에서 `Connector: 0.2.3-rc.1`을 확인할 수 있습니다.
+- v0.2.2 또는 해당 버전의 RC CLI는 `unity-bridge update --ref v0.2.3-rc.1`로
+  업데이트합니다. v0.2.1 이하에서는 위의 새 설치기를 다시 실행하세요.
+- 기본 설치와 버전 지정 없는 업데이트는 정식 v0.2.2를 선택합니다.
+  이 검증 결과로 전체 명령 응답 시간이나 FPS가 개선됐다고 판단하지 않습니다.

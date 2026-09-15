@@ -126,11 +126,43 @@ CLI version. CLI updates do not edit the Unity project's package reference.
 
 ## Prerelease
 
-Prereleases remain opt-in. Use an explicit tag such as `v0.2.2-rc.2` with that
-tag's installer and the same Connector Git URL suffix. Default installation
-and plain `unity-bridge update` select the latest stable release, now v0.2.2.
-RC1's stale Connector version is fixed in RC2 and v0.2.2. For older prerelease
-instructions, see the [RC2 installation guide](https://github.com/zjxps2007/UnityBridge/blob/v0.2.2-rc.2/docs/INSTALL.md#prerelease).
+v0.2.3-rc.1 publishes Heartbeat state changes sooner while keeping the regular
+0.5-second interval. Select this prerelease explicitly for both components.
+Default installation and plain `unity-bridge update` select stable v0.2.2.
+
+From v0.2.2 or a v0.2.2 release candidate:
+
+```text
+unity-bridge update --ref v0.2.3-rc.1
+```
+
+For a fresh installation or v0.2.1 and earlier, run the tagged installer.
+
+Windows PowerShell:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.1
+```
+
+macOS/Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.1
+```
+
+Unity Package Manager Git URL:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.1
+```
+
+After Unity finishes compiling, `unity-bridge status` should show
+`Connector: 0.2.3-rc.1`. Check the CLI with
+`unity-bridge update --check --ref v0.2.3-rc.1`. The CLI updater does not change the
+Unity package reference automatically.
 
 ## Update
 

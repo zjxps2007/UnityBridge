@@ -18,6 +18,11 @@ The startup improvements and Connector version fix are available in stable
 [v0.2.2](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.2).
 See [upgrading to v0.2.2](docs/INSTALL.md#upgrade-to-v022) to update both components.
 
+The [v0.2.3-rc.1 prerelease](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3-rc.1)
+adds faster publication of Heartbeat state changes. Follow the
+[prerelease instructions](docs/INSTALL.md#prerelease) to select it explicitly for
+both the CLI and Unity Connector. Default installation selects stable v0.2.2.
+
 ## Quick Start
 
 ### 1. Install The Unity Package
@@ -93,7 +98,7 @@ Standalone `wait-ready` does not request compilation or wait for unrelated work
 that starts after the Editor responds. See [CLI commands](docs/COMMANDS.md) for
 the readiness and refresh options.
 
-This branch keeps the periodic heartbeat interval at 0.5 seconds.
+v0.2.3-rc.1 keeps the periodic heartbeat interval at 0.5 seconds.
 Server start and pause/resume events publish immediately; other observed state
 changes publish on the next Editor update. `Heartbeat age` is the age of that
 saved snapshot. A busy or throttled Editor can take longer to update it.

@@ -121,11 +121,42 @@ CLI 업데이트는 Unity 프로젝트의 패키지 참조를 자동으로 변�
 
 ## 프리릴리스
 
-프리릴리스는 `v0.2.2-rc.2`처럼 태그를 직접 지정해야 설치됩니다. 해당 태그의
-설치기를 사용하고 Connector URL에도 같은 태그를 지정하세요. 기본 설치와
-버전 지정 없는 `unity-bridge update`는 최신 정식 릴리스인 v0.2.2를 선택합니다.
-RC1의 Connector 버전 표시 문제는 RC2와 v0.2.2에서 수정됐습니다.
-이전 프리릴리스 설치 방법은 [RC2 설치 안내](https://github.com/zjxps2007/UnityBridge/blob/v0.2.2-rc.2/docs/INSTALL.ko.md#프리릴리스)를 참고하세요.
+v0.2.3-rc.1은 평상시 0.5초 갱신 주기를 유지하면서 Heartbeat 상태 변화를 더 빠르게
+반영합니다. 두 구성 요소에 프리릴리스 태그를 직접 지정하세요. 기본 설치와
+버전 지정 없는 `unity-bridge update`는 정식 v0.2.2를 선택합니다.
+
+v0.2.2 또는 v0.2.2의 RC 버전에서는 다음 명령을 실행합니다.
+
+```text
+unity-bridge update --ref v0.2.3-rc.1
+```
+
+새로 설치하거나 v0.2.1 이하를 사용한다면 해당 태그의 설치기를 실행합니다.
+
+Windows PowerShell:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.1
+```
+
+macOS/Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.1
+```
+
+Unity Package Manager Git URL:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.1
+```
+
+Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.2.3-rc.1`을 확인합니다.
+CLI 버전은 `unity-bridge update --check --ref v0.2.3-rc.1`로 확인하세요.
+CLI 업데이터는 Unity 패키지 참조를 자동으로 변경하지 않습니다.
 
 ## 업데이트
 
