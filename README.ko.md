@@ -17,7 +17,7 @@ CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unit
 [v0.2.2 정식 릴리스](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.2)에 포함됩니다.
 [v0.2.2 업그레이드 안내](docs/INSTALL.ko.md#v022로-업그레이드)에 따라 두 구성 요소를 함께 업데이트하세요.
 
-[v0.2.3-rc.1 프리릴리스](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3-rc.1)는
+[v0.2.3-rc.2 프리릴리스](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3-rc.2)는
 Heartbeat 상태 변화를 더 빠르게 반영합니다. [프리릴리스 설치 안내](docs/INSTALL.ko.md#프리릴리스)에
 따라 CLI와 Unity Connector에 같은 태그를 지정하세요. 기본 설치는 정식 v0.2.2를 선택합니다.
 
@@ -96,7 +96,7 @@ unity-bridge test --mode EditMode
 기다리지 않습니다. 준비 확인과 새로고침 옵션은 [CLI 명령어](docs/COMMANDS.ko.md)를
 확인하세요.
 
-v0.2.3-rc.1은 평상시 heartbeat 갱신 간격을 0.5초로 유지합니다.
+v0.2.3-rc.2은 평상시 heartbeat 갱신 간격을 0.5초로 유지합니다.
 서버 시작과 일시정지·재개 이벤트는 즉시 기록하고, 그 외 감지한 상태 변화는 다음
 Editor 업데이트에 기록합니다. `Heartbeat age`는 저장된 상태의 경과 시간이며,
 Editor가 바쁘거나 백그라운드에서 느리게 갱신되면 더 길어질 수 있습니다.

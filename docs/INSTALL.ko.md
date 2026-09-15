@@ -121,14 +121,14 @@ CLI 업데이트는 Unity 프로젝트의 패키지 참조를 자동으로 변�
 
 ## 프리릴리스
 
-v0.2.3-rc.1은 평상시 0.5초 갱신 주기를 유지하면서 Heartbeat 상태 변화를 더 빠르게
+v0.2.3-rc.2은 평상시 0.5초 갱신 주기를 유지하면서 Heartbeat 상태 변화를 더 빠르게
 반영합니다. 두 구성 요소에 프리릴리스 태그를 직접 지정하세요. 기본 설치와
 버전 지정 없는 `unity-bridge update`는 정식 v0.2.2를 선택합니다.
 
 v0.2.2 또는 v0.2.2의 RC 버전에서는 다음 명령을 실행합니다.
 
 ```text
-unity-bridge update --ref v0.2.3-rc.1
+unity-bridge update --ref v0.2.3-rc.2
 ```
 
 새로 설치하거나 v0.2.1 이하를 사용한다면 해당 태그의 설치기를 실행합니다.
@@ -137,25 +137,25 @@ Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.1
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.1
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.2/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.2
 ```
 
 Unity Package Manager Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.2
 ```
 
-Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.2.3-rc.1`을 확인합니다.
-CLI 버전은 `unity-bridge update --check --ref v0.2.3-rc.1`로 확인하세요.
+Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.2.3-rc.2`을 확인합니다.
+CLI 버전은 `unity-bridge update --check --ref v0.2.3-rc.2`로 확인하세요.
 CLI 업데이터는 Unity 패키지 참조를 자동으로 변경하지 않습니다.
 
 ## 업데이트
@@ -179,6 +179,10 @@ standalone 빌드에서는 `update`가 현재 OS용 릴리스 설치 스크립�
 출력합니다. `--json` 출력과 `update` 명령 자체에서는 이 알림을 건너뜁니다.
 건너뛰려면 `UNITY_BRIDGE_SKIP_UPDATE_CHECK=1` 환경변수를 설정하거나 `--no-update-check`를
 붙이세요.
+
+GitHub가 비인증 버전 조회를 거부하면 `UNITY_BRIDGE_GITHUB_TOKEN`에 저장소 내용 읽기
+권한의 토큰을 지정할 수 있습니다. 선택 설정이며 버전 조회에 사용됩니다.
+CLI는 최초 GitHub API 요청에만 토큰을 전달합니다.
 
 ## Release asset
 

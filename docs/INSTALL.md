@@ -126,14 +126,14 @@ CLI version. CLI updates do not edit the Unity project's package reference.
 
 ## Prerelease
 
-v0.2.3-rc.1 publishes Heartbeat state changes sooner while keeping the regular
+v0.2.3-rc.2 publishes Heartbeat state changes sooner while keeping the regular
 0.5-second interval. Select this prerelease explicitly for both components.
 Default installation and plain `unity-bridge update` select stable v0.2.2.
 
 From v0.2.2 or a v0.2.2 release candidate:
 
 ```text
-unity-bridge update --ref v0.2.3-rc.1
+unity-bridge update --ref v0.2.3-rc.2
 ```
 
 For a fresh installation or v0.2.1 and earlier, run the tagged installer.
@@ -142,26 +142,26 @@ Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.1
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.1/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.1
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.2/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.2
 ```
 
 Unity Package Manager Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.2
 ```
 
 After Unity finishes compiling, `unity-bridge status` should show
-`Connector: 0.2.3-rc.1`. Check the CLI with
-`unity-bridge update --check --ref v0.2.3-rc.1`. The CLI updater does not change the
+`Connector: 0.2.3-rc.2`. Check the CLI with
+`unity-bridge update --check --ref v0.2.3-rc.2`. The CLI updater does not change the
 Unity package reference automatically.
 
 ## Update
@@ -186,6 +186,10 @@ Normal CLI commands check for a CLI update at most once per day and print a
 short notice only when a newer version is available. The notice is skipped for
 `--json` output and for the `update` command itself. Set
 `UNITY_BRIDGE_SKIP_UPDATE_CHECK=1` or pass `--no-update-check` to skip it.
+
+If GitHub denies unauthenticated version checks, `UNITY_BRIDGE_GITHUB_TOKEN` can
+supply a token with read access to the repository contents. It is optional and
+applies to version checks; the CLI sends it only to the initial GitHub API request.
 
 ## Release Assets
 

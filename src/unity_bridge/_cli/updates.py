@@ -295,6 +295,12 @@ def _read_remote_repository_file(repo: str, ref: str, path: str, *, timeout_sec:
             "User-Agent": "unity-bridge-cli",
         },
     )
+    token = os.environ.get("UNITY_BRIDGE_GITHUB_TOKEN", "").strip()
+    if token:
+        if "\r" in token or "\n" in token:
+            raise DiscoveryError("UNITY_BRIDGE_GITHUB_TOKEN must be a single-line value")
+        # The token belongs to the initial GitHub API request, never a redirect.
+        request.add_unredirected_header("Authorization", f"Bearer {token}")
     try:
         with urllib.request.urlopen(request, timeout=timeout_sec) as response:
             body = response.read()

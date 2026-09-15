@@ -21,6 +21,8 @@ jobs:
   standalone:
     name: Build standalone CLI (${{ matrix.asset_name }})
     runs-on: ${{ matrix.os }}
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -61,6 +63,7 @@ jobs:
         env:
           ASSET_NAME: ${{ matrix.asset_name }}
           BUILD_REF: ${{ env.RELEASE_REF }}
+          UNITY_BRIDGE_GITHUB_TOKEN: ${{ github.token }}
         run: |
           import json
           import os

@@ -37,6 +37,12 @@ Keep argument parsing ahead of update-module imports so help can finish early.
 Installed-package metadata is loaded only when an update/version check needs it.
 Automatic notices retain their existing daily cache, skip flags, and timeout.
 
+Remote version checks can use `UNITY_BRIDGE_GITHUB_TOKEN` when explicitly set.
+The release workflow supplies its read-only repository token only to the archived
+executable verification step. Authorization is sent to the initial GitHub API
+request and is omitted from redirects. `tests/test_update_auth.py` checks this
+with an offline HTTP transport, including same-host and cross-host redirects.
+
 ## Validation
 
 From the repository root:
