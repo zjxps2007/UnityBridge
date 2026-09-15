@@ -5,6 +5,12 @@
 The runner also extracts the baseline discovery implementation as
 `LegacyToolDiscovery` for handler and schema compatibility checks.
 
+The Connector is installed as an embedded UPM package using the source
+`package.json` name and version, rather than copying its scripts into `Assets`.
+For offline validation, Newtonsoft is copied from the installed Editor and its
+registry dependency is omitted from the fixture manifest. Existing user projects
+and installations are not changed.
+
 Build a baseline single-file CLI from `main` in a separate checkout/snapshot and
 the candidate bundle with the same Python/PyInstaller environment. Install or
 extract the candidate archive, then run from the repository root:
@@ -20,6 +26,10 @@ and measures the first console command without an RPC warm-up. It then checks
 lazy schemas, repeated list isolation, dynamically loaded tools, duplicate names,
 the baseline schema/handler contract, a real compilation/domain reload, and an
 actual `exec` compilation/Assembly.Load followed by another tool-list request.
+It also checks that JSON `status`, live `wait-ready`, and the human-readable
+`Connector:` line match the package version, both before and after domain reload.
+These checks catch a stale runtime version even when CLI and remote manifest
+version checks pass.
 Use `--variants candidate` for a candidate-only functional follow-up.
 
 These are empty-project batch-mode measurements, not GUI background latency or

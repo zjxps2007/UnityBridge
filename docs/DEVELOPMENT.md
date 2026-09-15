@@ -65,3 +65,17 @@ unpack it, and exercise the resulting executable. Compare startup with the same
 Python/PyInstaller versions and build mode; source-import timing alone does not
 verify the packaged command. Native Unity checks are described in
 [tests/unity/README.md](../tests/unity/README.md).
+
+## Connector version reporting
+
+`unity-bridge status` prints the version published by the running Unity Connector,
+not the CLI version. `Heartbeat` resolves it from Unity's package metadata and
+caches it until a package registration change or domain reload. Do not add a
+separate C# release-version constant. Source copies outside a UPM package report
+`unknown` instead of guessing a release version.
+
+Before a release, run the native checks in Unity 2021 and Unity 6. The heartbeat,
+live readiness response, and `Connector:` status line must match the installed
+`package.json`. `update --check` reads the remote manifest and does not replace this
+runtime check. v0.2.2-rc.1 shipped with a stale runtime constant despite matching
+CLI and manifest versions; v0.2.2-rc.2 fixes the runtime version source.

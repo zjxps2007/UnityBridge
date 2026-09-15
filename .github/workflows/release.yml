@@ -85,7 +85,7 @@ jobs:
           assert result["current_version"] == __version__, result
           assert result["latest_version"] == __version__, result
           assert result["target_connector_version"] == __version__, result
-          print(f"Verified {os.environ['ASSET_NAME']}: standalone CLI and Connector {__version__}")
+          print(f"Verified {os.environ['ASSET_NAME']}: standalone CLI and Connector manifest {__version__}")
 
       - name: Upload workflow artifact
         uses: actions/upload-artifact@v4

@@ -19,7 +19,7 @@ namespace UnityBridgeConnector
         const double REFRESH_GRACE_SECONDS = 1.0;
         const double COMPILE_GRACE_SECONDS = 5.0;
         const double PLAYMODE_GRACE_SECONDS = 5.0;
-        const string CONNECTOR_VERSION = "0.2.1";
+        static string s_ConnectorVersion;
         static string s_ForcedState;
         static double s_RefreshRequestTime;
         static double s_CompileRequestTime;
@@ -33,6 +33,7 @@ namespace UnityBridgeConnector
 
             EditorApplication.update += Tick;
             EditorApplication.quitting += Cleanup;
+            UnityEditor.PackageManager.Events.registeredPackages += _ => s_ConnectorVersion = null;
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
             AssemblyReloadEvents.afterAssemblyReload += () =>
             {
@@ -200,7 +201,13 @@ namespace UnityBridgeConnector
 
         static string GetConnectorVersion()
         {
-            return CONNECTOR_VERSION;
+            if (s_ConnectorVersion != null) return s_ConnectorVersion;
+
+            // Package metadata is the version source for Git, local, and embedded installs.
+            // Resolve it once per domain/package change, not on every heartbeat or request.
+            var version = UnityEditor.PackageManager.PackageInfo.FindForAssembly(typeof(Heartbeat).Assembly)?.version;
+            s_ConnectorVersion = string.IsNullOrEmpty(version) ? "unknown" : version;
+            return s_ConnectorVersion;
         }
 
         static string GetState()

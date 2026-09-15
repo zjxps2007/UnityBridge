@@ -13,7 +13,7 @@ CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unit
 압축을 풉니다. 실행 파일 옆의 런타임 폴더를 함께 유지하세요. 설치기는 v0.2.1 이하의
 단일 실행 파일도 지원합니다. 자세한 내용은 [설치와 업데이트](docs/INSTALL.ko.md#standalone-cli)를 참고하세요.
 
-`main` 병합 전에 시작 속도 개선을 시험하려면 [v0.2.2-rc.1 프리릴리스](docs/INSTALL.ko.md#프리릴리스)를
+`main` 병합 전에 시작 속도 개선을 시험하려면 [v0.2.2-rc.2 프리릴리스](docs/INSTALL.ko.md#프리릴리스)를
 설치하세요. 아래 빠른 시작 명령은 정식 릴리스를 설치합니다.
 
 ## 빠른 시작

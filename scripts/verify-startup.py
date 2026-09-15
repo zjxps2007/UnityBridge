@@ -43,12 +43,22 @@ def main():
     baseline_commit = subprocess.check_output(['git', 'rev-parse', options.baseline_ref], cwd=REPO, text=True).strip()
     results = []
     for number, variant in enumerate(options.variants, 1):
+        package_file = 'unity-bridge-connector/package.json'
+        package = json.loads((REPO / package_file).read_text(encoding='utf-8') if variant == 'candidate' else
+                             subprocess.check_output(['git', 'show', f'{options.baseline_ref}:{package_file}'], cwd=REPO))
+        expected_version = package['version']
+        package_root = project / 'Packages' / package['name']
+        package_root.mkdir(parents=True, exist_ok=True)
+        # Use a real embedded UPM package so runtime version resolution is exercised.
+        # Newtonsoft is supplied from the Editor below for offline validation.
+        package.pop('dependencies', None)
+        save(package_root / 'package.json', package)
         manifest = {}
         for name in files:
             relative = Path(name).relative_to('unity-bridge-connector/Editor')
             if 'TestRunner' in relative.parts or relative.name == 'TestRunner.meta':
                 continue
-            path = project / 'Assets/Connector/Editor' / relative
+            path = package_root / 'Editor' / relative
             path.parent.mkdir(parents=True, exist_ok=True)
             data = ((REPO / name).read_bytes() if variant == 'candidate' else
                     subprocess.check_output(['git', 'show', f'{options.baseline_ref}:{name}'], cwd=REPO))
@@ -71,7 +81,8 @@ def main():
         for name in ['audit-stop', 'audit-status.json']:
             (project / name).unlink(missing_ok=True)
         result = {'session': number, 'variant': variant, 'baseline_commit': baseline_commit,
-                  'source_sha256': manifest, 'calls': [], 'passed': False}
+                  'source_sha256': manifest, 'expected_connector_version': expected_version,
+                  'calls': [], 'passed': False}
         process = subprocess.Popen([str(unity), '-batchmode', '-nographics', '-projectPath', str(project),
                                     '-logFile', str(output / f'session-{number}.log'),
                                     '-executeMethod', 'StartupDiscoveryAudit.Start'],
@@ -124,6 +135,19 @@ def main():
             for name in ['first_console', 'warm_console_1', 'warm_console_2']:
                 response = call(name, 'console', '--count', '1', '--type', 'error')
                 assert response['success'] and response.get('data') == [], response
+
+            def check_versions(suffix):
+                for command in ['status', 'wait-ready']:
+                    response = call(command + suffix, command)
+                    assert response['connectorVersion'] == expected_version, response
+                # Also check the human-readable line reported in the RC1 regression.
+                text_status = subprocess.run([str(executable), '--no-update-check', '--project', str(project), 'status'],
+                                             capture_output=True, text=True, encoding='utf-8', timeout=30)
+                assert text_status.returncode == 0, text_status.stderr
+                assert f' Connector: {expected_version}' in text_status.stdout, text_status.stdout
+                result['status_text' + suffix] = text_status.stdout
+
+            check_versions('_before_reload')
             if variant == 'candidate':
                 response = call('discovery_checks', 'call', 'startup_discovery_audit')
                 assert response['success'], response
@@ -134,6 +158,7 @@ def main():
                 response = call('after_reload_checks', 'call', 'startup_discovery_audit')
                 assert response['success'] and response['data']['domain'] != old_domain, response
                 assert response['data']['revision'] == 1, response
+                check_versions('_after_reload')
                 expected_schemas = response['data']['schemas']
                 response = call('exec_after_reload', 'exec', '--code', 'return 1 + 2;')
                 assert response['success'] and response['data'] == 3, response

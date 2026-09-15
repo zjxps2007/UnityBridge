@@ -64,3 +64,16 @@ Standalone을 수정했다면 `scripts/build-standalone.py`로 압축 파일을 
 압축을 푼 실행 파일을 직접 확인합니다. 시작 시간은 동일한 Python·PyInstaller 버전과
 배포 방식으로 비교합니다. 소스 import 시간만으로 배포 실행 파일의 성능을 판단하지
 않습니다. 실제 Unity 검증은 [tests/unity/README.md](../tests/unity/README.md)를 참고하세요.
+
+## Connector 버전 표시
+
+`unity-bridge status`는 실행 중인 Unity Connector가 기록한 버전을 표시합니다.
+CLI 버전은 별개입니다. `Heartbeat`는 Unity 패키지 정보에서 버전을 읽고,
+패키지 등록 변경이나 도메인 리로드까지 캐시합니다. C# 코드에 별도의 릴리스 버전
+상수를 추가하지 마세요. UPM 패키지 밖에 소스만 복사한 경우에는 `unknown`을 표시합니다.
+
+릴리스 전에는 Unity 2021과 Unity 6에서 실제 검증을 실행합니다. heartbeat,
+실시간 준비 상태 응답, `Connector:` 표시가 설치된 `package.json` 버전과 일치해야 합니다.
+`update --check`는 원격 manifest를 읽으므로 이 검증을 대신하지 못합니다.
+v0.2.2-rc.1은 CLI와 manifest 버전이 일치해도 실행 중인 Connector의 상수가
+구버전으로 남아 있었습니다. v0.2.2-rc.2에서 버전 출처를 패키지 정보로 변경했습니다.
