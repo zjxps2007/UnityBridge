@@ -1,0 +1,66 @@
+# CLI 유지보수
+
+한국어 | [English](DEVELOPMENT.md)
+
+공개 진입점은 기존과 같은 `unity_bridge.cli:main`입니다. 설치된 명령,
+`python -m unity_bridge`, standalone 실행 파일이 모두 이 함수를 사용합니다.
+내부 구현은 `src/unity_bridge/_cli/`에 있습니다.
+
+| 파일 | 역할 |
+|---|---|
+| `cli.py` | 기본 명령과 직접 도구 호출을 구분하고, 클라이언트 생성·결과 출력·종료 코드를 처리합니다. |
+| `_cli/arguments.py` | 기본 명령의 옵션·도움말과 직접 호출의 플래그·반복 값·위치 인자·JSON 매개변수를 해석합니다. |
+| `_cli/commands.py` | 해석한 옵션을 `UnityClient`와 `UnityBridgeAdapter` 호출로 연결하고 C# 코드 입력을 읽습니다. |
+| `_cli/output.py` | 일반 텍스트·JSON·오류·Connector 버전 경고·업데이트 결과를 출력합니다. |
+| `_cli/updates.py` | Python 패키지 업데이트, standalone 업데이트 예약, 원격 버전 조회, 일일 알림 캐시를 처리합니다. |
+| `_cli/standalone.py` | 플랫폼·아키텍처를 선택하고 운영체제별 설치기 실행 명령을 만듭니다. |
+| `_cli/versions.py` | 공통 버전 해석과 비교를 담당합니다. |
+
+`_cli`는 내부 구현입니다. Python 프로그램에서 연동할 때는 `unity_bridge`가
+공개하는 client·adapter API를 사용합니다. 기존 `cli.build_parser`와
+`cli.add_common_options` 함수도 계속 사용할 수 있습니다.
+
+## 명령 변경 방법
+
+1. `arguments.py`에 옵션을 정의하고 `KNOWN_COMMANDS`에 명령 이름을 추가합니다.
+2. `commands.execute_command`에서 옵션을 실제 호출에 연결합니다. client·adapter의
+   결과를 반환하면 진입점이 출력과 성공·실패 종료 코드를 공통으로 처리합니다.
+3. `tests/test_cli.py`에서 요청 단위로 검증합니다. 명령 구문, JSON 형식,
+   stdout·stderr 구분, 종료 코드는 기존 사용자와의 호환성을 유지해야 하는 항목입니다.
+
+등록되지 않은 명령은 직접 도구 호출 파서로 처리합니다. 반복 플래그, `--params`,
+`--` 처리를 기본 명령의 argparse 옵션과 구분해 유지합니다. 직접 호출은 이미 발견한
+인스턴스를 요청에 재사용합니다. JSON 출력은 응답 데이터를 얕게 감싸고, 중첩된
+전체 데이터를 복사하지 않습니다.
+
+도움말이 빠르게 끝나도록 업데이트 모듈을 불러오기 전에 인자 해석을 수행합니다.
+설치된 패키지 메타데이터는 업데이트·버전 확인에 필요할 때 불러옵니다. 자동 알림의
+일일 캐시, 건너뛰기 옵션, 타임아웃 동작은 유지합니다.
+
+## 검증
+
+저장소 루트에서 실행합니다.
+
+```sh
+python -m unittest discover -s tests
+python -m compileall -q src tests
+git diff --check
+```
+
+CLI 변경만 확인하려면 다음 명령을 사용합니다.
+
+```sh
+python -m unittest discover -s tests -p test_cli.py
+```
+
+`tests/test_client.py`는 인스턴스 탐색·HTTP·adapter를 검증합니다. 임시 heartbeat와
+HTTP 서버 등 공통 도구는 `tests/helpers.py`에 있습니다.
+`tests/fixtures/cli_requests.json`은 모듈 분리 전의 요청 형식 21개를 기록합니다.
+명령의 외부 동작을 의도적으로 바꾸고 문서도 갱신하는 경우에만 해당 기대값을 바꿉니다.
+`tests/test_installers.py`는 가짜 다운로드와 임시 설치 폴더를 사용하며, 필요한
+운영체제나 셸이 없으면 해당 플랫폼 검사를 건너뜁니다.
+
+Standalone을 수정했다면 `scripts/build-standalone.py`로 압축 파일을 빌드하고,
+압축을 푼 실행 파일을 직접 확인합니다. 시작 시간은 동일한 Python·PyInstaller 버전과
+배포 방식으로 비교합니다. 소스 import 시간만으로 배포 실행 파일의 성능을 판단하지
+않습니다. 실제 Unity 검증은 [tests/unity/README.md](../tests/unity/README.md)를 참고하세요.

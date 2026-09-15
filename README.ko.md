@@ -121,6 +121,7 @@ unity-bridge update
 - [docs/INSTALL.ko.md](docs/INSTALL.ko.md): standalone 설치, 버전 고정, 업데이트, release asset.
 - [docs/COMMANDS.ko.md](docs/COMMANDS.ko.md): CLI 명령어, 공통 옵션, custom tool 호출.
 - [docs/PYTHON_PACKAGE.ko.md](docs/PYTHON_PACKAGE.ko.md): 개발 및 Python 직접 통합용 패키지 모드.
+- [docs/DEVELOPMENT.ko.md](docs/DEVELOPMENT.ko.md): CLI 모듈별 역할, 명령 변경 방법, 회귀 검사.
 
 ## 라이선스
 

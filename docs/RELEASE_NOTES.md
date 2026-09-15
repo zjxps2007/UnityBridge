@@ -4,6 +4,7 @@
 - Validate staged downloads before replacing the installed command. Give each build a separate runtime directory so updates do not overlay libraries used by an older process. Preserve custom installation paths during self-update.
 - Use Unity TypeCache for initial tool discovery, with reflection fallback for runtime-loaded assemblies. Generate parameter schemas only on a tool-list request and retain handler/schema caches for subsequent requests.
 - Keep dynamic tool discovery, duplicate-handler selection, domain-reload invalidation, and live readiness checks. No fixed readiness delay is added or removed by this change.
+- Split CLI argument parsing, command dispatch, output, update handling, installer commands, and version parsing into internal modules. Preserve the public entry point and command contracts, centralize output/error handling, and document module ownership and regression checks.
 
 # UnityBridge v0.2.1
 

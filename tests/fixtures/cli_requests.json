@@ -1,0 +1,366 @@
+{
+  "source_commit": "9c5d51b03c5e4afc658c45697d3dffd3f19537db",
+  "cases": [
+    {
+      "argv": [
+        "tools"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "list",
+        "params": {}
+      }
+    },
+    {
+      "argv": [
+        "console"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "console",
+        "params": {
+          "count": 50,
+          "type": "error,warning,log",
+          "stacktrace": "user"
+        }
+      }
+    },
+    {
+      "argv": [
+        "console",
+        "--clear"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "console",
+        "params": {
+          "clear": true
+        }
+      }
+    },
+    {
+      "argv": [
+        "console",
+        "--count",
+        "7",
+        "--type",
+        "error",
+        "--type",
+        "warning",
+        "--stacktrace",
+        "full"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "console",
+        "params": {
+          "count": 7,
+          "type": "error,warning",
+          "stacktrace": "full"
+        }
+      }
+    },
+    {
+      "argv": [
+        "refresh",
+        "--mode",
+        "force",
+        "--force",
+        "--path",
+        "Assets/A.cs",
+        "--path",
+        "Assets/B.cs",
+        "--compile",
+        "request"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "refresh_unity",
+        "params": {
+          "mode": "force",
+          "force": true,
+          "paths": [
+            "Assets/A.cs",
+            "Assets/B.cs"
+          ],
+          "compile": "request"
+        }
+      }
+    },
+    {
+      "argv": [
+        "test",
+        "--mode",
+        "EditMode",
+        "--filter",
+        "Example.Tests",
+        "--allow-dirty-scenes",
+        "--auto-save-scenes",
+        "--no-wait"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "run_tests",
+        "params": {
+          "mode": "EditMode",
+          "filter": "Example.Tests",
+          "allow_dirty_scenes": true,
+          "auto_save_scenes": true
+        }
+      }
+    },
+    {
+      "argv": [
+        "test",
+        "--mode",
+        "PlayMode",
+        "--no-wait"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "run_tests",
+        "params": {
+          "mode": "PlayMode",
+          "allow_dirty_scenes": false,
+          "auto_save_scenes": false
+        }
+      }
+    },
+    {
+      "argv": [
+        "editor",
+        "play"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "manage_editor",
+        "params": {
+          "action": "play",
+          "wait_for_completion": false
+        }
+      }
+    },
+    {
+      "argv": [
+        "editor",
+        "stop"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "manage_editor",
+        "params": {
+          "action": "stop",
+          "wait_for_completion": false
+        }
+      }
+    },
+    {
+      "argv": [
+        "editor",
+        "pause"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "manage_editor",
+        "params": {
+          "action": "pause"
+        }
+      }
+    },
+    {
+      "argv": [
+        "menu",
+        "File/Save Project"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "menu",
+        "params": {
+          "menu_path": "File/Save Project"
+        }
+      }
+    },
+    {
+      "argv": [
+        "reserialize"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "reserialize",
+        "params": {}
+      }
+    },
+    {
+      "argv": [
+        "reserialize",
+        "Assets/A.cs",
+        "Assets/B.cs"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "reserialize",
+        "params": {
+          "paths": [
+            "Assets/A.cs",
+            "Assets/B.cs"
+          ]
+        }
+      }
+    },
+    {
+      "argv": [
+        "profiler",
+        "hierarchy"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "profiler",
+        "params": {
+          "action": "hierarchy"
+        }
+      }
+    },
+    {
+      "argv": [
+        "screenshot",
+        "--view",
+        "game",
+        "--width",
+        "1280",
+        "--height",
+        "720",
+        "--output-path",
+        "shot.png"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "screenshot",
+        "params": {
+          "view": "game",
+          "output_path": "shot.png",
+          "width": 1280,
+          "height": 720
+        }
+      }
+    },
+    {
+      "argv": [
+        "exec",
+        "--code",
+        "return 1 + 2;",
+        "--using",
+        "System.Linq",
+        "--csc",
+        "custom-csc",
+        "--dotnet",
+        "custom-dotnet"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "exec",
+        "params": {
+          "code": "return 1 + 2;",
+          "usings": [
+            "System.Linq"
+          ],
+          "csc": "custom-csc",
+          "dotnet": "custom-dotnet"
+        }
+      }
+    },
+    {
+      "argv": [
+        "exec",
+        "--stdin"
+      ],
+      "stdin": "return 1 + 2;",
+      "request": {
+        "command": "exec",
+        "params": {
+          "code": "return 1 + 2;"
+        }
+      }
+    },
+    {
+      "argv": [
+        "call",
+        "custom_tool",
+        "--params",
+        "{\"nested\":{\"x\":2},\"flag\":false}"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "custom_tool",
+        "params": {
+          "nested": {
+            "x": 2
+          },
+          "flag": false
+        }
+      }
+    },
+    {
+      "argv": [
+        "custom_tool",
+        "--count",
+        "2",
+        "--count",
+        "3",
+        "--no-active",
+        "--name=player",
+        "--params",
+        "{\"data\":[1,2]}",
+        "first",
+        "second"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "custom_tool",
+        "params": {
+          "count": [
+            2,
+            3
+          ],
+          "active": false,
+          "name": "player",
+          "data": [
+            1,
+            2
+          ],
+          "args": [
+            "first",
+            "second"
+          ]
+        }
+      }
+    },
+    {
+      "argv": [
+        "list"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "list",
+        "params": {}
+      }
+    },
+    {
+      "argv": [
+        "custom_tool",
+        "--",
+        "--json",
+        "literal"
+      ],
+      "stdin": "",
+      "request": {
+        "command": "custom_tool",
+        "params": {
+          "args": [
+            "--json",
+            "literal"
+          ]
+        }
+      }
+    }
+  ]
+}
