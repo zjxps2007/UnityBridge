@@ -66,6 +66,29 @@ Python/PyInstaller versions and build mode; source-import timing alone does not
 verify the packaged command. Native Unity checks are described in
 [tests/unity/README.md](../tests/unity/README.md).
 
+## Heartbeat publication
+
+The working branch keeps periodic publication at 0.5 seconds, matching v0.2.2.
+Each tick checks state, compile errors, and port before applying
+the interval. Server startup and pause events publish explicitly. Keep Unity API
+reads and publication on the main thread; a background timer must not make an
+unresponsive Editor appear ready. Pending refresh, compile, and play-mode grace
+periods must remain in force.
+
+All writes go through the same atomic replacement and record their attempt time,
+including failed writes, to avoid retrying filesystem errors on every Editor
+frame. Event writes reset the periodic clock to avoid a redundant scheduled write
+immediately afterward. Steady-state writes remain at about 2 per
+second; state events can add writes. Use `--heartbeat-audit` in the native runner
+to compare actual cadence, file-write costs, and pause/resume status publication.
+These measurements do not establish whole-command or agent response speed.
+
+An earlier 0.1-second experiment increased periodic writes fivefold. This branch
+keeps the 0.5-second cadence and prioritizes publication when state changes.
+An unchanged Editor's `Heartbeat age` therefore keeps its usual range; the
+improvement is fresher state at transitions. Event writes and per-update state
+checks still have a cost, so do not describe the change as having zero overhead.
+
 ## Connector version reporting
 
 `unity-bridge status` prints the version published by the running Unity Connector,

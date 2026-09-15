@@ -80,6 +80,15 @@ An old `ready` file alone cannot complete the wait. Startup, connection recovery
 and state checks share `--timeout-sec`; port changes follow the same project.
 Use `status` for a snapshot of the heartbeat file without contacting the editor.
 
+The current branch keeps periodic heartbeats at 0.5 seconds, about two writes per
+second while state is unchanged. Server start and pause/resume events publish
+immediately; changes detected on an Editor update also bypass the periodic
+interval. `Heartbeat age` measures
+how old the saved snapshot is, not command response time. `status` prints once;
+run it again to read a newer snapshot. Editor stalls or background throttling can
+delay publication beyond 0.5 seconds. Refresh/compile/play readiness guards still
+apply, and the file is replaced atomically.
+
 Update the Python CLI and Unity Connector together to use live readiness checks.
 An older Connector reports an update error instead of accepting a cached state.
 

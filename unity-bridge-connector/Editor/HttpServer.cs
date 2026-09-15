@@ -99,6 +99,7 @@ namespace UnityBridgeConnector
 
                 _ = ListenLoop(listener, cts);
 
+                Heartbeat.PublishServerStarted();
                 Debug.Log($"[UnityBridge] HTTP server started on port {port}");
                 return true;
             }

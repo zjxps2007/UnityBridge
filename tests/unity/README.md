@@ -32,6 +32,22 @@ These checks catch a stale runtime version even when CLI and remote manifest
 version checks pass.
 Use `--variants candidate` for a candidate-only functional follow-up.
 
+For heartbeat changes, pass `--heartbeat-audit` and use the same installed CLI for
+both variants to isolate Connector behavior. For example, add
+`--baseline-ref v0.2.2 --variants baseline candidate --heartbeat-audit`.
+The runner copies `HeartbeatPublishingAudit.cs` into the disposable project,
+samples the saved file for five seconds at roughly 10 ms intervals using the
+CLI's bounded file-read retries, times 100 warm writes, and checks four real
+pause/resume events and subsequent `status` calls. The candidate must publish
+the new state by the pause event observer;
+baseline differences are recorded without failing the comparison. Warm write
+timing includes reflection and filesystem work, not whole-command latency.
+The fixture requests pause/resume through a file observed on `Editor.update`,
+because a paused Unity 2021 batch-mode Editor can suspend HTTP async continuations.
+The `status` checks still use the supplied standalone executable. The optional
+component profile separates snapshot/JSON creation, atomic writes, process lookup,
+and directory creation so publication changes can be assessed with their cost.
+
 These are empty-project batch-mode measurements, not GUI background latency or
 the time from an agent prompt to its displayed answer. Previous runs are retained
 and failing sessions are written before the runner exits.

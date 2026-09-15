@@ -16,6 +16,9 @@ namespace UnityBridgeConnector
 
         static double s_LastWrite;
         const double INTERVAL = 0.5;
+        static string s_LastAttemptedState;
+        static bool s_LastAttemptedCompileErrors;
+        static int s_LastAttemptedPort;
         const double REFRESH_GRACE_SECONDS = 1.0;
         const double COMPILE_GRACE_SECONDS = 5.0;
         const double PLAYMODE_GRACE_SECONDS = 5.0;
@@ -44,6 +47,7 @@ namespace UnityBridgeConnector
                 s_LastWrite = 0;
             };
             EditorApplication.playModeStateChanged += OnPlayModeChanged;
+            EditorApplication.pauseStateChanged += _ => Write();
         }
 
         static void OnBeforeAssemblyReload()
@@ -103,20 +107,35 @@ namespace UnityBridgeConnector
             WriteState("exiting_playmode");
         }
 
+        internal static void PublishServerStarted()
+        {
+            // Discovery should not wait for the first periodic Editor update.
+            Write();
+        }
+
         static void Tick()
         {
             if (!HttpServer.IsRunning) return;
 
             var now = EditorApplication.timeSinceStartup;
-            if (now - s_LastWrite < INTERVAL) return;
-            s_LastWrite = now;
+            UpdatePendingState(now);
+            var state = s_ForcedState ?? GetState();
+            var compileErrors = EditorUtility.scriptCompilationFailed;
+            var port = HttpServer.Port;
+            // Check cheap state fields each tick; serialize/write only when due or changed.
+            if (now - s_LastWrite < INTERVAL && state == s_LastAttemptedState &&
+                compileErrors == s_LastAttemptedCompileErrors && port == s_LastAttemptedPort)
+                return;
+            Write(state, compileErrors, port);
+        }
 
+        static void UpdatePendingState(double now)
+        {
             if (s_PlayModeTransitionTime > 0 &&
                 (s_ForcedState == "entering_playmode" || s_ForcedState == "exiting_playmode"))
             {
                 if (now - s_PlayModeTransitionTime < PLAYMODE_GRACE_SECONDS)
                 {
-                    Write();
                     return;
                 }
                 s_PlayModeTransitionTime = 0;
@@ -126,7 +145,6 @@ namespace UnityBridgeConnector
             {
                 if (now - s_CompileRequestTime < COMPILE_GRACE_SECONDS && EditorApplication.isCompiling == false)
                 {
-                    Write();
                     return;
                 }
                 s_CompileRequestTime = 0;
@@ -138,14 +156,12 @@ namespace UnityBridgeConnector
                     EditorApplication.isUpdating == false &&
                     EditorApplication.isCompiling == false)
                 {
-                    Write();
                     return;
                 }
                 s_RefreshRequestTime = 0;
             }
 
             s_ForcedState = null;
-            Write();
         }
 
         static string GetFilePath()
@@ -169,13 +185,24 @@ namespace UnityBridgeConnector
 
         static void Write()
         {
+            if (AssetDatabase.IsAssetImportWorkerProcess()) return;
+            Write(s_ForcedState ?? GetState(), EditorUtility.scriptCompilationFailed, HttpServer.Port);
+        }
+
+        static void Write(string state, bool compileErrors, int port)
+        {
             // Public state/cleanup methods can also be called directly from import code.
             if (AssetDatabase.IsAssetImportWorkerProcess()) return;
 
+            // Failed writes also count as attempts so transient I/O failures cannot busy-loop.
+            s_LastWrite = EditorApplication.timeSinceStartup;
+            s_LastAttemptedState = state;
+            s_LastAttemptedCompileErrors = compileErrors;
+            s_LastAttemptedPort = port;
             try
             {
                 Directory.CreateDirectory(s_Dir);
-                AtomicFile.WriteAllText(GetFilePath(), JsonConvert.SerializeObject(CaptureState()));
+                AtomicFile.WriteAllText(GetFilePath(), JsonConvert.SerializeObject(CaptureState(state, compileErrors, port)));
             }
             catch
             {
@@ -186,16 +213,21 @@ namespace UnityBridgeConnector
         // remain visible even before Unity's corresponding busy flag becomes true.
         internal static object CaptureState()
         {
+            return CaptureState(s_ForcedState ?? GetState(), EditorUtility.scriptCompilationFailed, HttpServer.Port);
+        }
+
+        static object CaptureState(string state, bool compileErrors, int port)
+        {
             return new
             {
-                state = s_ForcedState ?? GetState(),
+                state,
                 projectPath = GetProjectPath(),
-                port = HttpServer.Port,
+                port,
                 pid = System.Diagnostics.Process.GetCurrentProcess().Id,
                 unityVersion = Application.unityVersion,
                 connectorVersion = GetConnectorVersion(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
-                compileErrors = EditorUtility.scriptCompilationFailed,
+                compileErrors,
             };
         }
 

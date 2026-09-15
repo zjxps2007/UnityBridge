@@ -1,3 +1,19 @@
+# Unreleased
+
+- Keep periodic heartbeat publication at 0.5 seconds, about two writes per second
+  while state is unchanged. The earlier 0.1-second experiment is not adopted.
+- Publish server startup and pause/resume events immediately. Changes in state,
+  compile errors, or port detected on an Editor update bypass the interval.
+- Preserve refresh/compile/play readiness guards and atomic file replacement.
+  Event writes reset the periodic clock, and failed writes remain rate-limited.
+- Add optional Unity heartbeat audits for cadence, write cost, and pause/resume
+  status. This branch improves state freshness without raising the regular write
+  rate. It does not make whole-command latency or game-frame performance claims.
+
+한국어: 평상시 Heartbeat 갱신은 0.5초를 유지하고 상태 변화는 즉시 반영합니다.
+이 변경은 `codex/heartbeat-state-updates` 브랜치에서 진행하며, 아래 v0.2.2 정식
+배포본에는 포함되지 않습니다.
+
 # UnityBridge v0.2.2
 
 This stable release includes the startup improvements, CLI refactoring, and

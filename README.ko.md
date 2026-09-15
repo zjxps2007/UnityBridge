@@ -92,6 +92,11 @@ unity-bridge test --mode EditMode
 기다리지 않습니다. 준비 확인과 새로고침 옵션은 [CLI 명령어](docs/COMMANDS.ko.md)를
 확인하세요.
 
+현재 브랜치는 평상시 heartbeat 갱신 간격을 0.5초로 유지합니다.
+서버 시작과 일시정지·재개 이벤트는 즉시 기록하고, 그 외 감지한 상태 변화는 다음
+Editor 업데이트에 기록합니다. `Heartbeat age`는 저장된 상태의 경과 시간이며,
+Editor가 바쁘거나 백그라운드에서 느리게 갱신되면 더 길어질 수 있습니다.
+
 ```powershell
 unity-bridge editor play --wait
 unity-bridge editor stop --wait

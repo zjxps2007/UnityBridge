@@ -11,13 +11,36 @@ import json
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import time
 
 REPO = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(REPO / 'src'))
+from unity_bridge.client import _read_instance_text
 
 
 def save(path, data):
     path.write_text(json.dumps(data, indent=2), encoding='utf-8')
+
+
+def sample_heartbeat(path, duration=5):
+    """Observe the file read by status without warming up the HTTP command path."""
+    timestamps, ages, read_ms, read_errors = [], [], [], 0
+    start = time.monotonic()
+    while time.monotonic() - start < duration:
+        try:
+            read_start = time.perf_counter()
+            timestamp = json.loads(_read_instance_text(path))['timestamp']
+            read_ms.append((time.perf_counter() - read_start) * 1000)
+            ages.append(time.time() * 1000 - timestamp)
+            if not timestamps or timestamp != timestamps[-1]:
+                timestamps.append(timestamp)
+        except (OSError, ValueError):
+            read_errors += 1
+        time.sleep(.01)
+    return {'duration_sec': time.monotonic() - start, 'timestamps': timestamps,
+            'interval_ms': [b - a for a, b in zip(timestamps, timestamps[1:])],
+            'age_ms': ages, 'read_ms': read_ms, 'read_errors': read_errors}
 
 
 def main():
@@ -29,6 +52,8 @@ def main():
     parser.add_argument('--baseline-ref', default='main')
     parser.add_argument('--variants', nargs='+', choices=['baseline', 'candidate'],
                         default=['baseline', 'candidate', 'candidate', 'baseline'])
+    parser.add_argument('--heartbeat-audit', action='store_true',
+                        help='Measure heartbeat cadence/write cost and verify pause event publication.')
     parser.add_argument('--output', required=True, type=Path)
     options = parser.parse_args()
     output = options.output.resolve()
@@ -40,7 +65,7 @@ def main():
     files = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', options.baseline_ref,
                                      'unity-bridge-connector/Editor'], cwd=REPO, text=True).splitlines()
     legacy = subprocess.check_output(['git', 'show', f'{options.baseline_ref}:unity-bridge-connector/Editor/ToolDiscovery.cs'], cwd=REPO).decode()
-    baseline_commit = subprocess.check_output(['git', 'rev-parse', options.baseline_ref], cwd=REPO, text=True).strip()
+    baseline_commit = subprocess.check_output(['git', 'rev-parse', options.baseline_ref + '^{commit}'], cwd=REPO, text=True).strip()
     results = []
     for number, variant in enumerate(options.variants, 1):
         package_file = 'unity-bridge-connector/package.json'
@@ -68,6 +93,8 @@ def main():
         editor = project / 'Assets/Editor'
         editor.mkdir(parents=True, exist_ok=True)
         shutil.copy2(REPO / 'tests/unity/StartupDiscoveryAudit.cs', editor)
+        if options.heartbeat_audit:
+            shutil.copy2(REPO / 'tests/unity/HeartbeatPublishingAudit.cs', editor)
         (editor / 'LegacyToolDiscovery.cs').write_text(legacy.replace('ToolDiscovery', 'LegacyToolDiscovery'), encoding='utf-8')
         (editor / 'StartupRevision.cs').write_text('public static class StartupRevision { public const int Value = 0; }\n')
         plugins = project / 'Assets/Plugins/Editor'
@@ -78,7 +105,7 @@ def main():
         (project / 'ProjectSettings/ProjectVersion.txt').write_text(f'm_EditorVersion: {options.unity_version}\n')
         save(project / 'Packages/manifest.json', {'dependencies': {f'com.unity.modules.{name}': '1.0.0'
              for name in ['imgui', 'imageconversion', 'screencapture', 'jsonserialize']}})
-        for name in ['audit-stop', 'audit-status.json']:
+        for name in ['audit-stop', 'audit-status.json', 'audit-pause.json', 'audit-pause-request']:
             (project / name).unlink(missing_ok=True)
         result = {'session': number, 'variant': variant, 'baseline_commit': baseline_commit,
                   'source_sha256': manifest, 'expected_connector_version': expected_version,
@@ -108,6 +135,7 @@ def main():
                                 heartbeat.get('projectPath', '').casefold() == project.as_posix().casefold() and
                                 abs(time.time() * 1000 - heartbeat.get('timestamp', 0)) < 1500):
                             result['heartbeat'] = heartbeat
+                            heartbeat_file = file
                             break
                     if 'heartbeat' in result:
                         break
@@ -135,6 +163,10 @@ def main():
             for name in ['first_console', 'warm_console_1', 'warm_console_2']:
                 response = call(name, 'console', '--count', '1', '--type', 'error')
                 assert response['success'] and response.get('data') == [], response
+
+            if options.heartbeat_audit:
+                result['heartbeat_audit'] = {'idle': sample_heartbeat(heartbeat_file)}
+                assert result['heartbeat_audit']['idle']['interval_ms'], 'No periodic heartbeat observed'
 
             def check_versions(suffix):
                 for command in ['status', 'wait-ready']:
@@ -165,6 +197,38 @@ def main():
                 response = call('list_after_exec', 'tools')
                 assert response['success'] and len(response['data']) == expected_schemas, response
                 assert any(tool['name'] == 'startup_discovery_audit' for tool in response['data']), response
+
+            if options.heartbeat_audit:
+                response = call('heartbeat_write_cost', 'call', 'heartbeat_publishing_audit',
+                                '--params', json.dumps({'action': 'cost'}))
+                assert response['success'], response
+                result['heartbeat_audit']['cost'] = response['data']
+                response = call('heartbeat_enter_play', 'editor', 'play', '--wait')
+                assert response['success'], response
+                result['heartbeat_audit']['pause_events'] = []
+                for index in range(4):
+                    (project / 'audit-pause.json').unlink(missing_ok=True)
+                    (project / 'audit-pause-request').write_text('toggle')
+                    deadline = time.monotonic() + 5
+                    while time.monotonic() < deadline:
+                        try:
+                            event = json.loads((project / 'audit-pause.json').read_text(encoding='utf-8'))
+                            break
+                        except (OSError, ValueError):
+                            time.sleep(.01)
+                    else:
+                        raise AssertionError('Unity did not publish the pause audit event')
+                    result['heartbeat_audit']['pause_events'].append(event)
+                    assert 'error' not in event, event
+                    if variant == 'candidate':
+                        assert event['matches'], event
+                    status = call(f'status_after_pause_{index}', 'status')
+                    if variant == 'candidate':
+                        assert status['state'] == event['expected'], status
+                response = call('heartbeat_exit_play', 'editor', 'stop', '--wait')
+                assert response['success'], response
+                response = call('ready_after_play', 'wait-ready')
+                assert response['state'] == 'ready', response
             result['passed'] = True
         finally:
             (project / 'audit-stop').write_text('complete')

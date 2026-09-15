@@ -93,6 +93,11 @@ Standalone `wait-ready` does not request compilation or wait for unrelated work
 that starts after the Editor responds. See [CLI commands](docs/COMMANDS.md) for
 the readiness and refresh options.
 
+This branch keeps the periodic heartbeat interval at 0.5 seconds.
+Server start and pause/resume events publish immediately; other observed state
+changes publish on the next Editor update. `Heartbeat age` is the age of that
+saved snapshot. A busy or throttled Editor can take longer to update it.
+
 ```powershell
 unity-bridge editor play --wait
 unity-bridge editor stop --wait
