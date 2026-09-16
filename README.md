@@ -48,6 +48,8 @@ They require a [.NET 10 supported operating system](https://github.com/dotnet/co
 which is a separate requirement from the Connector's Unity version compatibility.
 See [backend behavior](docs/COMMANDS.md#execution-backend) and
 [installation requirements](docs/INSTALL.md#unreleased-host-enabled-builds).
+Measured latency, cold-start costs, memory use and verification limits are in
+the [validation report](docs/HOST_VALIDATION.md).
 
 ## Quick Start
 

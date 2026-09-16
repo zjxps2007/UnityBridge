@@ -43,6 +43,8 @@ CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 
 필요하며, 이는 Connector의 Unity 버전 호환성과 별개입니다.
 [실행 경로](docs/COMMANDS.ko.md#실행-경로)와
 [설치 조건](docs/INSTALL.ko.md#미출시-호스트-포함-빌드)을 확인하세요.
+실측 응답 시간, 첫 시작 비용, 메모리 사용량과 검증 범위는
+[검증 보고서](docs/HOST_VALIDATION.ko.md)에 정리했습니다.
 
 ## 빠른 시작
 
