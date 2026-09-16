@@ -1,4 +1,30 @@
-# UnityBridge v0.2.3
+# UnityBridge 0.3.0-alpha.1 development branch (unreleased)
+
+The public stable release remains [v0.2.3](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3).
+The `codex/external-host-compiler` branch adds an optional persistent Python host
+and a self-contained .NET 10/Roslyn compiler worker. This architecture has not
+been merged into `main` or published as another release.
+
+- Installers register absolute executable paths. Unity starts the host in the
+  background after startup; the host prepares compiler references and exits
+  after 30 seconds without live Editors or pending work.
+- Compile snippets outside Unity, then load and invoke them on Unity's main
+  thread. Cache compilation inputs and metadata, but emit a unique assembly
+  identity for each execution; results, assemblies, and delegates are not reused.
+- Preserve per-project request order, carry deadlines through the execution
+  lock, and return unknown completion without automatic replay after response
+  loss. Live readiness remains distinct from host process liveness.
+- Keep legacy Connector/Python installations and explicit compiler overrides
+  working. Select `--backend auto|host|legacy` or `UNITY_BRIDGE_BACKEND`.
+- Include authenticated loopback transport, compiler timeout/restart, registry
+  recovery, installer rollback checks, native audits, and five-platform builds.
+
+Project script changes still require Unity compilation/domain reload. Arbitrary
+C# already executing inside Unity cannot be forcibly cancelled. The bundled
+compiler increases installation size and resident memory; cold service startup
+and prepared command latency must be assessed separately.
+
+## Previously published: v0.2.3
 
 This stable release improves how quickly saved Heartbeat state reflects changes
 in the Unity Editor. CLI and Unity Connector versions are both `0.2.3`. It

@@ -44,6 +44,7 @@ namespace UnityBridgeConnector
         {
             public string Command;
             public JObject Parameters;
+            public BridgeRequestContext Request;
             public TaskCompletionSource<object> Tcs;
         }
 
@@ -154,6 +155,9 @@ namespace UnityBridgeConnector
             s_RestartPending = false;
             ClearRetry();
 
+            while (s_Queue.TryDequeue(out var pending))
+                pending.Tcs.TrySetResult(BridgeProtocol.Reject("not_ready", "Unity connector is stopping."));
+
             if (s_Listener == null) return;
 
             s_Cts?.Cancel();
@@ -220,12 +224,12 @@ namespace UnityBridgeConnector
         {
             try
             {
-                var r = await CommandRouter.Dispatch(item.Command, item.Parameters);
-                item.Tcs.SetResult(r);
+                var r = await CommandRouter.Dispatch(item.Command, item.Parameters, item.Request);
+                item.Tcs.TrySetResult(r);
             }
             catch (Exception ex)
             {
-                item.Tcs.SetResult(new ErrorResponse(ex.Message));
+                item.Tcs.TrySetResult(new ErrorResponse(ex.Message));
             }
         }
 
@@ -284,7 +288,7 @@ namespace UnityBridgeConnector
 
             response.ContentType = "application/json";
 
-            // Block browser cross-origin requests — CLI uses Go HTTP client (not subject to CORS)
+            // Block browser cross-origin requests; native CLI clients do not use CORS.
             if (request.HttpMethod == "OPTIONS")
             {
                 response.StatusCode = 204;
@@ -320,23 +324,47 @@ namespace UnityBridgeConnector
 
                     var command = json["command"]?.ToString();
                     var parameters = json["params"] as JObject;
+                    var suppliedToken = request.Headers["X-UnityBridge-Token"];
+                    var authenticated = BridgeHostConfiguration.Authenticate(suppliedToken);
 
                     if (string.IsNullOrEmpty(command))
                     {
                         result = new ErrorResponse("Missing 'command' field");
                         response.StatusCode = 400;
                     }
+                    else if ((BridgeProtocol.IsInternalCommand(command) || suppliedToken != null) && !authenticated)
+                    {
+                        result = BridgeProtocol.Reject("unauthorized", "Host authentication required.");
+                        response.StatusCode = 403;
+                    }
                     else
                     {
-                        var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
-                        s_Queue.Enqueue(new WorkItem
+                        var metadata = new BridgeRequestContext
                         {
-                            Command = command,
-                            Parameters = parameters,
-                            Tcs = tcs,
-                        });
-                        ForceEditorUpdate();
-                        result = await tcs.Task;
+                            RequestId = json["request_id"]?.ToString(),
+                            DeadlineUnixMs = (long?)json["deadline_unix_ms"],
+                            DomainId = json["domain_id"]?.ToString(),
+                            ReferenceGeneration = (long?)json["reference_generation"],
+                            Authenticated = authenticated,
+                        };
+                        if (BridgeProtocol.IsInternalCommand(command) && !metadata.DeadlineUnixMs.HasValue)
+                        {
+                            result = BridgeProtocol.Reject("invalid_request", "deadline_unix_ms is required.");
+                            response.StatusCode = 400;
+                        }
+                        else
+                        {
+                            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+                            s_Queue.Enqueue(new WorkItem
+                            {
+                                Command = command,
+                                Parameters = parameters,
+                                Request = metadata,
+                                Tcs = tcs,
+                            });
+                            ForceEditorUpdate();
+                            result = await tcs.Task;
+                        }
                     }
                 }
             }

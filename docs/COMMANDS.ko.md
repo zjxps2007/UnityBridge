@@ -3,6 +3,8 @@
 한국어 | [English](COMMANDS.md) | [README](../README.ko.md)
 
 이 문서는 `unity-bridge` CLI에서 지금 사용할 수 있는 명령어를 정리합니다.
+실행 경로 옵션은 미출시 **0.3.0-alpha.1** 기능입니다. 공개된 **v0.2.3**은
+기존 Connector 직접 연결을 사용합니다.
 
 ## 기본 형태
 
@@ -28,6 +30,7 @@ unity-bridge --json console --count 20
 |------|------|
 | `--project PATH_OR_TEXT` | 정확한 프로젝트 경로, 경로 suffix, 또는 정확한 프로젝트 폴더 이름으로 Unity 인스턴스를 선택합니다. |
 | `--port PORT` | 포트 번호로 Unity 인스턴스를 선택합니다. |
+| `--backend auto\|host\|legacy` | 호스트 또는 Connector 직접 연결을 선택합니다. 기본값은 `UNITY_BRIDGE_BACKEND`, 미설정 시 `auto`입니다. |
 | `--timeout-ms MS` | HTTP 요청 타임아웃입니다. 기본값은 `120000`입니다. |
 | `--instances-dir PATH` | 기본 `~/.unity-bridge/instances` 대신 다른 heartbeat 폴더를 사용합니다. |
 | `--json` | 결과를 JSON으로 출력합니다. 다른 프로그램이 파싱할 때 사용합니다. |
@@ -37,6 +40,31 @@ unity-bridge --json console --count 20
 `MyGame` 같은 경로 세그먼트 suffix를 확인합니다. `Game`이 `GamePrototype`에 매칭되는 식의 부분
 문자열 자동 선택은 하지 않습니다. suffix가 여러 Unity 인스턴스에 동시에 매칭되면 임의 선택하지 않고
 에러를 반환합니다. 자동화 연동에서는 전체 프로젝트 경로나 `--port` 사용을 권장합니다.
+
+## 실행 경로
+
+```powershell
+unity-bridge --backend host exec --code "return 42;"
+unity-bridge --backend legacy console --count 20
+```
+
+- `auto`: 선택한 Unity 프로젝트와 연결을 확인한 호환 호스트를 사용합니다. 없으면
+  요청을 전달하기 전에 기존 직접 연결을 선택합니다.
+- `host`: 호스트가 없으면 오류를 반환합니다. `status`처럼 파일 상태만 읽는 명령은
+  계속 파일을 사용하며, 옵션 때문에 Unity에 새 요청을 보내지 않습니다.
+- `legacy`: Connector에 직접 연결합니다. `exec --csc`나 `--dotnet`을 명시한 경우도
+  `--backend host` 여부와 관계없이 이 경로를 사용합니다.
+
+명시한 옵션은 `UNITY_BRIDGE_BACKEND`보다 우선합니다. `--port`는 계속 Unity의 포트를
+선택합니다. 호스트 경로에는 등록된 컴파일러 묶음과 호환 Connector가 필요합니다.
+Python만 설치한 경우에는 이미 등록된 호환 호스트가 없다면 직접 연결을 사용합니다.
+
+호스트는 프로젝트별 명령 순서를 유지하고, 아직 Unity에 전달하지 않은 명령만 리로드
+종료까지 기다립니다. 대기·컴파일·전달 과정에 원래 요청의 제한 시간을 적용합니다.
+이미 전달한 명령의 응답이 유실되면 `data.completion`은 `unknown`이며 완료 여부를
+확인할 수 없다는 뜻입니다. 변경 명령을 다시 실행하기 전 Editor 상태를 확인하세요.
+클라이언트는 다른 경로로 자동 재실행하지 않습니다. `not_started`는 명령이 실행되기
+전에 거부되었음을 뜻합니다.
 
 ## 명령어 목록
 
@@ -77,13 +105,18 @@ unity-bridge wait-ready --timeout-sec 300
 하나의 `--timeout-sec` 안에서 처리하고, 포트가 바뀌어도 같은 프로젝트를 따라갑니다.
 에디터에 요청하지 않고 heartbeat 파일의 상태만 조회하려면 `status`를 사용하세요.
 
-현재 브랜치는 평상시 heartbeat 갱신 간격을 0.5초, 즉 초당 약 2회로 유지합니다.
+Unity heartbeat는 평상시 갱신 간격을 0.5초, 즉 초당 약 2회로 유지합니다.
 서버 시작과 일시정지·재개 이벤트는 즉시 기록하고, Editor 업데이트에서 감지한
 상태 변화도 정기 갱신 시간을 기다리지 않습니다. `Heartbeat age`는 저장된 상태의
 경과 시간이며 명령 응답 시간과는 다릅니다. `status`는 한 번 출력하므로 최신 상태는
 다시 실행해서 확인합니다. Editor가 멈추거나 백그라운드 갱신이 느리면 0.5초를
 넘길 수 있습니다. 새로고침·컴파일·Play Mode 준비 확인과 파일의 원자적 교체는
 그대로 적용됩니다.
+
+독립 호스트를 설치하면 `status`에 `Host: running` 또는 `Host: unavailable`도 표시합니다.
+호스트가 실행 중이라고 Unity를 `ready`로 표시하거나 Unity heartbeat 시각을 갱신하지
+않습니다. `--json status`에는 별도 호스트 PID·포트, 프로젝트 등록 여부, 컴파일러의
+`prewarm_state`가 포함됩니다. 일반 PID와 포트는 계속 Unity를 가리킵니다.
 
 직접 상태 확인을 사용하려면 Python CLI와 Unity Connector를 함께 업데이트하세요.
 구형 Connector는 저장된 상태로 대신 성공하지 않고 업데이트 안내 오류를 반환합니다.
@@ -98,7 +131,7 @@ unity-bridge wait-ready --timeout-sec 300
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.2.1
+unity-bridge update --ref v0.2.3
 unity-bridge update --dry-run
 ```
 
@@ -236,6 +269,17 @@ unity-bridge exec --code "return Unity.Entities.World.All.Count;" --using Unity.
 짧은 코드는 inline `--code`를 사용해도 됩니다. 여러 줄 C# 코드이거나 PowerShell이 해석하기 쉬운
 문자(`;`, 따옴표, 줄바꿈 등)가 들어간 코드는 `--file`/`--code-file` 또는 `--stdin`을
 권장합니다.
+
+호스트 경로에서는 별도 Roslyn 워커가 실제 Unity 참조 DLL과 지원 언어 버전을 기준으로
+컴파일합니다. 결과 코드는 Unity 메인 스레드에서 실행합니다. 반복 코드는 컴파일 준비
+정보를 재사용하지만 매번 새로운 assembly identity로 emit하여 호출별 정적 상태를
+유지합니다. 반환값과 실행 자체를 캐시하지 않습니다. 참조 DLL의 식별자가 바뀌면
+기존 컴파일 캐시는 사용할 수 없습니다. 컴파일 제한 시간은 최대 30초이며 원래 명령의
+남은 시간도 적용됩니다. 이미 Unity 안에서 실행 중인 임의 C# 코드를 강제로 중단하는
+제한 시간은 아닙니다.
+
+프로젝트의 C# 파일을 수정하면 계속 `refresh --compile request --wait` 등으로 Unity
+컴파일을 수행해야 합니다. 독립 컴파일러는 `exec`의 임시 코드를 처리합니다.
 
 ### Raw connector command
 

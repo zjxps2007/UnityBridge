@@ -49,11 +49,19 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Set up compiler SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "10.0.401"
+
       - name: Install package and build dependencies
         run: python -m pip install -e ".[build]"
 
       - name: Test clients and installers
         run: python -m unittest discover -s tests
+
+      - name: Test compiler worker
+        run: dotnet run --project compiler-worker/UnityBridge.Compiler.Tests --configuration Release
 
       - name: Build standalone bundle
         run: python scripts/build-standalone.py --output-name "${{ matrix.asset_name }}"
@@ -87,6 +95,10 @@ jobs:
                   result.check_returncode()
               return result.stdout
           assert "wait-ready" in run("--help")
+          runtime = next((unpacked / "unity-bridge").glob("_unity_bridge_runtime_*"))
+          assert (runtime / "host-manifest.json").is_file()
+          worker = runtime / "compiler" / ("UnityBridge.Compiler.exe" if os.name == "nt" else "UnityBridge.Compiler")
+          run("_host", "check-worker", "--worker", str(worker.resolve()))
           with tempfile.TemporaryDirectory() as instances:
               assert json.loads(run("--json", "--no-update-check", "--instances-dir", instances, "instances")) == []
           result = json.loads(run("--json", "update", "--check", "--ref", os.environ["BUILD_REF"]))

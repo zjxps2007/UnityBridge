@@ -5,6 +5,10 @@
 Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/프로그램 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.
 
+현재 공개된 정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 미출시
+**0.3.0-alpha.1** 브랜치 기능입니다. Python 패키지만 설치하면 .NET이나 Roslyn
+워커를 다운로드하지 않습니다.
+
 ## 언제 사용하나
 
 Python 패키지 모드는 이런 경우에 사용합니다.
@@ -28,30 +32,31 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 특정 tag를 설치하려면:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.1"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
 
 ## 브랜치에서 설치
 
 릴리스 전 변경을 시험하려면 Python CLI와 Unity Connector를 같은 Git 브랜치에서
-설치하세요. 성능 개선 브랜치는 다음과 같이 설치할 수 있습니다.
+설치하세요. 개발 브랜치가 원격에 올라온 경우 아래 독립 호스트 브랜치를 사용할 수
+있습니다. 아직 푸시하지 않은 변경은 로컬 체크아웃에서 설치해야 합니다.
 
 Windows PowerShell:
 
 ```powershell
-python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/performance-improvements"
+python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
 ```
 
 macOS/Linux에서는 UnityBridge용 Python 환경에서 실행합니다.
 
 ```sh
-python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/performance-improvements"
+python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
 ```
 
 Unity Package Manager에는 같은 브랜치의 Git URL을 사용합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/performance-improvements
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/external-host-compiler
 ```
 
 브랜치가 갱신되면 CLI 설치 명령을 다시 실행하고 Unity 패키지도 업데이트하세요. 브랜치의
@@ -59,6 +64,11 @@ https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/
 구분할 수 없습니다. `python -m pip freeze`(macOS/Linux에서는 `python3`)와 Unity 프로젝트의
 `Packages/packages-lock.json`에서 Git 참조와 리비전을 확인하세요. standalone 설치기는
 이 브랜치를 선택하는 대신 릴리스 파일을 내려받습니다.
+
+이 과정은 Python 클라이언트와 Connector를 갱신하며 외부 컴파일러 런타임은 설치하지
+않습니다. 등록된 호환 호스트가 없으면 `auto`는 기존 직접 연결을 사용합니다. 독립
+컴파일러를 시험하려면 [개발 안내](DEVELOPMENT.ko.md#독립-호스트와-컴파일러)에 따라
+빌드·등록하거나, 같은 소스에서 만든 로컬 standalone 설치의 등록된 호스트를 사용하세요.
 
 ## 설치 스크립트로 Python 패키지 모드 설치
 
@@ -130,6 +140,27 @@ result = client.call("console", {"count": 20, "type": "error,warning"})
 print(result.success, result.message, result.data)
 ```
 
+실행 경로는 `UnityClient`에서 지정합니다. 명시한 값이 `UNITY_BRIDGE_BACKEND`보다
+우선하며, 둘 다 없으면 `auto`입니다. 같은 경로를 adapter에서도 사용하려면 해당
+클라이언트를 전달합니다.
+
+```python
+from unity_bridge import UnityBridgeAdapter, UnityClient
+
+client = UnityClient(project=r"D:\UnityProjects\MyGame", backend="host")
+bridge = UnityBridgeAdapter(client=client)
+result = client.call("exec", {"code": "return 42;"})
+if result.completion_unknown:
+    print("실행 완료를 확인할 수 없습니다. 재시도 전 Unity 상태를 확인하세요.")
+```
+
+`host`는 등록되어 실행 중인 호환 서비스를 요구하고, `legacy`는 Connector에 직접
+연결합니다. `auto`는 사용 가능한 호스트를 선택하며, 요청 전달 전일 때만 직접 연결로
+전환할 수 있습니다. `exec`에 `csc`나 `dotnet`을 명시하면 기존 컴파일러 경로를 사용합니다.
+전달 이후 호스트 응답이 유실되면 완료 여부가 불명확한 결과를 반환하며 직접 경로로
+자동 재실행하지 않습니다. `status()`는 계속 저장된 Unity 상태를 읽고 호스트 정보를
+별도로 제공합니다. 서비스가 실행 중인 것만으로 Unity의 준비 완료를 판단하지 않습니다.
+
 `UnityClient.wait_for_ready()`는 낮은 수준의 상태 대기 API로, 기본값에서는 기존 `ready`
 heartbeat를 읽고 즉시 반환할 수 있습니다. 고정 안정화 대기 없이 에디터의 현재 상태를
 직접 확인하려면 `UnityBridgeAdapter.wait_for_ready()`를 사용하세요. 별도의 안정화 시간이
@@ -148,5 +179,5 @@ Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/man
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.2.1
+unity-bridge update --ref v0.2.3
 ```

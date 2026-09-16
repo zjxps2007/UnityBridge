@@ -6,8 +6,8 @@ UnityBridge는 로컬 HTTP connector를 통해 Unity Editor를 제어하는 stan
 Python-native 클라이언트, Unity 패키지입니다.
 
 CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unity Editor를
-발견하고, 대상 Editor를 선택한 뒤 `http://127.0.0.1:{port}/command`로 JSON 명령을
-보냅니다.
+발견하고, 대상 Editor를 선택한 뒤 사용 가능한 로컬 호스트를 거치거나
+`http://127.0.0.1:{port}/command`로 직접 JSON 명령을 보냅니다.
 
 새 standalone 빌드는 실행 파일과 런타임을 묶은 압축 파일로 배포하며, 설치할 때 한 번
 압축을 풉니다. 실행 파일 옆의 런타임 폴더를 함께 유지하세요. 설치기는 v0.2.1 이하의
@@ -18,6 +18,31 @@ CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unit
 v0.2.2의 시작 속도 개선과 Connector 버전 표시 수정도 포함합니다.
 [v0.2.3 업그레이드 안내](docs/INSTALL.ko.md#v023으로-업그레이드)에 따라
 CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 정식 릴리스를 선택합니다.
+
+## 미출시: 독립 호스트와 컴파일러
+
+이 브랜치는 **0.3.0-alpha.1**을 개발하고 있으며, 현재 공개된 정식 버전은
+**v0.2.3**입니다. 아래 설치 명령은 정식 버전을 설치하므로 미출시 기능을 포함하지
+않습니다. 이 브랜치를 빌드하려면 [로컬 개발 안내](docs/DEVELOPMENT.ko.md#독립-호스트와-컴파일러)를 참고하세요.
+
+새 호스트는 Unity 도메인 밖에서 실행되어 재컴파일 중에도 아직 전달하지 않은 요청을
+보관합니다. 동봉된 Roslyn 워커가 C# 코드를 컴파일하고, Unity가 결과 DLL을 불러와
+메인 스레드에서 Unity API를 실행합니다. 프로젝트 스크립트를 바꾸면 Unity 자체의
+컴파일과 도메인 리로드는 여전히 필요합니다.
+
+- Unity가 등록된 호스트를 비동기로 시작하고 프로젝트 참조로 컴파일러를 미리 준비합니다.
+  실행 중인 Editor와 처리할 요청이 모두 없으면 30초 뒤 종료합니다.
+- 반복 코드는 컴파일 준비 정보를 재사용하되 호출마다 새 assembly identity로 emit하고
+  다시 실행합니다. 실행 결과나 정적 상태를 캐시하지 않습니다.
+- `--backend auto|host|legacy`로 경로를 선택합니다. `auto`는 준비된 호환 호스트를
+  사용하고, 없으면 기존 직접 연결을 사용합니다. `Host: running`은 Unity의 준비
+  완료를 뜻하지 않으며, `wait-ready`는 계속 Unity의 실제 응답을 확인합니다.
+
+호스트 포함 빌드는 .NET 런타임을 동봉하므로 사용자 PC에 SDK를 설치할 필요가 없습니다.
+다만 [.NET 10 지원 운영체제](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)가
+필요하며, 이는 Connector의 Unity 버전 호환성과 별개입니다.
+[실행 경로](docs/COMMANDS.ko.md#실행-경로)와
+[설치 조건](docs/INSTALL.ko.md#미출시-호스트-포함-빌드)을 확인하세요.
 
 ## 빠른 시작
 

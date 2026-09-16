@@ -204,6 +204,14 @@ function Install-Standalone {
         & $candidate --help *> $null
         if ($LASTEXITCODE -ne 0) { throw "Downloaded unity-bridge.exe verification failed; existing installation was preserved." }
 
+        $hasHost = $null -ne $runtime -and (Test-Path -LiteralPath (Join-Path $runtime.FullName 'host-manifest.json'))
+        if ($hasHost) {
+            $stagedWorker = Join-Path $runtime.FullName 'compiler\UnityBridge.Compiler.exe'
+            if (-not (Test-Path -LiteralPath $stagedWorker -PathType Leaf)) { throw 'Compiler worker is missing from the bundle.' }
+            & $candidate _host check-worker --worker $stagedWorker *> $null
+            if ($LASTEXITCODE -ne 0) { throw 'Compiler worker verification failed; existing installation was preserved.' }
+        }
+
         if ($null -ne $runtime) {
             $runtimeTarget = Join-Path $installRoot $runtime.Name
             if (Test-Path -LiteralPath $runtimeTarget) {
@@ -236,6 +244,17 @@ function Install-Standalone {
         }
         else {
             [System.IO.File]::Move($candidate, $targetPath)
+        }
+        if ($hasHost) {
+            $installedWorker = Join-Path $runtimeTarget 'compiler\UnityBridge.Compiler.exe'
+            & $targetPath _host register --executable $targetPath --worker $installedWorker *> $null
+            if ($LASTEXITCODE -ne 0) {
+                $previous = Join-Path $stage 'previous.exe'
+                if (Test-Path -LiteralPath $previous) {
+                    [System.IO.File]::Replace($previous, $targetPath, (Join-Path $stage 'failed.exe'))
+                }
+                throw 'Host registration failed. Check access to the user UnityBridge configuration directory.'
+            }
         }
     }
     finally {

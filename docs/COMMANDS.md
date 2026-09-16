@@ -3,6 +3,8 @@
 [한국어](COMMANDS.ko.md) | English | [README](../README.md)
 
 This document lists the commands currently available in the `unity-bridge` CLI.
+The backend options describe unreleased **0.3.0-alpha.1**; published **v0.2.3**
+continues to use direct Connector communication.
 
 ## Basic Form
 
@@ -28,6 +30,7 @@ unity-bridge --json console --count 20
 |--------|-------------|
 | `--project PATH_OR_TEXT` | Select a Unity instance by exact project path, path suffix, or exact project folder name. |
 | `--port PORT` | Select a Unity instance by port. |
+| `--backend auto\|host\|legacy` | Choose external-host or direct-Connector routing. Defaults to `UNITY_BRIDGE_BACKEND`, otherwise `auto`. |
 | `--timeout-ms MS` | HTTP request timeout. Default: `120000`. |
 | `--instances-dir PATH` | Use a heartbeat directory other than `~/.unity-bridge/instances`. |
 | `--json` | Print JSON output for other programs. |
@@ -39,6 +42,33 @@ It does not auto-select substring-only matches, so `Game` will not match
 `GamePrototype`. If a suffix matches multiple Unity instances, UnityBridge
 returns an error instead of choosing one arbitrarily. For automated integrations,
 prefer a full project path or `--port`.
+
+## Execution Backend
+
+```powershell
+unity-bridge --backend host exec --code "return 42;"
+unity-bridge --backend legacy console --count 20
+```
+
+- `auto`: use a compatible registered host that has negotiated the selected Unity
+  project; otherwise use the existing direct connection before submitting any work.
+- `host`: require that host, returning an error when unavailable. Snapshot commands
+  such as `status` still read files and do not force a Unity request.
+- `legacy`: communicate directly with the Connector. Explicit `exec --csc` or
+  `--dotnet` options also select this path, even with `--backend host`.
+
+An explicit option overrides `UNITY_BRIDGE_BACKEND`. `--port` continues to select
+the Unity port, not the host port. Host routing requires a registered compiler
+bundle and a compatible Connector; a Python-only install keeps the direct path
+unless a suitable host is already registered.
+
+The host preserves per-project command order and waits through reloads only for
+commands not yet sent to Unity. Queueing, compilation, and dispatch use the
+original request deadline. If an already sent command loses its response,
+`data.completion` is `unknown`; this means completion is uncertain. Inspect the
+Editor before deciding whether to repeat a changing command. The client does not
+automatically replay it through another route. `not_started` means execution was
+rejected before the command ran.
 
 ## Command List
 
@@ -80,7 +110,7 @@ An old `ready` file alone cannot complete the wait. Startup, connection recovery
 and state checks share `--timeout-sec`; port changes follow the same project.
 Use `status` for a snapshot of the heartbeat file without contacting the editor.
 
-The current branch keeps periodic heartbeats at 0.5 seconds, about two writes per
+Unity heartbeat publication keeps its regular 0.5-second interval, about two writes per
 second while state is unchanged. Server start and pause/resume events publish
 immediately; changes detected on an Editor update also bypass the periodic
 interval. `Heartbeat age` measures
@@ -88,6 +118,12 @@ how old the saved snapshot is, not command response time. `status` prints once;
 run it again to read a newer snapshot. Editor stalls or background throttling can
 delay publication beyond 0.5 seconds. Refresh/compile/play readiness guards still
 apply, and the file is replaced atomically.
+
+With the independent host installed, `status` also prints `Host: running` or
+`Host: unavailable`. The host process staying alive does not make Unity `ready`
+or update Unity's heartbeat timestamp. `--json status` includes separate host PID,
+port, project registration, and compiler `prewarm_state`; the ordinary PID and
+port continue to identify Unity.
 
 Update the Python CLI and Unity Connector together to use live readiness checks.
 An older Connector reports an update error instead of accepting a cached state.
@@ -102,7 +138,7 @@ not request compilation or guarantee that an unrelated task will not start later
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.2.1
+unity-bridge update --ref v0.2.3
 unity-bridge update --dry-run
 ```
 
@@ -243,6 +279,19 @@ unity-bridge exec --code "return Unity.Entities.World.All.Count;" --using Unity.
 Use inline `--code` for short snippets. For multi-line C# or code containing
 characters that shells often interpret, prefer `--file`/`--code-file` or
 `--stdin`.
+
+On the host backend, a separate Roslyn worker compiles against Unity's actual
+reference DLLs and supported language version. Unity executes the emitted code
+on its main thread. Repeated source reuses compiler preparation but emits a fresh
+assembly identity for each call, preserving fresh snippet static state. Neither
+return values nor execution are cached. Changes to reference DLL identities
+invalidate cached compilation. The compiler has a 30-second limit, also bounded
+by the remaining command deadline; that limit cannot forcibly interrupt arbitrary
+C# code already executing inside Unity.
+
+Project C# edits still need Unity compilation, for example
+`refresh --compile request --wait`. The independent compiler applies to `exec`
+snippets; it does not bypass Unity's project compilation pipeline.
 
 ### Raw Connector Commands
 

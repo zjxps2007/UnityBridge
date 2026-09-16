@@ -15,10 +15,77 @@
 | `_cli/updates.py` | Python 패키지 업데이트, standalone 업데이트 예약, 원격 버전 조회, 일일 알림 캐시를 처리합니다. |
 | `_cli/standalone.py` | 플랫폼·아키텍처를 선택하고 운영체제별 설치기 실행 명령을 만듭니다. |
 | `_cli/versions.py` | 공통 버전 해석과 비교를 담당합니다. |
+| `host/` | 선택적 로컬 서비스, 인증 통신, 프로젝트별 대기열, 런타임 등록과 컴파일러 프로세스를 관리합니다. |
+| 저장소 루트의 `compiler-worker/` | 독립 Roslyn 컴파일러, 내부 JSONL 프로토콜과 컴파일러 회귀 검증을 포함합니다. |
 
 `_cli`는 내부 구현입니다. Python 프로그램에서 연동할 때는 `unity_bridge`가
 공개하는 client·adapter API를 사용합니다. 기존 `cli.build_parser`와
 `cli.add_common_options` 함수도 계속 사용할 수 있습니다.
+
+## 독립 호스트와 컴파일러
+
+현재 브랜치는 미출시 **0.3.0-alpha.1**이며 공개된 정식 기준 버전은 **v0.2.3**입니다.
+서비스는 Unity 밖에서 실행되며, Unity API 실행은 계속 Connector의 메인 스레드에서
+처리합니다. 참조 정보에는 도메인·참조 세대, 실제 DLL 경로와 MVID, 명시적인 C# 언어
+버전이 포함됩니다. Unity 참조를 워커의 .NET 10 라이브러리로 대신하지 않습니다.
+
+서비스는 컴파일러 프로세스를 미리 실행하고 새 프로젝트 참조 정보마다 백그라운드에서
+`return null;`을 한 번 컴파일합니다. 이 준비용 DLL을 Unity에 로드하지 않습니다.
+반복 코드는 파싱·바인딩 준비 정보를 재사용하지만 호출마다 새 assembly identity로
+emit합니다. 호스트는 실행 결과·로드한 assembly·delegate를 캐시하지 않습니다.
+워커 캐시를 비워도 Unity 도메인에 이미 로드된 DLL은 해제되지 않습니다.
+
+Python 빌드 의존성과 .NET 10 SDK를 준비합니다. CI는 SDK **10.0.401**, 컴파일러
+프로젝트는 Roslyn **5.0.0**을 고정합니다. 작업 폴더의 SDK는 `--dotnet PATH`로
+지정할 수 있습니다. 완성된 배포 묶음을 쓰는 사용자에게는 SDK가 필요하지 않습니다.
+
+```sh
+python -m pip install -e ".[build]"
+dotnet run --project compiler-worker/UnityBridge.Compiler.Tests --configuration Release
+python scripts/build-compiler.py --runtime win-x64 --output build/compiler/win-x64
+python scripts/build-standalone.py --output-name unity-bridge-windows-amd64.zip --compiler-dir build/compiler/win-x64
+```
+
+다른 플랫폼에서는 `linux-x64`, `linux-arm64`, `osx-x64`, `osx-arm64`와 해당 압축 파일
+이름을 사용합니다. `--compiler-dir`을 생략하면 `build-standalone.py`가 현재 플랫폼의
+컴파일러도 빌드합니다. `--without-compiler`는 Connector에 직접 연결하는 개발용 묶음을
+만듭니다. 빌드 결과는 Git에서 제외한 `build/`와 `dist/`에 저장합니다.
+
+수정 가능한 Python 설치와 Windows 워커를 등록하는 예시입니다.
+
+```powershell
+$python = (Get-Command python).Source
+$worker = (Resolve-Path .\build\compiler\win-x64\UnityBridge.Compiler.exe).Path
+python -m unity_bridge _host register --executable $python --python-module --worker $worker
+python -m unity_bridge _host start
+python -m unity_bridge --backend host exec --code "return 42;"
+```
+
+일치하는 로컬 Connector 패키지를 사용하고 Unity를 열어 두세요. macOS/Linux에서는
+Python의 절대 경로와 `.exe`가 없는 워커 경로를 사용합니다. 수동으로 푼 standalone
+묶음은 해당 실행 파일의 `_host register --executable <CLI-절대경로> --worker
+<런타임/compiler/워커-절대경로>`를 실행하며 `--python-module`을 생략합니다.
+패키지 설치기는 등록을 자동으로 수행합니다. `_host`는 설치기·개발자용 내부 명령이며
+진단용 `_host status`, `_host stop`도 제공합니다. Unity가 열려 있으면 중지한 호스트가
+다시 실행될 수 있습니다.
+
+격리된 검증에는 Unity 시작 환경과 CLI 양쪽의 `UNITY_BRIDGE_HOST_HOME`을 같은 임시
+폴더로 설정합니다. 테스트용 실행 경로를 등록할 때 `--instances-dir`도 지정할 수
+있습니다. 검증 보고서에 등록 파일의 인증 토큰을 포함하지 마세요.
+
+내부 프로토콜과 캐시 한도는 [compiler-worker/README.md](../compiler-worker/README.md)에
+정리했습니다. 다음 조건을 유지합니다.
+
+- 호스트 요청의 원래 제한 시간을 유지하고, Unity는 실행 잠금 획득 후와 DLL 로드
+  직전에 다시 확인합니다.
+- 실행 전에 참조가 바뀌면 갱신할 수 있습니다. 전달 이후 실행 여부가 불확실하면
+  재실행하지 않고 `unknown`을 반환합니다. 실행 전 거부임이 확인된 `not_started`만
+  준비 과정을 다시 시도할 수 있습니다.
+- 실시간 상태 조회는 변경 명령 대기열에 막히지 않습니다. 호스트 상태로 Unity
+  heartbeat나 준비 완료를 대신하지 않습니다. 기존 PID·포트는 Unity를 뜻하며
+  호스트 등록은 별도 파일에 기록합니다.
+- 토큰이 포함된 요청은 로컬 주소만 사용하고 프록시·리다이렉트를 사용하지 않습니다.
+  새 런타임 등록 후 이전 서비스는 진행 중인 요청을 마치고 종료합니다.
 
 ## 명령 변경 방법
 
@@ -70,6 +137,20 @@ Standalone을 수정했다면 `scripts/build-standalone.py`로 압축 파일을 
 압축을 푼 실행 파일을 직접 확인합니다. 시작 시간은 동일한 Python·PyInstaller 버전과
 배포 방식으로 비교합니다. 소스 import 시간만으로 배포 실행 파일의 성능을 판단하지
 않습니다. 실제 Unity 검증은 [tests/unity/README.md](../tests/unity/README.md)를 참고하세요.
+
+호스트 브랜치에서는 `tests/test_host_service.py`, `tests/test_host_compiler.py`,
+`tests/test_host_registry.py`와 위의 C# 회귀 검증을 포함합니다. 요청 ID 중복,
+대기 전후 제한 시간, 컴파일러 실패와 재시작, 준비 중 리로드, 전달 이후 응답 유실,
+토큰 격리와 다중 프로젝트를 확인합니다. 실제 실행은 Unity 2021과 Unity 6에서
+검증하고, 최소 지원 버전의 API 호환성은 별도로 확인합니다.
+
+배포 workflow는 Windows x64, Linux x64·ARM64, macOS Intel·Apple Silicon 묶음과
+컴파일러 워커를 빌드·확인하도록 구성합니다. workflow를 수정한 것만으로 모든 플랫폼의
+실행 결과가 검증되는 것은 아닙니다. 새 기본 경로를 활성화하기 전 v0.2.3과 같은
+프로젝트·빌드 의존성으로 첫 실행과 사전 준비된 실행, 전체 응답 시간 p50·p95,
+Editor 정지, 상주 메모리와 설치 용량을 비교합니다. 일반 명령 p95가 5% 또는 10ms 중
+큰 값 이상 느려지면 원인을 확인합니다. 컴파일러만 측정한 결과로 전체 명령이
+빨라졌다고 판단하지 않습니다.
 
 ## Heartbeat 갱신
 

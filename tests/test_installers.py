@@ -1,6 +1,7 @@
 """Exercise the real installers offline, inside disposable installation paths."""
 from __future__ import annotations
 
+import json
 import os
 from pathlib import Path
 import shutil
@@ -26,19 +27,55 @@ class InstallerFixture(unittest.TestCase):
         self.fixtures = self.root / "fixtures"
         self.fixtures.mkdir()
         self.env = dict(os.environ, UNITY_BRIDGE_SKIP_UPDATE_CHECK="1",
-                        FIXTURE_DIR=self.fixtures.as_posix(), INSTALL_TEST_ROOT=str(self.root))
+                        FIXTURE_DIR=self.fixtures.as_posix(), INSTALL_TEST_ROOT=str(self.root),
+                        UNITY_BRIDGE_HOST_HOME=(self.root / 'host registry').as_posix(),
+                        HOST_TEST_LOG=(self.root / 'host-calls.tsv').as_posix())
 
-    def bundle(self, *, windows=False, valid=True):
+    def bundle(self, *, windows=False, valid=True, host=False, worker=True):
         source = self.root / uuid.uuid4().hex
         bundle = source / "unity-bridge"
         runtime = "_unity_bridge_runtime_" + uuid.uuid4().hex
         (bundle / runtime).mkdir(parents=True)
         (bundle / runtime / "payload").write_text(runtime)
+        if host:
+            (bundle / runtime / 'host-manifest.json').write_text(json.dumps({
+                'protocol': 1, 'version': 'fixture', 'compiler': 'compiler/UnityBridge.Compiler'}))
+            if worker:
+                compiler_dir = bundle / runtime / 'compiler'
+                compiler_dir.mkdir()
+                compiler_file = compiler_dir / ('UnityBridge.Compiler.exe' if windows else 'UnityBridge.Compiler')
+                compiler_file.write_text('fixture worker; the fixture CLI exercises installer sequencing'
+                                         if windows else '#!/bin/sh\nexit 0\n', newline='\n')
+                compiler_file.chmod(0o755)
         if windows:
-            shutil.copy2(self.good_exe if valid else self.bad_exe, bundle / "unity-bridge.exe")
+            shutil.copy2(self.host_exe if host else self.good_exe if valid else self.bad_exe,
+                         bundle / "unity-bridge.exe")
         else:
             command = bundle / "unity-bridge"
-            command.write_text(f'#!/bin/sh\ntest -f "$(dirname "$0")/{runtime}/payload" || exit 8\nexit {0 if valid else 9}\n', newline='\n')
+            source_text = f'#!/bin/sh\ntest -f "$(dirname "$0")/{runtime}/payload" || exit 8\n'
+            if host:
+                source_text += '''if [ "$1" = "_host" ]; then
+    operation="$2"
+    executable=""
+    if [ "$operation" = "register" ]; then executable="$4"; worker="$6"; else worker="$4"; fi
+    self="$0"
+    if command -v cygpath >/dev/null; then
+        self=$(cygpath -m "$self")
+        worker=$(cygpath -m "$worker")
+        if [ -n "$executable" ]; then executable=$(cygpath -m "$executable"); fi
+    fi
+    intact=no
+    if cmp -s "$INSTALL_TEST_ROOT/expected-previous" "$INSTALL_TEST_ROOT/custom install/unity-bridge"; then intact=yes; fi
+    printf '%s\\t%s\\t%s\\t%s\\t%s\\n' "$operation" "$self" "$executable" "$worker" "$intact" >> "$HOST_TEST_LOG"
+    if [ "$HOST_TEST_FAIL" = "$operation" ]; then exit 17; fi
+    if [ "$operation" = "register" ]; then
+        mkdir -p "$UNITY_BRIDGE_HOST_HOME"
+        printf '%s\\n' "$executable" > "$UNITY_BRIDGE_HOST_HOME/registered"
+    fi
+fi
+'''
+            source_text += f'exit {0 if valid else 9}\n'
+            command.write_text(source_text, newline='\n')
             command.chmod(0o755)
         archive = self.fixtures / ("unity-bridge-windows-amd64.zip" if windows else "unity-bridge-linux-amd64.tar.gz")
         extension = ".zip" if windows else ".tar.gz"
@@ -46,8 +83,71 @@ class InstallerFixture(unittest.TestCase):
         return archive, runtime
 
 
+class HostInstallerCases:
+    """Same observable install/rollback contract for the real POSIX/Windows scripts."""
+
+    windows = False
+
+    def prior_install(self):
+        _, previous_runtime = self.bundle(windows=self.windows)
+        self.run_installer()
+        target = self.install / ('unity-bridge.exe' if self.windows else 'unity-bridge')
+        before = target.read_bytes()
+        (self.root / 'expected-previous').write_bytes(before)
+        return target, before, previous_runtime
+
+    def host_calls(self):
+        path = self.root / 'host-calls.tsv'
+        return [line.split('\t') for line in path.read_text(encoding='utf-8-sig').splitlines()] if path.exists() else []
+
+    def test_host_worker_checked_before_replacement_and_registration_uses_final_paths(self):
+        target, before, _ = self.prior_install()
+        _, runtime = self.bundle(windows=self.windows, host=True)
+        self.run_installer()
+        calls = self.host_calls()
+        self.assertEqual([row[0] for row in calls], ['check-worker', 'register'])
+        self.assertIn('.unity-bridge-stage', calls[0][1])
+        self.assertIn('.unity-bridge-stage', calls[0][3])
+        self.assertEqual(calls[0][4], 'yes', 'Existing CLI changed before worker validation.')
+        self.assertEqual(Path(calls[1][1]).resolve(), target.resolve())
+        self.assertEqual(Path(calls[1][2]).resolve(), target.resolve())
+        expected_worker = self.install / runtime / 'compiler' / ('UnityBridge.Compiler.exe' if self.windows else 'UnityBridge.Compiler')
+        self.assertEqual(Path(calls[1][3]).resolve(), expected_worker.resolve())
+        self.assertEqual(calls[1][4], 'no', 'Registration did not use the newly installed CLI.')
+        self.assertNotEqual(target.read_bytes(), before)
+        self.assertTrue((self.root / 'host registry/registered').exists())
+
+    def test_broken_worker_preserves_existing_cli_before_replacement(self):
+        target, before, previous_runtime = self.prior_install()
+        self.bundle(windows=self.windows, host=True)
+        self.env['HOST_TEST_FAIL'] = 'check-worker'
+        self.run_installer(success=False)
+        self.assertEqual(target.read_bytes(), before)
+        self.assertTrue((self.install / previous_runtime / 'payload').exists())
+        self.assertEqual([row[0] for row in self.host_calls()], ['check-worker'])
+        self.assertFalse((self.root / 'host registry/registered').exists())
+
+    def test_registration_failure_rolls_back_existing_cli(self):
+        target, before, previous_runtime = self.prior_install()
+        self.bundle(windows=self.windows, host=True)
+        self.env['HOST_TEST_FAIL'] = 'register'
+        self.run_installer(success=False)
+        self.assertEqual(target.read_bytes(), before)
+        self.assertTrue((self.install / previous_runtime / 'payload').exists())
+        self.assertEqual([row[0] for row in self.host_calls()], ['check-worker', 'register'])
+        self.assertFalse((self.root / 'host registry/registered').exists())
+        self.assertEqual(list(self.install.glob('.unity-bridge-stage*')), [])
+
+    def test_marker_with_missing_worker_preserves_existing_install(self):
+        target, before, _ = self.prior_install()
+        self.bundle(windows=self.windows, host=True, worker=False)
+        self.run_installer(success=False)
+        self.assertEqual(target.read_bytes(), before)
+        self.assertEqual(self.host_calls(), [])
+
+
 @unittest.skipUnless(SHELL, "POSIX shell is not installed")
-class PosixInstallerTests(InstallerFixture):
+class PosixInstallerTests(HostInstallerCases, InstallerFixture):
     def setUp(self):
         super().setUp()
         fake_bin = self.root / "fake-bin"
@@ -110,7 +210,8 @@ cp "$FIXTURE_DIR/$asset" "$output"
 
 
 @unittest.skipUnless(os.name == 'nt', "Windows installer requires Windows")
-class WindowsInstallerTests(InstallerFixture):
+class WindowsInstallerTests(HostInstallerCases, InstallerFixture):
+    windows = True
     @classmethod
     def setUpClass(cls):
         cls.binaries = tempfile.TemporaryDirectory(prefix="unity-bridge-fixture-")
@@ -122,6 +223,37 @@ class WindowsInstallerTests(InstallerFixture):
             compiler = Path(os.environ['WINDIR']) / 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
             subprocess.run([str(compiler), '/nologo', f'/out:{output}', str(source)], check=True, capture_output=True)
             setattr(cls, f'{name}_exe', output)
+        source = Path(cls.binaries.name) / 'host.cs'
+        source.write_text('''using System;
+using System.IO;
+using System.Reflection;
+using System.Text;
+public class Fixture {
+    public static int Main(string[] args) {
+        if (args.Length == 0 || args[0] != "_host") return 0;
+        string operation = args[1];
+        string executable = operation == "register" ? args[3] : "";
+        string worker = operation == "register" ? args[5] : args[3];
+        string root = Environment.GetEnvironmentVariable("INSTALL_TEST_ROOT");
+        string expected = Path.Combine(root, "expected-previous");
+        string target = Path.Combine(root, "custom install", "unity-bridge.exe");
+        string intact = File.Exists(expected) && File.Exists(target) &&
+            Convert.ToBase64String(File.ReadAllBytes(expected)) == Convert.ToBase64String(File.ReadAllBytes(target)) ? "yes" : "no";
+        File.AppendAllText(Environment.GetEnvironmentVariable("HOST_TEST_LOG"),
+            String.Join("\\t", new[] { operation, Assembly.GetExecutingAssembly().Location, executable, worker, intact }) + "\\n", new UTF8Encoding(false));
+        if (Environment.GetEnvironmentVariable("HOST_TEST_FAIL") == operation) return 17;
+        if (operation == "register") {
+            string registry = Environment.GetEnvironmentVariable("UNITY_BRIDGE_HOST_HOME");
+            Directory.CreateDirectory(registry);
+            File.WriteAllText(Path.Combine(registry, "registered"), executable);
+        }
+        return 0;
+    }
+}
+''')
+        cls.host_exe = source.with_suffix('.exe')
+        subprocess.run([str(compiler), '/nologo', f'/out:{cls.host_exe}', str(source)],
+                       check=True, capture_output=True)
 
     def run_installer(self, *, success=True):
         driver = self.root / 'invoke.ps1'

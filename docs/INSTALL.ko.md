@@ -5,6 +5,9 @@
 이 문서는 standalone CLI 설치, Unity 패키지 버전 고정, 업데이트, release asset을 다룹니다.
 Python 패키지 모드는 [PYTHON_PACKAGE.ko.md](PYTHON_PACKAGE.ko.md)에 따로 정리했습니다.
 
+현재 공개된 정식 버전은 **v0.2.3**입니다. 아래의 독립 호스트는 **미출시
+0.3.0-alpha.1 브랜치** 기능이며, 아직 설치할 수 있는 공개 태그가 아닙니다.
+
 ## Unity 패키지
 
 Unity Editor에서 `Window > Package Manager > + > Add package from git URL...`을 열고
@@ -53,7 +56,7 @@ Edit > Preferences > General > Interaction Mode > No Throttling
 명령의 설치 경로는 유지됩니다. 실행 파일 옆의 `_unity_bridge_runtime_<build-id>`
 폴더도 필요하므로 실행 파일만 따로 옮기지 마세요. 업데이트는 내려받은 묶음을 검증한 뒤
 실행 파일을 교체합니다. 실행 중인 이전 명령을 위해 이전 런타임 폴더는 보관합니다.
-UnityBridge CLI 프로세스를 모두 종료한 뒤 사용하지 않는 런타임 폴더를 정리할 수 있지만,
+UnityBridge CLI·호스트·컴파일러 프로세스를 모두 종료한 뒤 사용하지 않는 런타임 폴더를 정리할 수 있지만,
 현재 설치된 빌드의 폴더는 유지해야 합니다. `update`는 사용자가 지정한 설치 경로도 유지합니다.
 
 Windows PowerShell:
@@ -67,6 +70,38 @@ macOS/Linux:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh | sh
 ```
+
+## 미출시 호스트 포함 빌드
+
+이 브랜치에서 만든 묶음에는 .NET 10 런타임과 Roslyn 컴파일러가 포함됩니다. 설치기는
+워커 실행을 확인하고 CLI·워커의 정확한 경로를 `~/.unity-bridge/host/`에 등록합니다.
+Unity Hub가 CLI의 PATH 설정을 물려받을 필요가 없습니다. `compiler/`를 포함한 런타임
+폴더 전체를 유지하세요. 사용자 PC에 .NET 런타임이나 SDK를 별도로 설치할 필요는
+없습니다. 워커를 실행할 수 없으면 기존 설치를 교체하기 전에 설치가 실패합니다.
+
+워커에는 [.NET 10 지원 운영체제](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)와
+해당 OS의 네이티브 의존성이 필요합니다. Connector가 Unity 2020.3 API와 호환된다는
+것이 해당 Editor를 실행할 수 있는 모든 구형 OS에서 워커도 동작한다는 뜻은 아닙니다.
+구형 환경은 v0.2.3을 유지하거나, 기존 환경이 지원하는 소스·Python 모드에서
+`legacy` 경로를 사용할 수 있습니다.
+
+같은 버전의 Connector가 있으면 Unity가 시작 후 백그라운드에서 호스트를 실행하고,
+서비스가 프로젝트 참조로 컴파일러를 미리 준비합니다. 여러 프로젝트를 관리하며
+도메인 리로드 중에도 유지됩니다. 추적 중인 Editor가 모두 닫히고 남은 요청이 없으면
+30초 후 종료합니다. 업데이트로 새 런타임이 등록되면 이전 서비스는 진행 중인 작업을
+마친 뒤 종료합니다. 호스트는 인증된 로컬 통신을 사용하고, 자체 프로세스 정보를
+Unity heartbeat와 별도 파일로 관리합니다.
+
+`unity-bridge status`는 호스트 사용 가능 여부를 따로 표시합니다. Unity PID·포트·상태와
+Heartbeat age는 계속 Editor를 뜻합니다. `--json status`에서는 프로젝트의 컴파일러
+`prewarm_state`를 확인할 수 있습니다. `--backend host`는 새 서비스를 요구하고,
+`--backend legacy`는 직접 연결을 사용합니다. `--backend auto`는 등록된 호환 호스트가
+준비되어 있으면 사용합니다. 자세한 동작은 [실행 경로](COMMANDS.ko.md#실행-경로)를 참고하세요.
+
+아직 공개된 alpha 배포 파일은 없습니다. [개발 안내](DEVELOPMENT.ko.md#독립-호스트와-컴파일러)에
+따라 로컬에서 빌드하고 등록하세요. 개발용 압축 파일을 수동으로 풀기만 하면 호스트는
+등록되지 않으므로 실행 파일·워커의 절대 경로를 등록해야 합니다. Python 패키지만
+설치하는 경우에는 컴파일러 런타임을 다운로드하지 않습니다.
 
 ## 특정 릴리스 설치
 

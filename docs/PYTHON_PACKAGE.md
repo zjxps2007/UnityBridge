@@ -6,6 +6,10 @@ Python package mode is for development and Python programs that need to import
 `unity_bridge` directly. For normal CLI use, the standalone installer is
 recommended because it does not require Python on the target machine.
 
+The current public stable version is **v0.2.3**. The independent-host options in
+this document describe the unreleased **0.3.0-alpha.1** branch. Installing the
+Python package alone does not download .NET or the Roslyn worker.
+
 ## When To Use
 
 Use Python package mode when:
@@ -29,30 +33,32 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 Install a specific tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.1"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
 
 ## Install From A Branch
 
 To test changes before a release, install the Python CLI and Unity Connector from
-the same Git branch. For example, use the performance branch as follows.
+the same Git branch. When the development branch is available on the remote,
+use the independent-host branch as follows; unpushed work must be installed from
+the local checkout instead.
 
 Windows PowerShell:
 
 ```powershell
-python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/performance-improvements"
+python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
 ```
 
 macOS/Linux, in the Python environment you use for UnityBridge:
 
 ```sh
-python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/performance-improvements"
+python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
 ```
 
 In Unity Package Manager, use the matching Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/performance-improvements
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/external-host-compiler
 ```
 
 Repeat the CLI install command and update the Unity package when the branch
@@ -61,6 +67,12 @@ does not identify the installed commit. Check `python -m pip freeze` (`python3` 
 macOS/Linux) and the Unity project's `Packages/packages-lock.json` for Git refs
 and revisions. The standalone installer downloads release assets rather than
 selecting this branch.
+
+This updates the Python client and Connector, not the external compiler runtime.
+Without a registered compatible host, `auto` uses the existing direct route.
+To test the independent compiler, also build and register it using
+[the development guide](DEVELOPMENT.md#independent-host-and-compiler), or use a
+matching locally built standalone installation that has registered its host.
 
 ## Install With The Installer
 
@@ -133,6 +145,28 @@ result = client.call("console", {"count": 20, "type": "error,warning"})
 print(result.success, result.message, result.data)
 ```
 
+The optional backend is selected on `UnityClient`; an explicit value overrides
+`UNITY_BRIDGE_BACKEND` (`auto` when unset). Pass that client to an adapter when
+you need the same choice throughout a workflow:
+
+```python
+from unity_bridge import UnityBridgeAdapter, UnityClient
+
+client = UnityClient(project=r"D:\UnityProjects\MyGame", backend="host")
+bridge = UnityBridgeAdapter(client=client)
+result = client.call("exec", {"code": "return 42;"})
+if result.completion_unknown:
+    print("Check Unity before retrying: execution could not be confirmed.")
+```
+
+`host` requires a compatible, running registered service; `legacy` uses the
+direct Connector. `auto` chooses the host when available and falls back only
+before submitting work. An explicit `csc` or `dotnet` exec parameter always uses
+the legacy compiler route. Host response loss after dispatch returns unknown
+completion and is never automatically replayed through the direct route.
+`status()` still reads Unity's saved state, with separate host metadata; a live
+service is not proof that Unity is ready.
+
 `UnityClient.wait_for_ready()` is a low-level state wait: its defaults may return
 an existing `ready` heartbeat immediately. Use `UnityBridgeAdapter.wait_for_ready()`
 to confirm the live editor state without a fixed settling delay. Set its optional
@@ -151,5 +185,5 @@ Unity project's `Packages/manifest.json` automatically.
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.2.1
+unity-bridge update --ref v0.2.3
 ```

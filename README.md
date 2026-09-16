@@ -7,7 +7,8 @@ controlling the Unity Editor through a local HTTP connector.
 
 The CLI discovers running Unity Editors through
 `~/.unity-bridge/instances/*.json` heartbeat files, selects the target Editor,
-and sends JSON commands to `http://127.0.0.1:{port}/command`.
+and sends JSON commands through the registered local host when available, or
+directly to `http://127.0.0.1:{port}/command`.
 
 New standalone builds ship as an archive containing the executable and its runtime,
 unpacked once during installation. Keep the runtime folder beside the executable.
@@ -20,6 +21,33 @@ interval. It includes the startup improvements and Connector version fix from
 v0.2.2. Follow [upgrading to v0.2.3](docs/INSTALL.md#upgrade-to-v023) to update
 both the CLI and Unity Connector. Default installation selects the latest stable
 release.
+
+## Unreleased: Independent Host And Compiler
+
+This branch develops **0.3.0-alpha.1**; the current public stable release remains
+**v0.2.3**. The install commands below install stable and do not enable these
+unreleased features. See [local development](docs/DEVELOPMENT.md#independent-host-and-compiler)
+to build this branch.
+
+The new host stays outside Unity's reloadable domain and keeps pending requests
+while Unity recompiles. A bundled Roslyn worker prepares C# independently; Unity
+loads the result and executes Unity API calls on its main thread. Project script
+changes still require Unity compilation and domain reload.
+
+- Unity starts the registered host asynchronously and prepares the compiler using
+  the project's references. The host exits after 30 seconds without a running
+  Editor or pending work.
+- Repeated snippets reuse compiler preparation, while every invocation emits a
+  fresh assembly identity and executes again. Results and static state are not cached.
+- `--backend auto|host|legacy` selects routing. `auto` uses a compatible registered
+  host when ready and supports the direct route otherwise. `Host: running` does
+  not mean Unity is ready; `wait-ready` still requires Unity's live response.
+
+Host-enabled bundles include their .NET runtime; end users do not need an SDK.
+They require a [.NET 10 supported operating system](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md),
+which is a separate requirement from the Connector's Unity version compatibility.
+See [backend behavior](docs/COMMANDS.md#execution-backend) and
+[installation requirements](docs/INSTALL.md#unreleased-host-enabled-builds).
 
 ## Quick Start
 

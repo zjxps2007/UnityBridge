@@ -31,6 +31,7 @@ GLOBAL_VALUE_OPTIONS = {
     "--port": "port",
     "--timeout-ms": "timeout_ms",
     "--instances-dir": "instances_dir",
+    "--backend": "backend",
 }
 GLOBAL_BOOL_OPTIONS = {"--json": "json", "--no-update-check": "no_update_check"}
 
@@ -47,6 +48,8 @@ def add_common_options(
     parser.add_argument("--port", type=int, default=default, help="Select Unity instance by port.")
     parser.add_argument("--timeout-ms", type=int, default=timeout_default, help="HTTP timeout in milliseconds.")
     parser.add_argument("--instances-dir", default=default, help="Override ~/.unity-bridge/instances.")
+    parser.add_argument("--backend", choices=["auto", "host", "legacy"], default=default,
+                        help="Select the automatic, external host, or direct Connector route.")
     no_update_default = argparse.SUPPRESS if suppress_defaults else False
     parser.add_argument("--no-update-check", action="store_true", default=no_update_default, help="Skip the automatic daily update notice.")
     if json_option:
@@ -170,6 +173,7 @@ def parse_direct_tool_args(argv: list[str]) -> argparse.Namespace:
         "port": None,
         "timeout_ms": 120_000,
         "instances_dir": None,
+        "backend": None,
         "json": False,
         "no_update_check": False,
         "params": {},

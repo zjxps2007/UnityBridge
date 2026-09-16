@@ -14,7 +14,7 @@ from .client import scan_instances
 from .client import send_command
 from .client import wait_for_state
 
-__version__ = "0.2.3"
+__version__ = "0.3.0-alpha.1"
 
 __all__ = [
     "CommandResponse",

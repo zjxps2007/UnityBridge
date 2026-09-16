@@ -228,6 +228,9 @@ namespace UnityBridgeConnector
                 connectorVersion = GetConnectorVersion(),
                 timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                 compileErrors,
+                bridgeProtocol = BridgeProtocol.Version,
+                domainId = BridgeProtocol.DomainId,
+                referenceGeneration = BridgeProtocol.ReferenceGeneration,
             };
         }
 

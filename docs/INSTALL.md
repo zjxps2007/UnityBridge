@@ -6,6 +6,9 @@ This document covers standalone CLI installation, Unity package version pinning,
 updates, and release assets. Python package mode is documented separately in
 [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md).
 
+The public stable release is **v0.2.3**. The independent host described below is
+part of the **unreleased 0.3.0-alpha.1 branch**, not a published installation tag.
+
 ## Unity Package
 
 In Unity Editor, open `Window > Package Manager > + > Add package from git URL...`
@@ -57,7 +60,7 @@ The command stays at the same installation path. Keep its adjacent
 `_unity_bridge_runtime_<build-id>` directory; copying only the executable will not
 work. Updates verify the downloaded bundle before replacing the command and keep
 older runtime directories for commands still running against them. Once all
-UnityBridge CLI processes are closed, obsolete runtime directories can be removed;
+UnityBridge CLI, host, and compiler processes are closed, obsolete runtime directories can be removed;
 keep the directory belonging to the currently installed build. The `update` command
 preserves a custom installation directory.
 
@@ -72,6 +75,41 @@ macOS/Linux:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh | sh
 ```
+
+## Unreleased Host-Enabled Builds
+
+Bundles built from this branch also contain a self-contained .NET 10/Roslyn
+compiler. The installer checks the worker and registers the exact CLI and worker
+paths under `~/.unity-bridge/host/`; Unity Hub does not need to inherit a CLI PATH
+entry. Keep the entire runtime directory, including `compiler/`. The user does
+not install a separate .NET runtime or SDK. Host-enabled installers fail if the
+bundled compiler cannot start, before replacing the existing installation.
+
+The worker requires a [.NET 10 supported operating system](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)
+and the relevant native OS dependencies. Supporting the Connector API in Unity
+2020.3 does not imply that the worker runs on every older OS supported by that
+Editor. Older systems can retain v0.2.3, or use source/Python mode with the
+`legacy` backend where that existing setup works.
+
+With a matching Connector, Unity starts the host in the background after startup
+and the service warms the compiler against that project's references. It manages
+multiple projects and stays alive across domain reloads. When all tracked Editors
+are closed and no requests remain, it shuts down after 30 seconds. An update
+registers the new runtime; the previous service exits after outstanding work drains.
+The host uses authenticated loopback communication and keeps its process registry
+separate from Unity heartbeat files.
+
+`unity-bridge status` shows host availability separately; its Unity PID, port,
+state, and Heartbeat age still describe the Editor. Use `--json status` for the
+project's compiler `prewarm_state`. `--backend host` requires the new service,
+`--backend legacy` selects direct communication, and `--backend auto` uses a
+registered compatible host when available. See [backend behavior](COMMANDS.md#execution-backend).
+
+There are no public alpha assets yet. Build and register a local installation
+using [development instructions](DEVELOPMENT.md#independent-host-and-compiler).
+Manually extracting a development archive alone does not register its host;
+register its absolute executable and worker paths as described there. Installing
+only the Python package does not download the compiler runtime.
 
 ## Install A Specific Release
 

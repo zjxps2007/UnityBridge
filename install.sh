@@ -275,6 +275,15 @@ install_standalone() {
 
     step "Verifying downloaded unity-bridge"
     "$candidate" --help >/dev/null
+    has_host=0
+    if [ -n "$runtime" ] && [ -f "${runtime}/host-manifest.json" ]; then
+        if [ ! -x "${runtime}/compiler/UnityBridge.Compiler" ]; then
+            echo "Compiler worker is missing or not executable." >&2
+            exit 1
+        fi
+        "$candidate" _host check-worker --worker "${runtime}/compiler/UnityBridge.Compiler" >/dev/null
+        has_host=1
+    fi
     if [ -n "$runtime" ]; then
         runtime_target="${INSTALL_DIR}/${runtime_name}"
         if [ -e "$runtime_target" ]; then
@@ -288,8 +297,20 @@ install_standalone() {
         fi
     fi
     target="${INSTALL_DIR}/unity-bridge"
+    if [ "$has_host" -eq 1 ] && [ -f "$target" ]; then
+        cp -p "$target" "${stage}/previous"
+    fi
     # Staging is on the same filesystem: readers see either the old or new file.
     mv -f "$candidate" "$target"
+    if [ "$has_host" -eq 1 ]; then
+        if ! "$target" _host register --executable "$target" --worker "${runtime_target}/compiler/UnityBridge.Compiler" >/dev/null; then
+            if [ -f "${stage}/previous" ]; then
+                mv -f "${stage}/previous" "$target"
+            fi
+            echo "Host registration failed. Check access to the user UnityBridge configuration directory." >&2
+            exit 1
+        fi
+    fi
 
     add_path_entry "$INSTALL_DIR"
     PATH="$INSTALL_DIR:$PATH"

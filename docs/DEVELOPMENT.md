@@ -15,10 +15,81 @@ Implementation modules live in `src/unity_bridge/_cli/`.
 | `_cli/updates.py` | Python package updates, scheduling standalone updates, remote versions, and daily notice caching. |
 | `_cli/standalone.py` | Platform/architecture selection and platform-specific installer command construction. |
 | `_cli/versions.py` | Shared version parsing and comparison. |
+| `host/` | Optional local service, authenticated transport, project queues, runtime registration, and compiler process supervision. |
+| `compiler-worker/` (repository root) | Independent Roslyn compiler, its private JSONL protocol, and compiler regression scenarios. |
 
 The `_cli` package is internal. Python integrations should use the client and
 adapter APIs exported by `unity_bridge`. The existing `cli.build_parser` and
 `cli.add_common_options` functions remain available.
+
+## Independent Host And Compiler
+
+The current branch is unreleased **0.3.0-alpha.1**; public **v0.2.3** remains the
+stable baseline. The service runs outside Unity, while the Connector still owns
+Unity API execution on the main thread. A reference context includes the domain
+and reference generation, actual DLL paths/MVIDs, and explicit C# language version.
+No .NET 10 framework references are substituted for Unity's references.
+
+The service starts the compiler process early and schedules one background
+`return null;` compilation per new project context. That warmup DLL is never
+loaded into Unity. Repeated user source reuses parsed/bound compiler preparation
+but emits a unique assembly identity on every invocation. Runtime return values,
+loaded assemblies, and delegates are not cached by the host. Worker cache eviction
+does not unload assemblies already loaded in the Unity domain.
+
+Install Python build dependencies and a .NET 10 SDK. CI pins SDK **10.0.401**;
+Roslyn **5.0.0** is pinned in the compiler project. A workspace SDK can be selected
+with `--dotnet PATH`; users of the built bundle do not install an SDK.
+
+```sh
+python -m pip install -e ".[build]"
+dotnet run --project compiler-worker/UnityBridge.Compiler.Tests --configuration Release
+python scripts/build-compiler.py --runtime win-x64 --output build/compiler/win-x64
+python scripts/build-standalone.py --output-name unity-bridge-windows-amd64.zip --compiler-dir build/compiler/win-x64
+```
+
+For other platforms, use `linux-x64`, `linux-arm64`, `osx-x64`, or `osx-arm64`
+and the matching archive name. `build-standalone.py` builds the native compiler
+automatically when `--compiler-dir` is omitted. `--without-compiler` deliberately
+creates a development bundle that uses direct Connector execution. Build output
+lives under ignored `build/` and `dist/` directories.
+
+To register an editable Python checkout with a built Windows worker:
+
+```powershell
+$python = (Get-Command python).Source
+$worker = (Resolve-Path .\build\compiler\win-x64\UnityBridge.Compiler.exe).Path
+python -m unity_bridge _host register --executable $python --python-module --worker $worker
+python -m unity_bridge _host start
+python -m unity_bridge --backend host exec --code "return 42;"
+```
+
+Use a matching local Connector package and keep Unity open. On macOS/Linux, use
+the absolute Python path and worker executable without `.exe`. For a manually
+unpacked standalone bundle, run its executable's `_host register --executable
+<absolute-cli-path> --worker <absolute-runtime/compiler/UnityBridge.Compiler-path>`
+without `--python-module`. Packaged installers perform this registration themselves.
+`_host` is a private installer/developer interface; `_host status` and `_host stop`
+are available for diagnosis. An open Unity Editor may restart a stopped host.
+
+For isolated tests, set `UNITY_BRIDGE_HOST_HOME` to a temporary directory in both
+Unity's launch environment and the CLI. `--instances-dir` can be supplied when
+registering the test launcher. Never include registry tokens in test reports.
+
+The private protocol and cache limits are documented in
+[compiler-worker/README.md](../compiler-worker/README.md). Preserve these boundaries:
+
+- Host requests retain their original deadline; Unity rechecks it after acquiring
+  the execution lock and before loading an emitted assembly.
+- A changed context can be refreshed before execution. Once dispatch is uncertain,
+  return `unknown` rather than replaying the command. Only a proven `not_started`
+  rejection permits a preparation retry.
+- Live control queries bypass the mutation queue. Host health cannot advance the
+  Unity heartbeat or satisfy live readiness. Existing heartbeat PID/port fields
+  continue to identify Unity; host registration lives in separate files.
+- Token-bearing requests stay on loopback, do not inherit proxies, and do not
+  follow redirects. New runtime registration retires the previous service after
+  its outstanding work drains.
 
 ## Changing a command
 
@@ -71,6 +142,22 @@ unpack it, and exercise the resulting executable. Compare startup with the same
 Python/PyInstaller versions and build mode; source-import timing alone does not
 verify the packaged command. Native Unity checks are described in
 [tests/unity/README.md](../tests/unity/README.md).
+
+For the host branch, include `tests/test_host_service.py`,
+`tests/test_host_compiler.py`, `tests/test_host_registry.py`, and the C# regression
+command above. Exercise duplicate IDs, deadlines before and after queueing,
+compiler failure/restart, reload during preparation, lost responses after
+dispatch, token isolation, and multiple projects. Native checks must cover both
+Unity 2021 and Unity 6; minimum-version API compatibility is a separate check.
+
+The release workflow is configured to build and verify Windows x64, Linux x64
+and ARM64, and macOS Intel and Apple Silicon bundles, including the compiler
+worker. Changing that workflow is not evidence that all platform jobs have run.
+Before enabling a new default route, compare with v0.2.3 using identical projects
+and build dependencies: cold and prewarmed requests, p50/p95 end-to-end latency,
+Editor stalls, resident memory, and installed size. Investigate a normal-command
+p95 regression exceeding the larger of 5% or 10 ms; compiler microbenchmarks
+alone do not establish whole-command improvement.
 
 ## Heartbeat publication
 

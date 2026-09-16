@@ -12,6 +12,8 @@ dist/
 *.egg-info/
 *.spec
 .codex-deps/
+compiler-worker/**/bin/
+compiler-worker/**/obj/
 
 .coverage
 .pytest_cache/

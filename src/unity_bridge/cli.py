@@ -26,6 +26,10 @@ __all__ = ["main", "build_parser", "add_common_options"]
 
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:1] == ["_host"]:
+        from .host import main as host_main
+
+        return host_main(argv[1:])
     direct = is_direct_tool_invocation(argv)
     json_output = direct_json_requested(argv)
     try:
@@ -66,6 +70,7 @@ def _create_client(args: argparse.Namespace) -> UnityClient:
         port=args.port,
         timeout_ms=args.timeout_ms,
         instances_dir=args.instances_dir,
+        backend=getattr(args, "backend", None),
     )
 
 

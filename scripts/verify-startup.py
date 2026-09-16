@@ -64,6 +64,9 @@ def main():
     project = output / 'UnityProject'
     files = subprocess.check_output(['git', 'ls-tree', '-r', '--name-only', options.baseline_ref,
                                      'unity-bridge-connector/Editor'], cwd=REPO, text=True).splitlines()
+    candidate_files = sorted(path.relative_to(REPO).as_posix()
+                             for path in (REPO / 'unity-bridge-connector/Editor').rglob('*')
+                             if path.is_file())
     legacy = subprocess.check_output(['git', 'show', f'{options.baseline_ref}:unity-bridge-connector/Editor/ToolDiscovery.cs'], cwd=REPO).decode()
     baseline_commit = subprocess.check_output(['git', 'rev-parse', options.baseline_ref + '^{commit}'], cwd=REPO, text=True).strip()
     results = []
@@ -79,7 +82,7 @@ def main():
         package.pop('dependencies', None)
         save(package_root / 'package.json', package)
         manifest = {}
-        for name in files:
+        for name in candidate_files if variant == 'candidate' else files:
             relative = Path(name).relative_to('unity-bridge-connector/Editor')
             if 'TestRunner' in relative.parts or relative.name == 'TestRunner.meta':
                 continue

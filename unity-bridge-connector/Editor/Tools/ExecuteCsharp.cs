@@ -195,22 +195,7 @@ namespace UnityBridgeConnector.Tools
                 }
 
                 var bytes = File.ReadAllBytes(outFile);
-                var compiled = Assembly.Load(bytes);
-                var method = compiled.GetType("__CliDynamic")?.GetMethod("Execute");
-                if (method == null)
-                    return new ErrorResponse("Internal error: compiled type or method not found.");
-
-                object result;
-                try
-                {
-                    result = method.Invoke(null, null);
-                }
-                catch (TargetInvocationException tie)
-                {
-                    var inner = tie.InnerException ?? tie;
-                    return new ErrorResponse($"Runtime error: {inner.GetType().Name}: {inner.Message}");
-                }
-                return new SuccessResponse("OK", Serialize(result, 0));
+                return ExecuteAssembly(bytes);
             }
             finally
             {
@@ -218,6 +203,24 @@ namespace UnityBridgeConnector.Tools
                 try { File.Delete(outFile); } catch { }
                 try { File.Delete(rspFile); } catch { }
             }
+        }
+
+        // Every request loads and invokes independently. Do not cache Assembly,
+        // delegate or result objects: snippets may contain mutable static state.
+        internal static object ExecuteAssembly(byte[] bytes)
+        {
+            var compiled = Assembly.Load(bytes);
+            var method = compiled.GetType("__CliDynamic")?.GetMethod("Execute");
+            if (method == null)
+                return new ErrorResponse("Internal error: compiled type or method not found.");
+            object result;
+            try { result = method.Invoke(null, null); }
+            catch (TargetInvocationException tie)
+            {
+                var inner = tie.InnerException ?? tie;
+                return new ErrorResponse($"Runtime error: {inner.GetType().Name}: {inner.Message}");
+            }
+            return new SuccessResponse("OK", Serialize(result, 0));
         }
 
         private static string FindCsc(string cscOverride = null)

@@ -8,8 +8,8 @@ namespace UnityBridgeConnector
 {
     /// <summary>
     /// Routes incoming command requests to the appropriate tool handler.
-    /// All requests are serialized through a single queue to prevent
-    /// race conditions when multiple CLI agents access the same Unity instance.
+    /// Tool execution is serialized to prevent races between CLI agents.
+    /// Readiness and compiler-context controls bypass that execution lock.
     /// </summary>
     public static class CommandRouter
     {
@@ -17,9 +17,37 @@ namespace UnityBridgeConnector
 
         public static async Task<object> Dispatch(string command, JObject parameters)
         {
-            await s_Lock.WaitAsync();
+            return await Dispatch(command, parameters, null);
+        }
+
+        internal static async Task<object> Dispatch(string command, JObject parameters, BridgeRequestContext request)
+        {
+            var rejected = BridgeProtocol.Validate(request);
+            if (rejected != null) return rejected;
+            if (BridgeProtocol.IsInternalCommand(command) && (request == null || !request.Authenticated))
+                return BridgeProtocol.Reject("unauthorized", "Host authentication required.");
+
+            // These controls remain on the Editor thread, but do not wait behind
+            // a long-running asynchronous tool or external compilation request.
+            if (command == "get_editor_state")
+                return await DispatchInternal(command, parameters);
+            if (command == "bridge_context")
+                return BridgeProtocol.CaptureContext();
+
+            if (request?.DeadlineUnixMs != null)
+            {
+                var remaining = request.DeadlineUnixMs.Value - DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+                if (remaining <= 0 || !await s_Lock.WaitAsync((int)Math.Min(remaining, int.MaxValue)))
+                    return BridgeProtocol.Reject("expired", "Request deadline expired while waiting to execute.");
+            }
+            else await s_Lock.WaitAsync();
             try
             {
+                // A timeout/domain change may occur while queued behind another tool.
+                rejected = BridgeProtocol.Validate(request, request != null && request.Authenticated);
+                if (rejected != null) return rejected;
+                if (command == "bridge_exec_assembly")
+                    return BridgeProtocol.ExecuteAssembly(parameters, request);
                 return await DispatchInternal(command, parameters);
             }
             finally

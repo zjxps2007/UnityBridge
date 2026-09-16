@@ -6,7 +6,7 @@ import os
 import time
 import urllib.error
 import urllib.request
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Callable
 
@@ -53,6 +53,10 @@ class Instance:
     connector_version: str = ""
     timestamp: int = 0
     compile_errors: bool = False
+    bridge_protocol: int = 0
+    domain_id: str = ""
+    reference_generation: int = 0
+    host_status: dict[str, Any] | None = None
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Instance":
@@ -65,10 +69,13 @@ class Instance:
             connector_version=str(data.get("connectorVersion", "") or ""),
             timestamp=int(data.get("timestamp") or 0),
             compile_errors=bool(data.get("compileErrors", False)),
+            bridge_protocol=int(data.get("bridgeProtocol") or 0),
+            domain_id=str(data.get("domainId", "") or ""),
+            reference_generation=int(data.get("referenceGeneration") or 0),
         )
 
     def to_dict(self) -> dict[str, Any]:
-        return {
+        payload = {
             "state": self.state,
             "projectPath": self.project_path,
             "port": self.port,
@@ -78,6 +85,12 @@ class Instance:
             "timestamp": self.timestamp,
             "compileErrors": self.compile_errors,
         }
+        if self.bridge_protocol:
+            payload.update(bridgeProtocol=self.bridge_protocol, domainId=self.domain_id,
+                           referenceGeneration=self.reference_generation)
+        if self.host_status is not None:
+            payload["host"] = self.host_status
+        return payload
 
     @property
     def is_active(self) -> bool:
@@ -125,6 +138,7 @@ class UnityClient:
         instances_dir: str | Path | None = None,
         cwd: str | Path | None = None,
         process_checker: ProcessDeadChecker | None = None,
+        backend: str | None = None,
     ) -> None:
         self.project = str(project) if project is not None else ""
         self.port = port
@@ -132,6 +146,9 @@ class UnityClient:
         self.instances_dir = Path(instances_dir) if instances_dir is not None else default_instances_dir()
         self.cwd = Path(cwd) if cwd is not None else None
         self.process_checker = process_checker
+        self.backend = backend or os.environ.get("UNITY_BRIDGE_BACKEND", "auto")
+        if self.backend not in {"auto", "host", "legacy"}:
+            raise DiscoveryError("backend must be auto, host, or legacy")
 
     def scan_instances(self, *, remove_stale: bool = True) -> list[Instance]:
         return scan_instances(
@@ -151,12 +168,18 @@ class UnityClient:
 
     def status(self) -> Instance:
         if self.port is not None:
-            return find_by_port(
+            instance = find_by_port(
                 self.port,
                 instances_dir=self.instances_dir,
                 process_checker=self.process_checker,
             )
-        return self.discover_instance()
+        else:
+            instance = self.discover_instance()
+        if instance.bridge_protocol:
+            from .host import host_status
+
+            instance = replace(instance, host_status=host_status(instance, self.instances_dir))
+        return instance
 
     def call(
         self,
@@ -167,7 +190,21 @@ class UnityClient:
         instance: Instance | None = None,
     ) -> CommandResponse:
         target = instance or self.discover_instance()
-        return send_command(target, command, params, timeout_ms=timeout_ms or self.timeout_ms)
+        timeout = timeout_ms or self.timeout_ms
+        # Explicit compiler overrides retain their direct Connector semantics.
+        compiler_override = command == "exec" and isinstance(params, dict) and any(
+            str(key).casefold() in {"csc", "dotnet"} and value for key, value in params.items()
+        )
+        if self.backend != "legacy" and not compiler_override:
+            if target.bridge_protocol == 1:
+                from .host import try_host_command
+
+                response = try_host_command(target, command, params, timeout, self.instances_dir)
+                if response is not None:
+                    return response
+            if self.backend == "host":
+                raise UnityConnectionError("no compatible UnityBridge host is ready for this Unity instance")
+        return send_command(target, command, params, timeout_ms=timeout)
 
     def wait_for_alive(self, *, timeout_ms: int | None = None) -> Instance:
         return wait_for_alive(

@@ -44,6 +44,10 @@ def _print_instance(instance: Instance) -> None:
     print(f" Connector: {instance.connector_version or 'unknown'}")
     print(f" PID: {instance.pid}")
     print(f" Heartbeat age: {age_label}")
+    if instance.host_status is not None:
+        host = instance.host_status
+        print(f" Host: {host.get('state', 'unavailable')}" +
+              (f" ({host['version']})" if host.get('version') else ""))
     print_connector_version_warning(instance, json_output=False)
 
 
