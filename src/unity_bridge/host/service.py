@@ -15,6 +15,7 @@ from typing import Any
 import uuid
 
 from .compiler import CompilerError, CompilerWorker
+from .context import PreparedContext
 from .registry import (PROTOCOL, atomic_json, endpoint_path, load_launcher, normalized_project,
                        process_alive, read_json)
 from .transport import MAX_MESSAGE_BYTES, TransportError, post
@@ -61,7 +62,7 @@ class Job:
 class Project:
     def __init__(self, snapshot: dict[str, Any]):
         self.snapshot = snapshot
-        self.context: dict[str, Any] | None = None
+        self.context: PreparedContext | None = None
         self.context_key: tuple | None = None
         self.negotiating = False
         self.next_negotiate = 0.
@@ -152,10 +153,11 @@ class HostService:
                     or not isinstance(context.get("references"), list)
                     or not isinstance(context.get("languageVersion"), str)):
                 return
+            prepared = PreparedContext.from_connector(context)
             warm_context = False
             with project.condition:
                 if Project.key(project.snapshot) == key:
-                    project.context = context
+                    project.context = prepared
                     project.context_key = key
                     if project.warmed_key != key:
                         project.warmed_key = key
@@ -164,9 +166,9 @@ class HostService:
                         warm_context = True
                     project.condition.notify_all()
             if warm_context:
-                threading.Thread(target=self._prewarm_context, args=(project, context, key),
+                threading.Thread(target=self._prewarm_context, args=(project, prepared, key),
                                  daemon=True, name="unity-host-reference-prewarm").start()
-        except (TransportError, ValueError, TypeError, OSError):
+        except (TransportError, ValueError, TypeError, KeyError, OSError):
             pass
         finally:
             with project.condition:
@@ -174,7 +176,7 @@ class HostService:
                 project.next_negotiate = time.monotonic() + 1.
             self._write_registry()
 
-    def _prewarm_context(self, project: Project, context: dict[str, Any], key: tuple) -> None:
+    def _prewarm_context(self, project: Project, context: PreparedContext, key: tuple) -> None:
         # Compile an innocuous wrapper only. Its assembly is never loaded into Unity.
         job = Job({"command": "exec", "params": {"code": "return null;"}},
                   time.monotonic() + 30., "prewarm")
@@ -214,7 +216,10 @@ class HostService:
             key = (normalized_project(snapshot["projectPath"]), snapshot["pid"])
             found.add(key)
             with self.projects_lock:
-                project = self.projects.setdefault(key, Project(snapshot))
+                project = self.projects.get(key)
+                if project is None:
+                    project = Project(snapshot)
+                    self.projects[key] = project
             start_negotiation = False
             with project.condition:
                 project.snapshot, project.alive = snapshot, True
@@ -263,7 +268,7 @@ class HostService:
                 pass
             self.stopping.wait(self.scan_interval)
 
-    def _wait_context(self, project: Project, job: Job) -> dict[str, Any] | None:
+    def _wait_context(self, project: Project, job: Job) -> PreparedContext | None:
         with project.condition:
             while not job.done.is_set() and not self.stopping.is_set():
                 remaining = job.deadline - time.monotonic()
@@ -274,11 +279,11 @@ class HostService:
                     return None
                 if (project.snapshot.get("state") not in BUSY_STATES
                         and project.context is not None and project.context_key == Project.key(project.snapshot)):
-                    return dict(project.context)
+                    return project.context
                 project.condition.wait(min(.1, remaining))
         return None
 
-    def _compile(self, context: dict[str, Any], job: Job) -> dict[str, Any]:
+    def _compile(self, context: PreparedContext, job: Job) -> dict[str, Any]:
         params = job.payload.get("params") or {}
         if not isinstance(params, dict):
             raise CompilerError("compile_error", "exec parameters must be an object")
@@ -292,13 +297,11 @@ class HostService:
             usings = usings.split(",")
         if not isinstance(usings, list) or any(not isinstance(item, str) for item in usings):
             raise CompilerError("compile_error", "Additional using directives must be strings")
-        references = context["references"]
-        identity = sorted((str(ref["path"]), str(ref["mvid"])) for ref in references)
-        generation = hashlib.sha256(json.dumps(identity, separators=(",", ":")).encode()).hexdigest()
+        generation = context.compiler_reference_generation
         result = self.compiler.request({
             "operation": "compile", "code": code, "usings": usings,
-            "language_version": context["languageVersion"], "references": references,
-            "project_id": normalized_project(context["projectPath"]),
+            "language_version": context.language_version, "references": context.references,
+            "project_id": context.project_id,
             "reference_generation": generation, "fresh_identity": True,
         }, deadline=job.deadline)
         if (result.get("reference_generation") != generation
@@ -339,8 +342,8 @@ class HostService:
             with project.condition:
                 snapshot = dict(project.snapshot)
                 context_stale = (project.context_key != Project.key(snapshot)
-                                 or context.get("domainId") != snapshot.get("domainId")
-                                 or context.get("referenceGeneration") != snapshot.get("referenceGeneration"))
+                                 or context.domain_id != snapshot.get("domainId")
+                                 or context.reference_generation != snapshot.get("referenceGeneration"))
             if context_stale:
                 if attempt == 0:
                     continue
@@ -363,7 +366,7 @@ class HostService:
                 "command": forwarded_command, "params": forwarded_params,
                 "request_id": job.payload["request_id"],
                 "deadline_unix_ms": min(job.payload["deadline_unix_ms"], int(time.time() * 1000 + remaining * 1000)),
-                "domain_id": context["domainId"], "reference_generation": context["referenceGeneration"],
+                "domain_id": context.domain_id, "reference_generation": context.reference_generation,
             }
             try:
                 response = post(snapshot["port"], self.descriptor["token"], "/command", forwarded, remaining)

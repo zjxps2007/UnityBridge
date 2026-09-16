@@ -157,7 +157,12 @@ def main():
             raise RuntimeError("Unity exited; inspect unity.log")
         if heartbeat_file is not None:
             # Use the client reader's bounded Windows atomic-replacement retries.
-            return json.loads(_read_instance_text(heartbeat_file))
+            try:
+                return json.loads(_read_instance_text(heartbeat_file))
+            except FileNotFoundError:
+                # A domain reload removes the previous heartbeat before the new
+                # listener publishes it again. The readiness poll must continue.
+                return {}
         for path in (Path.home() / ".unity-bridge/instances").glob("*.json"):
             value = read(path)
             if value and value.get("pid") == process.pid and value.get("projectPath", "").casefold() == project.as_posix().casefold():
@@ -228,6 +233,14 @@ def main():
             return {"connector_http": status, "host_http": host_status}
         check("authentication", authentication)
 
+        def main_thread_results():
+            hosted = require_success(host("host_audit_main_thread"))
+            legacy = require_success(direct("host_audit_main_thread", auth=False)[1])
+            assert hosted == legacy, (hosted, legacy)
+            assert Path(hosted["projectDataPath"]).resolve() == (project / "Assets").resolve(), hosted
+            return hosted
+        check("async_tool_and_result_getters_on_main_thread", main_thread_results)
+
         def cli_routing():
             response = subprocess.run(cli + ["--json", "--no-update-check", "--project", str(project),
                                              "exec", "--code", "return 20 + 22;"],
@@ -284,6 +297,32 @@ def main():
             assert after == before + 1, (before, after)
             return {"before": before, "after": after, "control_state": control["instance"]["state"], "expired": expired}
         check("control_bypass_and_no_late_side_effect", queued_deadline)
+
+        def queued_listener_restart():
+            before = require_success(direct("host_audit_counter", auth=False)[1])
+            ready_marker = project / "host-audit-listener-gate-ready"
+            audit_result = project / "host-audit-listener-restart.json"
+            ready_marker.unlink(missing_ok=True)
+            audit_result.unlink(missing_ok=True)
+            # Submit once through the real HTTP listener. Closing that listener
+            # may lose its response; the driver never retries this accepted work.
+            gated = pool.submit(direct, "host_audit_listener_gate", auth=False, seconds=20)
+            wait_for(ready_marker.is_file, 10)
+            assert not gated.done(), "The HTTP gate did not remain blocked"
+            (project / "host-audit-listener-restart-request").write_text("restart", encoding="utf-8")
+            audit = wait_for(lambda: read(audit_result), 15)
+            assert "error" not in audit, audit
+            assert audit["queuedBeforeStop"] and audit["listenerRestarted"], audit
+            assert audit["before"] == audit["after"] == before and audit["gateEntries"] == 1, audit
+            try:
+                status, response = gated.result(timeout=5)
+                delivery = {"http_status": status, "response": response}
+            except (OSError, http.client.HTTPException, ValueError) as error:
+                delivery = {"response_lost": type(error).__name__}
+            ready(timeout=15)
+            assert require_success(direct("host_audit_counter", auth=False)[1]) == before
+            return {"audit": audit, "accepted_gate_delivery": delivery, "fresh_http_request_succeeded": True}
+        check("queued_old_listener_request_never_executes_after_restart", queued_listener_restart)
 
         def while_compiling():
             code = "return 42; } " + " ".join(f"public static int M{i}() => {i};" for i in range(6000)) + " public static object Tail() { return null;"

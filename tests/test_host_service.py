@@ -19,6 +19,7 @@ import uuid
 from unity_bridge.client import Instance
 from unity_bridge.host import host_status, try_host_command
 from unity_bridge.host.compiler import CompilerError
+from unity_bridge.host.context import PreparedContext
 from unity_bridge.host.registry import atomic_json, endpoint_path, register_launcher
 from unity_bridge.host.service import HostService
 from unity_bridge.host.transport import TransportError, post
@@ -238,6 +239,26 @@ class HostServiceTests(unittest.TestCase):
             self.service.scan_once()
         self.assertEqual(len(self.compiler.calls), 1)
         self.assertEqual(self.executed, [])
+
+    def test_exec_reuses_prepared_context_until_reference_generation_changes(self):
+        project = self.service._project_list()[0]
+        initial = project.context
+        with patch.object(PreparedContext, "from_connector", wraps=PreparedContext.from_connector) as prepare:
+            for code in ("first-exec", "second-exec"):
+                self.assertTrue(self.call("exec", params={"code": code})["success"])
+            prepare.assert_not_called()
+            self.assertIs(project.context, initial)
+            self.assertTrue(all(call["fresh_identity"] for call in self.compiler.calls))
+            self.assertTrue(all(call["reference_generation"] == initial.compiler_reference_generation
+                                for call in self.compiler.calls))
+            self.snapshot["referenceGeneration"] += 1
+            self.publish_snapshot()
+            eventually(lambda: project.context is not initial)
+            eventually(lambda: project.prewarm_state == "ready")
+            self.assertEqual(prepare.call_count, 1)
+            self.assertTrue(self.call("exec", params={"code": "after-ref-change"})["success"])
+            self.assertEqual(prepare.call_count, 1)
+        self.assertEqual(self.executed, ["first-exec", "second-exec", "after-ref-change"])
 
     def test_proven_not_started_stale_domain_can_retry_but_executes_once(self):
         self.reject_stale_once = True

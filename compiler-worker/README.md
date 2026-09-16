@@ -68,6 +68,12 @@ DLLs during rebuilds. Missing, changed, or unreadable references fail before
 emission. Compilation keys include source, language/options, compiler and
 wrapper version, project ID, and ordered absolute reference paths/MVIDs.
 
+`MetadataReferenceCache` owns reference loading and identity checks. A cold load
+reads one image and shares its immutable bytes between MVID validation and Roslyn;
+a cache hit still reads the file's actual MVID. `BoundedCache` handles retention
+separately from compilation, so changing eviction policy does not change identity
+validation or emitted assembly isolation.
+
 `fresh_identity` defaults to `true`: cached parsing/binding is reused, but each
 call emits a unique assembly name to preserve per-call type and static-state
 isolation. Only explicit `false` permits byte-identical DLL reuse. `cache_hit`

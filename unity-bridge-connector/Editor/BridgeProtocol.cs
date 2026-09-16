@@ -18,6 +18,7 @@ namespace UnityBridgeConnector
         internal string DomainId;
         internal long? ReferenceGeneration;
         internal bool Authenticated;
+        internal CancellationToken ListenerCancellation;
     }
 
     internal static class BridgeProtocol
@@ -56,6 +57,11 @@ namespace UnityBridgeConnector
         internal static ErrorResponse Validate(BridgeRequestContext request, bool requireReady = false)
         {
             if (request == null) return null;
+            // Parsing can overlap a listener restart, or a command can still be
+            // waiting for the execution lock. Its old connection cannot authorize
+            // execution after the listener that accepted it has stopped.
+            if (request.ListenerCancellation.IsCancellationRequested)
+                return Reject("not_ready", "Unity connector is stopping.");
             if (request.DeadlineUnixMs.HasValue &&
                 DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() >= request.DeadlineUnixMs.Value)
                 return Reject("expired", "Request deadline expired before execution.");

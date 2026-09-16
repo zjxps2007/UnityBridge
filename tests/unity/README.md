@@ -58,7 +58,8 @@ and failing sessions are written before the runner exits.
 isolated host registry. It checks real external compilation, authentication,
 static-state isolation, stale references/domains, deadlines inside the execution
 lock, control requests during queued work, compiler errors, reload recovery, and
-play/pause readiness. It starts and closes only the processes it owns.
+play/pause readiness. Asynchronous handlers and custom result getters must both
+remain on the Unity main thread. It starts and closes only the processes it owns.
 
 ```powershell
 python scripts/verify-host.py --unity-editor "C:/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Unity.exe" --unity-version 6000.3.13f1 --worker "path/to/compiler/UnityBridge.Compiler.exe" --cli-exe "path/to/unity-bridge.exe" --stale-host-registry --output .codex-deps/host-native-unity6
@@ -79,6 +80,11 @@ Those gaps are batch-mode observations, not GUI/game frame-time measurements.
 ```powershell
 python scripts/benchmark-host.py --unity-editor "C:/Program Files/Unity/Hub/Editor/6000.3.13f1/Editor/Unity.exe" --unity-version 6000.3.13f1 --baseline-bin "path/to/v0.2.3/unity-bridge.exe" --candidate-bin "path/to/candidate/unity-bridge.exe" --output .codex-deps/host-benchmark-unity6
 ```
+
+To compare two external-host builds, add `--baseline-host --baseline-ref <commit>`
+and supply the matching baseline executable. Both variants then register/start
+their own host and perform the same cold and prewarm-only sequences. Without
+this flag the baseline retains the legacy path used for the v0.2.3 comparison.
 
 The result file records the ordinary-command gate: candidate p95 may not exceed
 baseline by more than `max(5% of baseline, 10 ms)`. A functional pass alone does

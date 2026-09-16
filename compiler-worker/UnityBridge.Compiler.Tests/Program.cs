@@ -98,6 +98,33 @@ try
         Check(engine.Process(Request("return 1;", providedReferences: [new ReferenceIdentity(Path.Combine(temporary, "missing.dll"), Guid.NewGuid().ToString())])).ErrorCode == "stale_reference", "Deleted references require refresh.");
     });
 
+    Test("Uncached references reject a stale identity before emission", () =>
+    {
+        var staleReferences = references.Select(reference => reference.Path == fixturePath
+            ? new ReferenceIdentity(reference.Path, Guid.NewGuid().ToString()) : reference).ToArray();
+        var result = new CompilerEngine().Process(Request("return Fixture.Value;", providedReferences: staleReferences));
+        Check(result.ErrorCode == "stale_reference" && result.AssemblyBase64 is null, "Cold reference load validates the image sent to Roslyn.");
+        Check(result.Error == "Unity reference changed: " + fixturePath, "Reference-change diagnostic is preserved.");
+    });
+
+    Test("Cached references release files and reject deletion or corruption", () =>
+    {
+        const string code = "return Fixture.Value + 3;";
+        Check(engine.Process(Request(code, freshIdentity: false)).Success, "Fixture is cached before mutation.");
+        var original = File.ReadAllBytes(fixturePath);
+        var timestamp = File.GetLastWriteTimeUtc(fixturePath);
+        using (File.Open(fixturePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
+        File.Delete(fixturePath);
+        Check(engine.Process(Request(code, freshIdentity: false)).ErrorCode == "stale_reference", "Compilation cache cannot hide a deleted reference.");
+        File.WriteAllBytes(fixturePath, [0, 1, 2, 3]);
+        File.SetLastWriteTimeUtc(fixturePath, timestamp);
+        Check(engine.Process(Request(code, freshIdentity: false)).ErrorCode == "stale_reference", "Compilation cache cannot hide a corrupt reference with the same timestamp.");
+        File.WriteAllBytes(fixturePath, original);
+        File.SetLastWriteTimeUtc(fixturePath, timestamp);
+        var restored = engine.Process(Request(code, freshIdentity: false));
+        Check(restored.Success && restored.CacheHit && restored.EmitReused, "Restoring the same identity safely reuses cached compilation bytes.");
+    });
+
     Test("Worker never executes compiled code", () =>
     {
         var sentinel = Path.Combine(temporary, "must-not-exist.txt");

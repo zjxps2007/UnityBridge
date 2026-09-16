@@ -2,6 +2,7 @@
 using System;
 using System.Reflection;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -16,6 +17,7 @@ public static class HostConnectorAudit
     static readonly Type Context = Connector.GetType("UnityBridgeConnector.BridgeRequestContext", true);
     const BindingFlags InternalStatic = BindingFlags.Static | BindingFlags.NonPublic;
     public static int Executions;
+    public static readonly int MainThreadId = Thread.CurrentThread.ManagedThreadId;
 
     static HostConnectorAudit()
     {
@@ -42,6 +44,62 @@ public static class HostConnectorAudit
                 File.WriteAllText(Path.Combine(root, "host-audit-readiness.json"), JsonConvert.SerializeObject(new { error = error.ToString() }));
             }
         };
+        EditorApplication.update += () =>
+        {
+            var requestPath = Path.Combine(root, "host-audit-listener-restart-request");
+            if (!File.Exists(requestPath)) return;
+            File.Delete(requestPath);
+            _ = CheckQueuedListenerCancellation(root);
+        };
+    }
+
+    static async Task CheckQueuedListenerCancellation(string root)
+    {
+        object result;
+        try
+        {
+            Require(HostConnectorListenerGateTool.Waiting, "The real HTTP gate did not acquire the execution lock");
+            var before = Executions;
+            var source = (CancellationTokenSource)typeof(HttpServer).GetField("s_Cts", InternalStatic).GetValue(null);
+            var previousListener = typeof(HttpServer).GetField("s_Listener", InternalStatic).GetValue(null);
+            var token = source.Token;
+            Require(!token.IsCancellationRequested, "Listener was already stopped before queuing");
+            var request = Activator.CreateInstance(Context, true);
+            Context.GetField("ListenerCancellation", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(request, token);
+            Context.GetField("DeadlineUnixMs", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(request, (long?)(DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + 10000));
+            // Invoke on the main thread with the actual accepting listener's token.
+            // The real HTTP gate above holds the lock, so this call deterministically
+            // passes initial validation and suspends at the execution lock.
+            var dispatch = typeof(CommandRouter).GetMethod("Dispatch", InternalStatic, null,
+                new[] { typeof(string), typeof(JObject), Context }, null);
+            var waiting = (Task<object>)dispatch.Invoke(null,
+                new object[] { "host_audit_counter", new JObject { ["increment"] = true }, request });
+            Require(!waiting.IsCompleted, "Counter mutation did not wait behind the HTTP gate");
+
+            typeof(HttpServer).GetMethod("StopListener", InternalStatic).Invoke(null, null);
+            Require(token.IsCancellationRequested, "Stopping the listener did not cancel its requests");
+            typeof(HttpServer).GetMethod("Start", InternalStatic).Invoke(null, null);
+            Require(HttpServer.IsRunning && !ReferenceEquals(previousListener,
+                typeof(HttpServer).GetField("s_Listener", InternalStatic).GetValue(null)), "Listener did not restart");
+            HostConnectorListenerGateTool.Release();
+            var rejected = JObject.FromObject(await waiting);
+            Require((bool)rejected["success"] == false &&
+                (string)rejected["data"]["reason"] == "not_ready" &&
+                (string)rejected["data"]["completion"] == "not_started", "Old listener waiter was not rejected after acquiring the lock");
+            Require(Executions == before, "Old listener waiter mutated state after restart");
+            result = new { before, after = Executions, queuedBeforeStop = true, listenerRestarted = true,
+                gateEntries = HostConnectorListenerGateTool.Entries, rejected };
+        }
+        catch (Exception error)
+        {
+            result = new { error = error.ToString() };
+        }
+        finally
+        {
+            HostConnectorListenerGateTool.Release();
+        }
+        File.WriteAllText(Path.Combine(root, "host-audit-listener-restart.json"), JsonConvert.SerializeObject(result));
     }
 
     public static object Validate()
@@ -52,6 +110,17 @@ public static class HostConnectorAudit
         CheckRejection("expired", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - 1, domain, generation);
         CheckRejection("stale_domain", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + 10000, "previous-domain", generation);
         CheckRejection("stale_references", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() + 10000, domain, generation - 1);
+        using (var cancellation = new CancellationTokenSource())
+        {
+            var stoppedRequest = Activator.CreateInstance(Context, true);
+            Context.GetField("ListenerCancellation", BindingFlags.Instance | BindingFlags.NonPublic)
+                .SetValue(stoppedRequest, cancellation.Token);
+            cancellation.Cancel();
+            var rejected = JObject.FromObject(Protocol.GetMethod("Validate", InternalStatic)
+                .Invoke(null, new object[] { stoppedRequest, false }));
+            Require((string)rejected["data"]["reason"] == "not_ready" &&
+                (string)rejected["data"]["completion"] == "not_started", "Stopped listener allowed execution");
+        }
         var captured = JObject.FromObject(Protocol.GetMethod("CaptureContext", InternalStatic).Invoke(null, null));
         Require((bool)captured["success"], "Context failed");
         Require((int)captured["data"]["protocol"] == 1, "Protocol mismatch");
@@ -99,6 +168,68 @@ public static class HostConnectorAudit
     static void Require(bool valid, string message)
     {
         if (!valid) throw new Exception(message);
+    }
+}
+
+[UnityBridgeTool(Name = "host_audit_listener_gate")]
+public static class HostConnectorListenerGateTool
+{
+    static TaskCompletionSource<bool> s_Release;
+    public static bool Waiting { get; private set; }
+    public static int Entries { get; private set; }
+
+    public static async Task<object> HandleCommand(JObject parameters)
+    {
+        s_Release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        Waiting = true;
+        Entries++;
+        var root = Path.GetDirectoryName(UnityEngine.Application.dataPath);
+        File.WriteAllText(Path.Combine(root, "host-audit-listener-gate-ready"), Entries.ToString());
+        try
+        {
+            // Bound a broken fixture so the audit cannot hold the execution lock forever.
+            if (await Task.WhenAny(s_Release.Task, Task.Delay(15000)) != s_Release.Task)
+                throw new Exception("Listener restart audit did not release the HTTP gate.");
+            return new SuccessResponse("Listener gate released");
+        }
+        finally { Waiting = false; }
+    }
+
+    public static void Release() => s_Release?.TrySetResult(true);
+}
+
+[UnityBridgeTool(Name = "host_audit_main_thread")]
+public static class HostConnectorMainThreadTool
+{
+    public static async Task<object> HandleCommand(JObject parameters)
+    {
+        RequireMainThread();
+        await Task.Delay(20);
+        RequireMainThread();
+        return new SuccessResponse("Main-thread result", new MainThreadResult());
+    }
+
+    static void RequireMainThread()
+    {
+        if (Thread.CurrentThread.ManagedThreadId != HostConnectorAudit.MainThreadId)
+            throw new Exception("Tool execution or serialization left the Unity main thread.");
+    }
+
+    sealed class MainThreadResult
+    {
+        public string projectDataPath
+        {
+            get
+            {
+                RequireMainThread();
+                // A custom result getter is allowed to use Unity APIs.
+                return UnityEngine.Application.dataPath;
+            }
+        }
+        public int threadId
+        {
+            get { RequireMainThread(); return Thread.CurrentThread.ManagedThreadId; }
+        }
     }
 }
 

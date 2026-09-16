@@ -1,8 +1,10 @@
 from pathlib import Path
 import sys
 import tempfile
+import threading
 import time
 import unittest
+from unittest.mock import patch
 
 from unity_bridge.host.compiler import CompilerError, CompilerWorker
 
@@ -65,6 +67,57 @@ class CompilerWorkerTests(unittest.TestCase):
         self.assertLess(time.monotonic() - started, 3)
         self.assertIsNone(self.worker.process)
         self.worker.argv = original_argv
+        self.assertTrue(self.worker.prewarm()["success"])
+
+    def test_started_watchdog_finishes_before_request_releases_worker(self):
+        self.worker.prewarm()
+        callback_started = threading.Event()
+        callback_release = threading.Event()
+        cancellation_requested = threading.Event()
+        request_finished = threading.Event()
+        errors = []
+
+        class StartedWatchdog(threading.Thread):
+            # Simulate Timer.run having passed its cancellation check just before
+            # the response arrives, but not yet entered the timeout callback.
+            def __init__(self, interval, callback):
+                super().__init__()
+                self.callback = callback
+
+            def run(self):
+                callback_started.set()
+                callback_release.wait(5)
+                self.callback()
+
+            def start(self):
+                super().start()
+                if not callback_started.wait(2):
+                    raise RuntimeError("Fixture watchdog did not start")
+
+            def cancel(self):
+                cancellation_requested.set()
+
+        def request():
+            try:
+                self.worker.prewarm()
+            except CompilerError as exc:
+                errors.append(exc)
+            finally:
+                request_finished.set()
+
+        with patch("unity_bridge.host.compiler.threading.Timer", StartedWatchdog):
+            thread = threading.Thread(target=request)
+            thread.start()
+            try:
+                self.assertTrue(cancellation_requested.wait(2))
+                self.assertFalse(request_finished.wait(.1), "Started timeout callback must finish before another request can use the worker")
+                self.assertTrue(self.worker.lock.locked())
+            finally:
+                callback_release.set()
+                thread.join(3)
+        self.assertFalse(thread.is_alive())
+        self.assertEqual([error.code for error in errors], ["compiler_timeout"])
+        self.assertIsNone(self.worker.process)
         self.assertTrue(self.worker.prewarm()["success"])
 
 

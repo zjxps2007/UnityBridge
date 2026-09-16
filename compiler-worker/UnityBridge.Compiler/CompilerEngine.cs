@@ -1,6 +1,3 @@
-using System.Collections.Immutable;
-using System.Reflection.Metadata;
-using System.Reflection.PortableExecutable;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.CodeAnalysis;
@@ -19,7 +16,7 @@ public sealed class CompilerEngine
         "System.Threading.Tasks", "UnityEngine", "UnityEngine.SceneManagement", "UnityEditor",
         "UnityEditor.SceneManagement", "UnityEditorInternal",
     ];
-    private readonly BoundedCache<ReferenceEntry> references = new(512, 256L * 1024 * 1024);
+    private readonly MetadataReferenceCache references = new();
     // Weight includes references (conservatively counting shared images more than once).
     private readonly BoundedCache<CompilationEntry> compilations = new(64, 256L * 1024 * 1024);
 
@@ -64,7 +61,7 @@ public sealed class CompilerEngine
     private CompileResponse Compile(CompileRequest request, LanguageVersion languageVersion)
     {
         var source = BuildSource(request.Code!, request.Usings);
-        var referenceEntries = new List<ReferenceEntry>(request.References.Length);
+        var referenceEntries = new List<MetadataReferenceEntry>(request.References.Length);
         var identities = new List<string>(request.References.Length);
         foreach (var reference in request.References)
         {
@@ -73,28 +70,9 @@ public sealed class CompilerEngine
                 return Fail(request, "invalid_request", "Each Unity reference requires a path and valid MVID.");
             if (!Path.IsPathFullyQualified(reference.Path))
                 return Fail(request, "invalid_request", "Unity reference paths must be absolute.");
-            var path = Path.GetFullPath(reference.Path);
-            var key = (OperatingSystem.IsWindows() ? path.ToUpperInvariant() : path) + "|" + expectedMvid.ToString("N");
-            // Always read the actual MVID, including cache hits: timestamps can be preserved by a rebuild.
-            using (var stream = File.Open(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete))
-            using (var pe = new PEReader(stream))
-            {
-                if (!pe.HasMetadata || ReadMvid(pe) != expectedMvid)
-                    throw new StaleReferenceException("Unity reference changed: " + path);
-            }
-            if (!references.TryGet(key, out var entry))
-            {
-                var bytes = File.ReadAllBytes(path);
-                using (var pe = new PEReader(ImmutableArray.Create(bytes)))
-                {
-                    if (!pe.HasMetadata || ReadMvid(pe) != expectedMvid)
-                        throw new StaleReferenceException("Unity reference changed while reading: " + path);
-                }
-                entry = new ReferenceEntry(MetadataReference.CreateFromImage(ImmutableArray.Create(bytes), filePath: path), bytes.LongLength);
-                references.Add(key, entry, entry.Weight);
-            }
+            var entry = references.Get(reference.Path, expectedMvid);
             referenceEntries.Add(entry);
-            identities.Add(key);
+            identities.Add(entry.Identity);
         }
 
         var keyBytes = Encoding.UTF8.GetBytes(string.Join("\0", new[]
@@ -156,12 +134,6 @@ public sealed class CompilerEngine
             .Append(code).Append("\n  }\n}\n").ToString();
     }
 
-    private static Guid ReadMvid(PEReader pe)
-    {
-        var metadata = pe.GetMetadataReader();
-        return metadata.GetGuid(metadata.GetModuleDefinition().Mvid);
-    }
-
     private static string NewAssemblyName() => "UnityBridgeExec_" + Guid.NewGuid().ToString("N");
 
     private static CompilerDiagnostic FormatDiagnostic(Diagnostic diagnostic)
@@ -186,54 +158,11 @@ public sealed class CompilerEngine
             ReferenceGeneration = request.ReferenceGeneration, Diagnostics = diagnostics ?? [],
         };
 
-    private sealed record ReferenceEntry(PortableExecutableReference Reference, long Weight);
-
     private sealed class CompilationEntry(CSharpCompilation compilation, long weight)
     {
         public CSharpCompilation Compilation { get; } = compilation;
         public long Weight { get; } = weight;
         public byte[]? EmittedBytes { get; set; }
         public CompilerDiagnostic[] Diagnostics { get; set; } = [];
-    }
-
-    private sealed class StaleReferenceException(string message) : Exception(message);
-}
-
-internal sealed class BoundedCache<T>(int capacity, long maxBytes) where T : class
-{
-    private readonly Dictionary<string, LinkedListNode<(string Key, T Value, long Weight)>> entries = new(StringComparer.Ordinal);
-    private readonly LinkedList<(string Key, T Value, long Weight)> lru = new();
-    private long bytes;
-
-    public bool TryGet(string key, out T value)
-    {
-        if (entries.TryGetValue(key, out var node))
-        {
-            lru.Remove(node);
-            lru.AddLast(node);
-            value = node.Value.Value;
-            return true;
-        }
-        value = null!;
-        return false;
-    }
-
-    public void Add(string key, T value, long weight)
-    {
-        if (entries.Remove(key, out var existing))
-        {
-            bytes -= existing.Value.Weight;
-            lru.Remove(existing);
-        }
-        if (weight > maxBytes) return;
-        while (entries.Count >= capacity || bytes + weight > maxBytes)
-        {
-            var oldest = lru.First!;
-            bytes -= oldest.Value.Weight;
-            entries.Remove(oldest.Value.Key);
-            lru.RemoveFirst();
-        }
-        entries[key] = lru.AddLast((key, value, weight));
-        bytes += weight;
     }
 }

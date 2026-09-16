@@ -1,4 +1,4 @@
-"""Compare standalone v0.2.3 and the external host in disposable native Unity projects.
+"""Compare standalone builds in disposable native Unity projects.
 
 Records process-to-response latency, Editor update gaps, Windows working sets and
 installation size. Batch-mode update gaps are not interactive GUI frame timings.
@@ -72,6 +72,8 @@ def main():
     parser.add_argument("--baseline-bin", required=True, type=Path)
     parser.add_argument("--candidate-bin", required=True, type=Path)
     parser.add_argument("--baseline-ref", default="v0.2.3")
+    parser.add_argument("--baseline-host", action="store_true",
+                        help="Use the external host in both builds (baseline defaults to legacy)")
     parser.add_argument("--variants", nargs="+", choices=["baseline", "candidate"],
                         default=["baseline", "candidate", "candidate", "baseline"])
     parser.add_argument("--samples", default=40, type=int)
@@ -83,12 +85,14 @@ def main():
     if any(output.iterdir()):
         parser.error("Use an empty output directory to preserve previous evidence")
     unity = args.unity_editor.resolve()
-    results = {"unity_version": args.unity_version, "baseline_ref": args.baseline_ref, "sessions": [],
+    results = {"unity_version": args.unity_version, "baseline_ref": args.baseline_ref,
+               "baseline_host": args.baseline_host, "sessions": [],
                "scope": "Windows, empty projects, batchmode/nographics, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms"}
     files = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", args.baseline_ref,
                                      "unity-bridge-connector/Editor"], cwd=REPO, text=True).splitlines()
     candidate_files = [p.relative_to(REPO).as_posix() for p in (REPO / "unity-bridge-connector/Editor").rglob("*") if p.is_file()]
     for number, variant in enumerate(args.variants, 1):
+        use_host = variant == "candidate" or args.baseline_host
         folder = output / f"{number}-{variant}"
         project = folder / "UnityProject"
         editor = project / "Assets/Editor"
@@ -174,8 +178,8 @@ def main():
                         return value
                 return None
             row["initial_heartbeat"] = wait(heartbeat)
-            backend = "host" if variant == "candidate" else None
-            if variant == "candidate":
+            backend = "host" if use_host else None
+            if use_host:
                 runtime = next(executable.parent.glob("_unity_bridge_runtime_*"))
                 worker = runtime / "compiler/UnityBridge.Compiler.exe"
                 response = subprocess.run([str(executable), "_host", "register", "--executable", str(executable),
@@ -183,17 +187,17 @@ def main():
                 assert response.returncode == 0, response.stderr
                 descriptor = read(folder / "host/launcher.json")
             cold_start = time.perf_counter()
-            if variant == "candidate":
+            if use_host:
                 response = subprocess.run([str(executable), "_host", "start"], env=env, capture_output=True, text=True, timeout=30)
                 assert response.returncode == 0, response.stderr
                 wait(lambda: any(p.get("pid") == unity_process.pid for p in registry().get("projects", [])), 40)
             assert call("first_exec", "exec", "--code", "return 40 + 2;", backend=backend)["data"] == 42
             row["cold_service_to_first_result_ms"] = (time.perf_counter() - cold_start) * 1000
-            if variant == "candidate":
+            if use_host:
                 wait(lambda: all(p.get("prewarmState") == "ready" for p in registry().get("projects", [])), 40)
                 row["host_before"] = host_request("/health")
             assert call("warmed_new_snippet", "exec", "--code", "return 42 + 1;", backend=backend)["data"] == 43
-            if variant == "candidate":
+            if use_host:
                 # A fresh worker that has only performed automatic harmless
                 # reference preparation, and has never compiled a user request.
                 previous_pid = registry()["pid"]
@@ -217,7 +221,7 @@ def main():
                 assert call("repeat_exec", "exec", "--code", "return 123;", backend=backend)["data"] == 123
             row["exec_editor_gaps"] = call("frame_exec_stop", "call", "host_performance_audit", "--params", '{"action":"stop"}', backend=backend)["data"]["gaps_ms"]
             row["unity_working_set_bytes"] = working_set(unity_process.pid)
-            if variant == "candidate":
+            if use_host:
                 info = host_request("/health")
                 row["host_after"] = info
                 row["host_working_set_bytes"] = working_set(registry()["pid"])

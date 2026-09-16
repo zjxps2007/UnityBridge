@@ -4,8 +4,6 @@ import ctypes
 import json
 import os
 import time
-import urllib.error
-import urllib.request
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from typing import Any, Callable
@@ -33,7 +31,7 @@ class UnityConnectionError(UnityBridgeError):
 
 
 class UnityHttpError(UnityConnectionError):
-    """Raised when the Unity Connector returns a non-200 HTTP response."""
+    """Raised when the Unity Connector returns a non-success HTTP response."""
 
     def __init__(self, status_code: int, body: str, command: str) -> None:
         detail = body or f"HTTP {status_code} from Unity (command: {command})"
@@ -428,26 +426,30 @@ def send_command(
     *,
     timeout_ms: int = DEFAULT_TIMEOUT_MS,
 ) -> CommandResponse:
+    from http.client import HTTPConnection
+
     if params is None:
         params = {}
     body = json.dumps({"command": command, "params": params}).encode("utf-8")
-    request = urllib.request.Request(
-        f"http://127.0.0.1:{instance.port}/command",
-        data=body,
-        headers={"Content-Type": "application/json"},
-        method="POST",
-    )
+    # This endpoint is always loopback HTTP. A generic urllib opener also sets
+    # up HTTPS/certificates on a fresh CLI process. Use one direct connection,
+    # without consulting proxies or following redirects that could replay work.
+    connection = HTTPConnection("127.0.0.1", instance.port, timeout=timeout_ms / 1000)
     try:
-        with urllib.request.urlopen(request, timeout=timeout_ms / 1000) as response:
+        connection.request("POST", "/command", body=body,
+                           headers={"Content-Type": "application/json", "Connection": "close"})
+        with connection.getresponse() as response:
+            if not 200 <= response.status < 300:
+                try:
+                    error_body = response.read().decode("utf-8", errors="replace")
+                except OSError:
+                    error_body = ""
+                raise UnityHttpError(response.status, error_body, command)
             response_body = response.read()
-    except urllib.error.HTTPError as exc:
-        try:
-            error_body = exc.read().decode("utf-8", errors="replace")
-        except OSError:
-            error_body = ""
-        raise UnityHttpError(exc.code, error_body, command) from exc
     except (OSError, TimeoutError) as exc:
         raise UnityConnectionError(f"cannot connect to Unity at port {instance.port}: {exc}") from exc
+    finally:
+        connection.close()
 
     if not response_body:
         return CommandResponse(

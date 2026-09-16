@@ -35,17 +35,17 @@ namespace UnityBridgeConnector
         static string s_LastFailureMessage;
         static double s_LastFailureLogTime;
         static bool s_Stopping;
-        static bool s_RestartPending;
         static int s_QueueDrainPosted;
 
         static readonly ConcurrentQueue<WorkItem> s_Queue = new ConcurrentQueue<WorkItem>();
+        static readonly ConcurrentQueue<HttpListener> s_FailedListeners = new ConcurrentQueue<HttpListener>();
 
         struct WorkItem
         {
             public string Command;
             public JObject Parameters;
             public BridgeRequestContext Request;
-            public TaskCompletionSource<object> Tcs;
+            public TaskCompletionSource<string> Tcs;
         }
 
         static HttpServer()
@@ -98,7 +98,10 @@ namespace UnityBridgeConnector
                 ClearRetry();
                 ClearStartFailure();
 
-                _ = ListenLoop(listener, cts);
+                // Network continuations must not wait for another Editor update.
+                // Only dispatch and result serialization cross to the main thread.
+                var token = cts.Token;
+                _ = Task.Run(() => ListenLoop(listener, token));
 
                 Heartbeat.PublishServerStarted();
                 Debug.Log($"[UnityBridge] HTTP server started on port {port}");
@@ -152,17 +155,16 @@ namespace UnityBridgeConnector
         static void StopListener()
         {
             s_Stopping = true;
-            s_RestartPending = false;
             ClearRetry();
-
-            while (s_Queue.TryDequeue(out var pending))
-                pending.Tcs.TrySetResult(BridgeProtocol.Reject("not_ready", "Unity connector is stopping."));
-
-            if (s_Listener == null) return;
 
             s_Cts?.Cancel();
             s_Cts?.Dispose();
             s_Cts = null;
+
+            while (s_Queue.TryDequeue(out var pending))
+                CompleteItem(pending, BridgeProtocol.Reject("not_ready", "Unity connector is stopping."));
+
+            if (s_Listener == null) return;
 
             try
             {
@@ -206,11 +208,14 @@ namespace UnityBridgeConnector
 
         static void ProcessQueue()
         {
-            if (s_RestartPending)
+            while (s_FailedListeners.TryDequeue(out var failedListener))
             {
-                s_RestartPending = false;
-                Heartbeat.MarkStopped();
-                ScheduleRetry();
+                if (!s_Stopping && ReferenceEquals(s_Listener, failedListener))
+                {
+                    StopListener();
+                    Heartbeat.MarkStopped();
+                    ScheduleRetry();
+                }
             }
 
             if (!IsRunning && s_NextStartAttemptTime > 0 && EditorApplication.timeSinceStartup >= s_NextStartAttemptTime)
@@ -225,17 +230,24 @@ namespace UnityBridgeConnector
             try
             {
                 var r = await CommandRouter.Dispatch(item.Command, item.Parameters, item.Request);
-                item.Tcs.TrySetResult(r);
+                CompleteItem(item, r);
             }
             catch (Exception ex)
             {
-                item.Tcs.TrySetResult(new ErrorResponse(ex.Message));
+                CompleteItem(item, new ErrorResponse(ex.Message));
             }
         }
 
-        static async Task ListenLoop(HttpListener listener, CancellationTokenSource cts)
+        static void CompleteItem(WorkItem item, object result)
         {
-            var ct = cts.Token;
+            // Custom tools may return objects whose properties/converters use
+            // Unity APIs. Keep their serialization on the dispatch thread.
+            try { item.Tcs.TrySetResult(JsonConvert.SerializeObject(result)); }
+            catch (Exception ex) { item.Tcs.TrySetException(ex); }
+        }
+
+        static async Task ListenLoop(HttpListener listener, CancellationToken ct)
+        {
             try
             {
                 while (!ct.IsCancellationRequested)
@@ -244,8 +256,8 @@ namespace UnityBridgeConnector
 
                     try
                     {
-                        var context = await listener.GetContextAsync();
-                        _ = HandleRequest(context);
+                        var context = await listener.GetContextAsync().ConfigureAwait(false);
+                        _ = HandleRequest(context, ct);
                     }
                     catch (ObjectDisposedException)
                     {
@@ -263,25 +275,13 @@ namespace UnityBridgeConnector
             }
             finally
             {
-                if (!ct.IsCancellationRequested && !s_Stopping && ReferenceEquals(s_Listener, listener))
-                {
-                    try
-                    {
-                        listener.Stop();
-                        listener.Close();
-                    }
-                    catch
-                    {
-                    }
-                    s_Listener = null;
-                    if (ReferenceEquals(s_Cts, cts))
-                        s_Cts = null;
-                    s_RestartPending = true;
-                }
+                // Lifecycle changes stay on the main thread; identify the
+                // failed listener so an old loop cannot stop its replacement.
+                if (!ct.IsCancellationRequested) s_FailedListeners.Enqueue(listener);
             }
         }
 
-        static async Task HandleRequest(HttpListenerContext context)
+        static async Task HandleRequest(HttpListenerContext context, CancellationToken listenerToken)
         {
             var request = context.Request;
             var response = context.Response;
@@ -302,12 +302,13 @@ namespace UnityBridgeConnector
                 response.StatusCode = 403;
                 var buf = Encoding.UTF8.GetBytes("{\"error\":\"Browser requests are not allowed\"}");
                 response.ContentLength64 = buf.Length;
-                await response.OutputStream.WriteAsync(buf, 0, buf.Length);
+                await response.OutputStream.WriteAsync(buf, 0, buf.Length).ConfigureAwait(false);
                 response.Close();
                 return;
             }
 
-            object result;
+            object result = null;
+            string responseJson = null;
 
             try
             {
@@ -319,7 +320,7 @@ namespace UnityBridgeConnector
                 else
                 {
                     using var reader = new StreamReader(request.InputStream, Encoding.UTF8);
-                    var body = await reader.ReadToEndAsync();
+                    var body = await reader.ReadToEndAsync().ConfigureAwait(false);
                     var json = JObject.Parse(body);
 
                     var command = json["command"]?.ToString();
@@ -346,6 +347,7 @@ namespace UnityBridgeConnector
                             DomainId = json["domain_id"]?.ToString(),
                             ReferenceGeneration = (long?)json["reference_generation"],
                             Authenticated = authenticated,
+                            ListenerCancellation = listenerToken,
                         };
                         if (BridgeProtocol.IsInternalCommand(command) && !metadata.DeadlineUnixMs.HasValue)
                         {
@@ -354,7 +356,7 @@ namespace UnityBridgeConnector
                         }
                         else
                         {
-                            var tcs = new TaskCompletionSource<object>(TaskCreationOptions.RunContinuationsAsynchronously);
+                            var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
                             s_Queue.Enqueue(new WorkItem
                             {
                                 Command = command,
@@ -363,7 +365,7 @@ namespace UnityBridgeConnector
                                 Tcs = tcs,
                             });
                             ForceEditorUpdate();
-                            result = await tcs.Task;
+                            responseJson = await tcs.Task.ConfigureAwait(false);
                         }
                     }
                 }
@@ -374,10 +376,10 @@ namespace UnityBridgeConnector
                 response.StatusCode = 500;
             }
 
-            var responseJson = JsonConvert.SerializeObject(result);
+            if (responseJson == null) responseJson = JsonConvert.SerializeObject(result);
             var buffer = Encoding.UTF8.GetBytes(responseJson);
             response.ContentLength64 = buffer.Length;
-            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length);
+            await response.OutputStream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
             response.Close();
         }
     }

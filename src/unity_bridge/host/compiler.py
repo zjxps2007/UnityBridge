@@ -128,6 +128,9 @@ class CompilerWorker:
                 raise CompilerError("compiler_timeout", "Compiler failed to respond within its time limit") from exc
             finally:
                 watchdog.cancel()
+                # cancel() cannot stop a callback that has already started. Join
+                # before releasing the worker so it cannot kill the next request.
+                watchdog.join()
             if timed_out.is_set():
                 self._stop()
                 raise CompilerError("compiler_timeout", "Compiler failed to respond within its time limit")
