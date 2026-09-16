@@ -192,7 +192,18 @@ def main():
             if variant == "candidate":
                 wait(lambda: all(p.get("prewarmState") == "ready" for p in registry().get("projects", [])), 40)
                 row["host_before"] = host_request("/health")
-            assert call("prepared_first_exec", "exec", "--code", "return 42 + 1;", backend=backend)["data"] == 43
+            assert call("warmed_new_snippet", "exec", "--code", "return 42 + 1;", backend=backend)["data"] == 43
+            if variant == "candidate":
+                # A fresh worker that has only performed automatic harmless
+                # reference preparation, and has never compiled a user request.
+                previous_pid = registry()["pid"]
+                assert host_request("/stop").get("stopped")
+                wait(lambda: registry().get("pid") != previous_pid, 10)
+                response = subprocess.run([str(executable), "_host", "start"], env=env, capture_output=True, text=True, timeout=30)
+                assert response.returncode == 0, response.stderr
+                wait(lambda: any(p.get("pid") == unity_process.pid and p.get("prewarmState") == "ready"
+                                 for p in registry().get("projects", [])), 40)
+            assert call("prewarm_only_first_exec", "exec", "--code", "return 45 + 6;", backend=backend)["data"] == 51
             call("frame_idle_start", "call", "host_performance_audit", "--params", '{"action":"start"}', backend=backend)
             time.sleep(2)
             row["idle_editor_gaps"] = call("frame_idle_stop", "call", "host_performance_audit", "--params", '{"action":"stop"}', backend=backend)["data"]["gaps_ms"]
@@ -215,7 +226,10 @@ def main():
                 child_output = subprocess.check_output(["powershell", "-NoProfile", "-Command", command], text=True)
                 children = json.loads(child_output) if child_output.strip() else []
                 if isinstance(children, dict): children = [children]
-                row["worker_working_set_bytes"] = sum(working_set(int(p["ProcessId"])) or 0 for p in children if p["Name"] == "UnityBridge.Compiler.exe")
+                workers = [p for p in children if p["Name"] == "UnityBridge.Compiler.exe"]
+                assert len(workers) == 1, ("Expected exactly one live compiler child", children)
+                row["worker_working_set_bytes"] = working_set(int(workers[0]["ProcessId"]))
+                assert row["worker_working_set_bytes"] is not None, "Compiler working set unavailable"
             row["passed"] = True
         finally:
             if unity_process.poll() is None:
@@ -236,7 +250,7 @@ def main():
     for variant in ("baseline", "candidate"):
         sessions = [row for row in results["sessions"] if row["variant"] == variant]
         summary[variant] = {name: stats([c["ms"] for row in sessions for c in row["calls"] if c["name"] == name])
-                            for name in ("status", "console", "tools", "unique_exec", "repeat_exec", "first_exec", "prepared_first_exec")}
+                            for name in ("status", "console", "tools", "unique_exec", "repeat_exec", "first_exec", "warmed_new_snippet", "prewarm_only_first_exec")}
         summary[variant]["cold_service_to_first_result"] = stats([r["cold_service_to_first_result_ms"] for r in sessions])
         summary[variant]["idle_editor_gaps"] = stats([g for r in sessions for g in r["idle_editor_gaps"]])
         summary[variant]["exec_editor_gaps"] = stats([g for r in sessions for g in r["exec_editor_gaps"]])
@@ -245,7 +259,9 @@ def main():
         baseline, candidate = summary["baseline"][name]["p95_ms"], summary["candidate"][name]["p95_ms"]
         gates[name] = {"passed": candidate - baseline <= max(baseline * .05, 10), "delta_ms": candidate - baseline,
                        "allowed_ms": max(baseline * .05, 10)}
-    results.update(summary=summary, ordinary_command_gates=gates, passed=all(r["passed"] for r in results["sessions"]))
+    functional_passed = all(r["passed"] for r in results["sessions"])
+    results.update(summary=summary, ordinary_command_gates=gates, functional_passed=functional_passed,
+                   passed=functional_passed and all(g["passed"] for g in gates.values()))
     save(output / "results.json", results)
     print(json.dumps({"summary": summary, "gates": gates}, indent=2))
 

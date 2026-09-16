@@ -3,16 +3,9 @@ from __future__ import annotations
 
 import http.client
 import json
-import urllib.error
-import urllib.request
 from typing import Any
 
 MAX_MESSAGE_BYTES = 32 * 1024 * 1024
-
-
-class NoRedirect(urllib.request.HTTPRedirectHandler):
-    def redirect_request(self, req, fp, code, msg, headers, newurl):
-        return None
 
 
 class TransportError(Exception):
@@ -24,19 +17,25 @@ def post(port: int, token: str, path: str, payload: dict[str, Any], timeout: flo
         raise TransportError("Invalid local endpoint")
     if path not in {"/command", "/health", "/stop"}:
         raise TransportError("Invalid local operation")
-    request = urllib.request.Request(f"http://127.0.0.1:{port}{path}",
-                                     data=json.dumps(payload).encode("utf-8"), method="POST",
-                                     headers={"Content-Type": "application/json"})
-    request.add_unredirected_header("X-UnityBridge-Token", token)
-    opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect())
+    # The destination is always a fixed loopback HTTP endpoint. Generic urllib
+    # openers also initialize HTTPS and the Windows certificate store, even for
+    # these HTTP-only calls; doing that per forward adds avoidable startup work.
+    # HTTPConnection neither consults proxy settings nor follows redirects.
+    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=max(.001, timeout))
     try:
-        with opener.open(request, timeout=max(.001, timeout)) as response:
-            raw = response.read(MAX_MESSAGE_BYTES + 1)
+        connection.request("POST", path, body=json.dumps(payload).encode("utf-8"),
+                           headers={"Content-Type": "application/json", "X-UnityBridge-Token": token})
+        response = connection.getresponse()
+        if response.status != 200:
+            raise TransportError("Local endpoint did not accept the request")
+        raw = response.read(MAX_MESSAGE_BYTES + 1)
         if not raw or len(raw) > MAX_MESSAGE_BYTES:
             raise TransportError("Local endpoint returned an empty or oversized response")
         value = json.loads(raw)
         if not isinstance(value, dict):
             raise TransportError("Local endpoint returned an invalid response")
         return value
-    except (OSError, ValueError, http.client.HTTPException, urllib.error.URLError) as exc:
+    except (OSError, ValueError, http.client.HTTPException) as exc:
         raise TransportError("Local endpoint did not return a complete valid response") from exc
+    finally:
+        connection.close()

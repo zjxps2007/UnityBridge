@@ -32,7 +32,9 @@ def host_home() -> Path:
 
 
 def normalized_project(path: str | Path) -> str:
-    return os.path.normcase(os.path.abspath(path)).replace("\\", "/")
+    # macOS commonly exposes the same temporary directory as /var/... and
+    # /private/var/.... Compare physical paths consistently with registry writes.
+    return os.path.normcase(os.path.realpath(path)).replace("\\", "/")
 
 
 def read_json(path: Path) -> dict[str, Any] | None:

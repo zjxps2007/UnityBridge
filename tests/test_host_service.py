@@ -386,6 +386,17 @@ class HostServiceTests(unittest.TestCase):
         self.assertEqual(self.service.last_registry['projects'][0]['prewarmState'], 'fixture-updated')
         self.assertTrue(self.call('still-live')['success'])
 
+    def test_instance_directory_symlink_alias_matches_registered_physical_path(self):
+        alias = self.directory / 'instances alias'
+        try:
+            alias.symlink_to(self.instances, target_is_directory=True)
+        except (OSError, NotImplementedError) as exc:
+            self.skipTest(f'Directory symlink creation is unavailable: {exc}')
+        self.assertTrue(host_status(self.instance(), alias)['project_registered'])
+        result = try_host_command(self.instance(), 'through-alias', {}, 1000, alias)
+        self.assertTrue(result.success)
+        self.assertEqual(self.executed, ['through-alias'])
+
 
 if __name__ == "__main__":
     unittest.main()
