@@ -18,6 +18,7 @@ import uuid
 
 from unity_bridge.client import Instance
 from unity_bridge.host import host_status, try_host_command
+from unity_bridge.host.compiler import CompilerError
 from unity_bridge.host.registry import atomic_json, endpoint_path, register_launcher
 from unity_bridge.host.service import HostService
 from unity_bridge.host.transport import TransportError, post
@@ -46,7 +47,10 @@ class FakeCompiler:
     def request(self, payload, *, deadline):
         self.calls.append(payload)
         self.started.set()
-        self.release.wait(max(0, deadline - time.monotonic()))
+        if not self.release.wait(max(0, deadline - time.monotonic())):
+            # A timed-out worker cannot produce a successful assembly. Windows
+            # waits may return just before monotonic() crosses the deadline.
+            raise CompilerError("compiler_timeout", "Fixture compilation timed out")
         return {"reference_generation": payload["reference_generation"],
                 "assembly_base64": base64.b64encode(payload["code"].encode()).decode()}
 
