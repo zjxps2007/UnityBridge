@@ -74,7 +74,7 @@ verify the packaged command. Native Unity checks are described in
 
 ## Heartbeat publication
 
-The working branch keeps periodic publication at 0.5 seconds, matching v0.2.2.
+v0.2.3 keeps periodic publication at 0.5 seconds, matching v0.2.2.
 Each tick checks state, compile errors, and port before applying
 the interval. Server startup and pause events publish explicitly. Keep Unity API
 reads and publication on the main thread; a background timer must not make an
@@ -89,7 +89,7 @@ second; state events can add writes. Use `--heartbeat-audit` in the native runne
 to compare actual cadence, file-write costs, and pause/resume status publication.
 These measurements do not establish whole-command or agent response speed.
 
-An earlier 0.1-second experiment increased periodic writes fivefold. This branch
+An earlier 0.1-second experiment increased periodic writes fivefold. v0.2.3
 keeps the 0.5-second cadence and prioritizes publication when state changes.
 An unchanged Editor's `Heartbeat age` therefore keeps its usual range; the
 improvement is fresher state at transitions. Event writes and per-update state

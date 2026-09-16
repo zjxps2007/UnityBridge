@@ -75,88 +75,64 @@ Windows PowerShell:
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
 iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.1
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3
 ```
 
 macOS/Linux:
 
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.1
+sh /tmp/unity-bridge-install.sh --version v0.2.3
 ```
 
-## v0.2.2로 업그레이드
+## v0.2.3으로 업그레이드
 
-v0.2.2는 RC2에서 검증한 시작 속도 개선, CLI 리팩토링, Connector 버전 표시 수정을
-포함하는 정식 릴리스입니다. CLI와 Unity 패키지를 함께 업데이트하세요.
+v0.2.3은 Heartbeat 상태 반영 개선과 버전 조회 시 선택적 GitHub 인증을 포함하는
+정식 릴리스입니다. v0.2.2의 시작 속도 개선, CLI 리팩토링, Connector 버전 표시
+수정도 포함합니다. CLI와 Unity 패키지를 함께 업데이트하세요. 기본 설치와 버전
+지정 없는 `unity-bridge update`는 최신 정식 릴리스를 선택합니다.
 
-CLI가 RC1 또는 RC2이면 `unity-bridge update --ref v0.2.2`를 실행합니다.
-v0.2.1 이하의 업데이터는 단일 실행 파일 형식을 기대하므로, 새 태그의 설치기를
-다시 실행하세요.
-
-Windows PowerShell:
-
-```powershell
-$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.2
-```
-
-macOS/Linux:
-
-```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.2/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.2
-```
-
-Unity Package Manager Git URL:
+v0.2.2, v0.2.2의 RC 버전 또는 v0.2.3-rc.2에서는 다음 명령을 실행합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.2
-```
-
-Unity 컴파일이 끝나면 `unity-bridge status`에 `Connector: 0.2.2`가 표시되어야 합니다.
-`unity-bridge update --check --ref v0.2.2`로 CLI 버전도 확인합니다.
-CLI 업데이트는 Unity 프로젝트의 패키지 참조를 자동으로 변경하지 않습니다.
-
-## 프리릴리스
-
-v0.2.3-rc.2은 평상시 0.5초 갱신 주기를 유지하면서 Heartbeat 상태 변화를 더 빠르게
-반영합니다. 두 구성 요소에 프리릴리스 태그를 직접 지정하세요. 기본 설치와
-버전 지정 없는 `unity-bridge update`는 정식 v0.2.2를 선택합니다.
-
-v0.2.2 또는 v0.2.2의 RC 버전에서는 다음 명령을 실행합니다.
-
-```text
-unity-bridge update --ref v0.2.3-rc.2
+unity-bridge update --ref v0.2.3
 ```
 
 새로 설치하거나 v0.2.1 이하를 사용한다면 해당 태그의 설치기를 실행합니다.
+이전 업데이터는 단일 실행 파일 형식을 기대하므로 새 설치기를 사용해야 합니다.
 
 Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.2/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3-rc.2
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.2.3
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3-rc.2/install.sh -o /tmp/unity-bridge-install.sh
-sh /tmp/unity-bridge-install.sh --version v0.2.3-rc.2
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.2.3/install.sh -o /tmp/unity-bridge-install.sh
+sh /tmp/unity-bridge-install.sh --version v0.2.3
 ```
 
 Unity Package Manager Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3-rc.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3
 ```
 
-Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.2.3-rc.2`을 확인합니다.
-CLI 버전은 `unity-bridge update --check --ref v0.2.3-rc.2`로 확인하세요.
+Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.2.3`을 확인합니다.
+CLI 버전은 `unity-bridge update --check --ref v0.2.3`으로 확인하세요.
 CLI 업데이터는 Unity 패키지 참조를 자동으로 변경하지 않습니다.
+
+## 프리릴리스
+
+프리릴리스는 배포된 태그를 직접 지정해야 합니다. `unity-bridge update --ref`나
+설치기의 `-Version` / `--version` 옵션을 사용하고, Unity 패키지도 같은 태그로
+고정하세요. 기본 설치와 업데이트는 정식 릴리스를 선택합니다.
+v0.2.3-rc.2의 Heartbeat 개선은 정식 v0.2.3에 포함되어 있습니다. 해당 RC에서 정식으로
+이동하려면 [위 업그레이드 안내](#v023으로-업그레이드)를 따르세요.
 
 ## 업데이트
 
@@ -206,7 +182,7 @@ unity-bridge-darwin-arm64.tar.gz
 tag를 배포한 뒤에는 Unity 패키지 URL 뒤에 tag를 붙여 고정할 수 있습니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.2.3
 ```
 
 ## 로컬 설치 스크립트
