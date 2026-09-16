@@ -16,6 +16,7 @@
 | `_cli/standalone.py` | 플랫폼·아키텍처를 선택하고 운영체제별 설치기 실행 명령을 만듭니다. |
 | `_cli/versions.py` | 공통 버전 해석과 비교를 담당합니다. |
 | `host/` | 선택적 로컬 서비스, 인증 통신, 프로젝트별 대기열, 런타임 등록과 컴파일러 프로세스를 관리합니다. |
+| `host/context.py` | 협상한 Unity 참조 정보마다 참조 식별값과 프로젝트 정보를 한 번 준비합니다. |
 | 저장소 루트의 `compiler-worker/` | 독립 Roslyn 컴파일러, 내부 JSONL 프로토콜과 컴파일러 회귀 검증을 포함합니다. |
 
 `_cli`는 내부 구현입니다. Python 프로그램에서 연동할 때는 `unity_bridge`가
@@ -29,11 +30,24 @@
 처리합니다. 참조 정보에는 도메인·참조 세대, 실제 DLL 경로와 MVID, 명시적인 C# 언어
 버전이 포함됩니다. Unity 참조를 워커의 .NET 10 라이브러리로 대신하지 않습니다.
 
+Connector의 HTTP 읽기·쓰기는 백그라운드에서 처리합니다. 대기열의 도구 실행과
+결과 직렬화는 Unity 메인 스레드에서 수행하며, Unity API를 사용하는 사용자 정의
+결과 getter·converter도 여기에 포함합니다. Connector의 dispatch await는 Unity 동기화 컨텍스트를
+유지합니다. 요청은 수신한 리스너에 속하며, 리스너 중지·교체 후 해당 대기 요청이
+뒤늦게 실행되지 않도록 해야 합니다.
+
 서비스는 컴파일러 프로세스를 미리 실행하고 새 프로젝트 참조 정보마다 백그라운드에서
 `return null;`을 한 번 컴파일합니다. 이 준비용 DLL을 Unity에 로드하지 않습니다.
 반복 코드는 파싱·바인딩 준비 정보를 재사용하지만 호출마다 새 assembly identity로
 emit합니다. 호스트는 실행 결과·로드한 assembly·delegate를 캐시하지 않습니다.
 워커 캐시를 비워도 Unity 도메인에 이미 로드된 DLL은 해제되지 않습니다.
+
+`host/context.py`는 참조 정보를 협상한 뒤 프로젝트 경로 정규화와 참조 식별 해시를
+한 번 계산합니다. 반복 요청은 이 스냅샷을 재사용하고, 도메인이나 참조 세대가
+바뀌면 새로 협상합니다. 워커의 `MetadataReferenceCache`는 캐시하지 않은 DLL을
+하나의 이미지로 읽어 MVID를 검증하고 같은 불변 이미지를 Roslyn에 전달합니다.
+캐시가 있어도 파일의 현재 MVID를 다시 확인하므로 수정 시각이 같아도 참조 변경을
+검사합니다. 캐시에 열린 DLL 파일 핸들을 남기지 않습니다.
 
 Python 빌드 의존성과 .NET 10 SDK를 준비합니다. CI는 SDK **10.0.401**, 컴파일러
 프로젝트는 Roslyn **5.0.0**을 고정합니다. 작업 폴더의 SDK는 `--dotnet PATH`로
@@ -84,8 +98,10 @@ Python의 절대 경로와 `.exe`가 없는 워커 경로를 사용합니다. �
 - 실시간 상태 조회는 변경 명령 대기열에 막히지 않습니다. 호스트 상태로 Unity
   heartbeat나 준비 완료를 대신하지 않습니다. 기존 PID·포트는 Unity를 뜻하며
   호스트 등록은 별도 파일에 기록합니다.
-- 토큰이 포함된 요청은 로컬 주소만 사용하고 프록시·리다이렉트를 사용하지 않습니다.
-  새 런타임 등록 후 이전 서비스는 진행 중인 요청을 마치고 종료합니다.
+- 호스트 경로와 기존 Connector 직접 연결 모두 로컬 HTTP를 사용하고 환경 변수의
+  프록시나 리다이렉트를 따르지 않습니다. 직접 연결은 HTTP 연결 하나를 열어 범용
+  HTTPS·인증서 초기화를 생략합니다. 두 경로 모두 응답 유실 후 명령을 재실행하지
+  않습니다. 새 런타임 등록 후 이전 서비스는 진행 중인 요청을 마치고 종료합니다.
 
 ## 명령 변경 방법
 
@@ -138,7 +154,7 @@ Standalone을 수정했다면 `scripts/build-standalone.py`로 압축 파일을 
 배포 방식으로 비교합니다. 소스 import 시간만으로 배포 실행 파일의 성능을 판단하지
 않습니다. 실제 Unity 검증은 [tests/unity/README.md](../tests/unity/README.md)를 참고하세요.
 
-호스트 브랜치에서는 `tests/test_host_service.py`, `tests/test_host_compiler.py`,
+호스트 브랜치에서는 `tests/test_host_service.py`, `tests/test_host_context.py`, `tests/test_host_compiler.py`,
 `tests/test_host_registry.py`와 위의 C# 회귀 검증을 포함합니다. 요청 ID 중복,
 대기 전후 제한 시간, 컴파일러 실패와 재시작, 준비 중 리로드, 전달 이후 응답 유실,
 토큰 격리와 다중 프로젝트를 확인합니다. 실제 실행은 Unity 2021과 Unity 6에서
@@ -151,6 +167,9 @@ Standalone을 수정했다면 `scripts/build-standalone.py`로 압축 파일을 
 Editor 정지, 상주 메모리와 설치 용량을 비교합니다. 일반 명령 p95가 5% 또는 10ms 중
 큰 값 이상 느려지면 원인을 확인합니다. 컴파일러만 측정한 결과로 전체 명령이
 빨라졌다고 판단하지 않습니다.
+
+[최초 v0.2.3 비교 보고서](HOST_VALIDATION.ko.md)는 당시 검증 기록으로 유지합니다.
+이후 브랜치 변경과 검증은 [추가 최적화 보고서](HOST_OPTIMIZATION.ko.md)에 기록합니다.
 
 ## Heartbeat 갱신
 

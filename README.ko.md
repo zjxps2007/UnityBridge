@@ -34,6 +34,8 @@ CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 
   실행 중인 Editor와 처리할 요청이 모두 없으면 30초 뒤 종료합니다.
 - 반복 코드는 컴파일 준비 정보를 재사용하되 호출마다 새 assembly identity로 emit하고
   다시 실행합니다. 실행 결과나 정적 상태를 캐시하지 않습니다.
+- Connector의 네트워크 입출력은 백그라운드에서 처리합니다. 도구 호출과 결과
+  직렬화는 Unity 메인 스레드에서 수행합니다.
 - `--backend auto|host|legacy`로 경로를 선택합니다. `auto`는 준비된 호환 호스트를
   사용하고, 없으면 기존 직접 연결을 사용합니다. `Host: running`은 Unity의 준비
   완료를 뜻하지 않으며, `wait-ready`는 계속 Unity의 실제 응답을 확인합니다.
@@ -43,8 +45,9 @@ CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 
 필요하며, 이는 Connector의 Unity 버전 호환성과 별개입니다.
 [실행 경로](docs/COMMANDS.ko.md#실행-경로)와
 [설치 조건](docs/INSTALL.ko.md#미출시-호스트-포함-빌드)을 확인하세요.
-실측 응답 시간, 첫 시작 비용, 메모리 사용량과 검증 범위는
-[검증 보고서](docs/HOST_VALIDATION.ko.md)에 정리했습니다.
+[최초 검증 보고서](docs/HOST_VALIDATION.ko.md)는 v0.2.3과 비교한 실측 응답 시간,
+첫 시작 비용, 메모리 사용량과 검증 범위를 기록합니다. 이후 개발 브랜치의 변경은
+[추가 최적화 보고서](docs/HOST_OPTIMIZATION.ko.md)를 참고하세요.
 
 ## 빠른 시작
 

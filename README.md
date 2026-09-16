@@ -39,6 +39,8 @@ changes still require Unity compilation and domain reload.
   Editor or pending work.
 - Repeated snippets reuse compiler preparation, while every invocation emits a
   fresh assembly identity and executes again. Results and static state are not cached.
+- Connector network I/O runs in the background. Tool invocation and result
+  serialization remain on Unity's main thread.
 - `--backend auto|host|legacy` selects routing. `auto` uses a compatible registered
   host when ready and supports the direct route otherwise. `Host: running` does
   not mean Unity is ready; `wait-ready` still requires Unity's live response.
@@ -48,8 +50,10 @@ They require a [.NET 10 supported operating system](https://github.com/dotnet/co
 which is a separate requirement from the Connector's Unity version compatibility.
 See [backend behavior](docs/COMMANDS.md#execution-backend) and
 [installation requirements](docs/INSTALL.md#unreleased-host-enabled-builds).
-Measured latency, cold-start costs, memory use and verification limits are in
-the [validation report](docs/HOST_VALIDATION.md).
+The [initial validation report](docs/HOST_VALIDATION.md) records the comparison
+with v0.2.3, including cold-start costs, memory use, and verification limits.
+See the [follow-up optimization report](docs/HOST_OPTIMIZATION.md) for subsequent
+changes to this development branch.
 
 ## Quick Start
 
