@@ -282,7 +282,8 @@ class HostServiceTests(unittest.TestCase):
 
         with patch.object(handler, "reply", inspect_socket):
             self.assertTrue(self.call("small-response")["success"])
-        self.assertEqual(observed, [1])
+        self.assertEqual(len(observed), 1)
+        self.assertTrue(observed[0])  # Darwin can return a nonzero bit flag rather than 1.
 
     def test_playing_and_paused_projects_can_execute(self):
         for state in ("playing", "paused"):
