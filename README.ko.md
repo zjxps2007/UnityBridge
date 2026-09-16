@@ -19,11 +19,12 @@ v0.2.2의 시작 속도 개선과 Connector 버전 표시 수정도 포함합니
 [v0.2.3 업그레이드 안내](docs/INSTALL.ko.md#v023으로-업그레이드)에 따라
 CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 정식 릴리스를 선택합니다.
 
-## 미출시: 독립 호스트와 컴파일러
+## 프리릴리스: 독립 호스트와 컴파일러
 
-이 브랜치는 **0.3.0-alpha.1**을 개발하고 있으며, 현재 공개된 정식 버전은
-**v0.2.3**입니다. 아래 설치 명령은 정식 버전을 설치하므로 미출시 기능을 포함하지
-않습니다. 이 브랜치를 빌드하려면 [로컬 개발 안내](docs/DEVELOPMENT.ko.md#독립-호스트와-컴파일러)를 참고하세요.
+**v0.3.0-rc.1**은 독립 호스트와 컴파일러의 릴리스 후보이며, 정식 버전은
+**v0.2.3**입니다. 아래 빠른 시작 명령은 정식 버전을 선택합니다. RC를 시험하려면
+[같은 태그의 설치기와 Unity 패키지](docs/INSTALL.ko.md#프리릴리스)를 사용하세요.
+RC는 `codex/external-host-compiler`에서 개발하며 `main`에는 병합하지 않았습니다.
 
 새 호스트는 Unity 도메인 밖에서 실행되어 재컴파일 중에도 아직 전달하지 않은 요청을
 보관합니다. 동봉된 Roslyn 워커가 C# 코드를 컴파일하고, Unity가 결과 DLL을 불러와
@@ -44,10 +45,11 @@ CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 
 다만 [.NET 10 지원 운영체제](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)가
 필요하며, 이는 Connector의 Unity 버전 호환성과 별개입니다.
 [실행 경로](docs/COMMANDS.ko.md#실행-경로)와
-[설치 조건](docs/INSTALL.ko.md#미출시-호스트-포함-빌드)을 확인하세요.
+[설치 조건](docs/INSTALL.ko.md#호스트-포함-프리릴리스-빌드)을 확인하세요.
 [최초 검증 보고서](docs/HOST_VALIDATION.ko.md)는 v0.2.3과 비교한 실측 응답 시간,
-첫 시작 비용, 메모리 사용량과 검증 범위를 기록합니다. 이후 개발 브랜치의 변경은
-[추가 최적화 보고서](docs/HOST_OPTIMIZATION.ko.md)를 참고하세요.
+첫 시작 비용, 메모리 사용량과 검증 범위를 기록합니다.
+[추가 최적화 보고서](docs/HOST_OPTIMIZATION.ko.md)는 이번 RC 이전 alpha 개발 커밋의
+후속 개선을 측정한 기록입니다.
 
 ## 빠른 시작
 

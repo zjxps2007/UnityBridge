@@ -6,8 +6,8 @@ Python package mode is for development and Python programs that need to import
 `unity_bridge` directly. For normal CLI use, the standalone installer is
 recommended because it does not require Python on the target machine.
 
-The current public stable version is **v0.2.3**. The independent-host options in
-this document describe the unreleased **0.3.0-alpha.1** branch. Installing the
+The stable version is **v0.2.3**. The independent-host options in
+this document describe prerelease **0.3.0-rc.1**. Installing the
 Python package alone does not download .NET or the Roslyn worker.
 
 ## When To Use
@@ -35,6 +35,23 @@ Install a specific tag:
 ```powershell
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
+
+For the **v0.3.0-rc.1** Python package, explicitly select the RC tag:
+
+```powershell
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.1"
+```
+
+Use the matching Unity Package Manager URL:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+```
+
+This does not install the compiler runtime. The `auto` backend keeps the direct
+route unless a matching host is registered. To use the independent compiler,
+also install the [RC standalone bundle](INSTALL.md#prerelease), or build and
+register it with [the development guide](DEVELOPMENT.md#independent-host-and-compiler).
 
 ## Install From A Branch
 
@@ -89,6 +106,10 @@ macOS/Linux:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh | sh -s -- --python-mode
 ```
+
+These commands install the default Python Git source. In Python mode, `-Version`
+or `--version` does not pin the package; use the exact pip tag above, or set
+`-PackageSpec` / `--package-spec` to that full Git package URL.
 
 ## Run From A Cloned Repo
 

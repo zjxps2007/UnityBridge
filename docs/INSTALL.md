@@ -6,8 +6,9 @@ This document covers standalone CLI installation, Unity package version pinning,
 updates, and release assets. Python package mode is documented separately in
 [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md).
 
-The public stable release is **v0.2.3**. The independent host described below is
-part of the **unreleased 0.3.0-alpha.1 branch**, not a published installation tag.
+The stable release is **v0.2.3**. The independent host described below is part of
+the **v0.3.0-rc.1 prerelease**. Install it explicitly using the [RC instructions](#prerelease);
+default installation continues to select stable.
 
 ## Unity Package
 
@@ -76,9 +77,9 @@ macOS/Linux:
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh | sh
 ```
 
-## Unreleased Host-Enabled Builds
+## Host-Enabled Prerelease Builds
 
-Bundles built from this branch also contain a self-contained .NET 10/Roslyn
+The v0.3.0-rc.1 bundles also contain a self-contained .NET 10/Roslyn
 compiler. The installer checks the worker and registers the exact CLI and worker
 paths under `~/.unity-bridge/host/`; Unity Hub does not need to inherit a CLI PATH
 entry. Keep the entire runtime directory, including `compiler/`. The user does
@@ -105,11 +106,11 @@ project's compiler `prewarm_state`. `--backend host` requires the new service,
 `--backend legacy` selects direct communication, and `--backend auto` uses a
 registered compatible host when available. See [backend behavior](COMMANDS.md#execution-backend).
 
-There are no public alpha assets yet. Build and register a local installation
-using [development instructions](DEVELOPMENT.md#independent-host-and-compiler).
-Manually extracting a development archive alone does not register its host;
-register its absolute executable and worker paths as described there. Installing
-only the Python package does not download the compiler runtime.
+Use the [tagged RC installer](#prerelease) to install and register the host.
+To build locally, follow [development instructions](DEVELOPMENT.md#independent-host-and-compiler).
+Manually extracting an archive alone does not register its host; register its
+absolute executable and worker paths as described there. Installing only the
+Python package does not download the compiler runtime.
 
 ## Install A Specific Release
 
@@ -173,9 +174,52 @@ Unity package reference automatically.
 
 ## Prerelease
 
-Prereleases require an explicit published tag: pass it to `unity-bridge update --ref`,
-or use the installer's `-Version` / `--version` option. Pin the Unity
-package to the same tag. Default installation and updates select stable releases.
+For **v0.3.0-rc.1**, use both the installer script and release assets from that tag.
+This is also the upgrade path from v0.2.3 or older: their updater downloads the
+`main` installer, which does not register the new host. If the existing CLI lives
+in a custom directory, add `-InstallDir <existing-directory>` or
+`--install-dir <existing-directory>` to the installation command.
+
+Windows PowerShell:
+
+```powershell
+$script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.1
+```
+
+macOS/Linux:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.sh -o /tmp/unity-bridge-install-rc.sh
+sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.1
+```
+
+Pin the Unity Package Manager Git URL to the same tag:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+```
+
+After Unity finishes compiling, `unity-bridge status` should show
+`Connector: 0.3.0-rc.1`. Check the CLI with:
+
+```text
+unity-bridge update --check --ref v0.3.0-rc.1
+```
+
+Once the RC CLI is installed, keep the explicit RC reference when updating or
+reinstalling it:
+
+```text
+unity-bridge update --ref v0.3.0-rc.1
+```
+
+The RC updater selects the installer from that tag and preserves the current
+installation directory. Plain standalone `unity-bridge update` selects the latest
+stable release and can replace this RC with v0.2.3. The CLI updater does not update
+the Unity package automatically, so also change its tag when switching versions.
+Default installation does not opt into RC versions.
 The Heartbeat changes from v0.2.3-rc.2 are included in stable v0.2.3; use the
 [upgrade instructions above](#upgrade-to-v023) to move from that RC to stable.
 

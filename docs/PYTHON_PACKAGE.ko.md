@@ -5,8 +5,8 @@
 Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/프로그램 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.
 
-현재 공개된 정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 미출시
-**0.3.0-alpha.1** 브랜치 기능입니다. Python 패키지만 설치하면 .NET이나 Roslyn
+정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 **0.3.0-rc.1 프리릴리스**
+기능입니다. Python 패키지만 설치하면 .NET이나 Roslyn
 워커를 다운로드하지 않습니다.
 
 ## 언제 사용하나
@@ -34,6 +34,23 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 ```powershell
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
+
+**v0.3.0-rc.1** Python 패키지는 RC 태그를 직접 지정합니다.
+
+```powershell
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.1"
+```
+
+Unity Package Manager에도 같은 태그의 URL을 사용합니다.
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+```
+
+이 명령은 컴파일러 런타임을 설치하지 않습니다. 일치하는 호스트가 등록되지 않으면
+`auto`는 직접 연결을 유지합니다. 독립 컴파일러를 쓰려면
+[RC standalone 묶음](INSTALL.ko.md#프리릴리스)도 설치하거나
+[개발 안내](DEVELOPMENT.ko.md#독립-호스트와-컴파일러)에 따라 빌드·등록하세요.
 
 ## 브랜치에서 설치
 
@@ -85,6 +102,10 @@ macOS/Linux:
 ```sh
 curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.sh | sh -s -- --python-mode
 ```
+
+위 명령은 기본 Python Git 소스를 설치합니다. Python 모드의 `-Version`·`--version`은
+패키지 버전을 고정하지 않습니다. 위의 정확한 pip 태그를 사용하거나
+`-PackageSpec`·`--package-spec`에 해당 Git 패키지 URL 전체를 지정하세요.
 
 ## 클론한 repo에서 실행
 

@@ -22,12 +22,12 @@ v0.2.2. Follow [upgrading to v0.2.3](docs/INSTALL.md#upgrade-to-v023) to update
 both the CLI and Unity Connector. Default installation selects the latest stable
 release.
 
-## Unreleased: Independent Host And Compiler
+## Prerelease: Independent Host And Compiler
 
-This branch develops **0.3.0-alpha.1**; the current public stable release remains
-**v0.2.3**. The install commands below install stable and do not enable these
-unreleased features. See [local development](docs/DEVELOPMENT.md#independent-host-and-compiler)
-to build this branch.
+**v0.3.0-rc.1** is the release candidate for the independent host and compiler;
+the stable release remains **v0.2.3**. The quick-start commands below select stable.
+To try the RC, use its [tagged installer and matching Unity package](docs/INSTALL.md#prerelease).
+The RC is developed on `codex/external-host-compiler` and is not merged into `main`.
 
 The new host stays outside Unity's reloadable domain and keeps pending requests
 while Unity recompiles. A bundled Roslyn worker prepares C# independently; Unity
@@ -49,11 +49,11 @@ Host-enabled bundles include their .NET runtime; end users do not need an SDK.
 They require a [.NET 10 supported operating system](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md),
 which is a separate requirement from the Connector's Unity version compatibility.
 See [backend behavior](docs/COMMANDS.md#execution-backend) and
-[installation requirements](docs/INSTALL.md#unreleased-host-enabled-builds).
+[installation requirements](docs/INSTALL.md#host-enabled-prerelease-builds).
 The [initial validation report](docs/HOST_VALIDATION.md) records the comparison
 with v0.2.3, including cold-start costs, memory use, and verification limits.
-See the [follow-up optimization report](docs/HOST_OPTIMIZATION.md) for subsequent
-changes to this development branch.
+The [follow-up optimization report](docs/HOST_OPTIMIZATION.md) records later
+changes measured on the alpha development commits preceding this RC.
 
 ## Quick Start
 

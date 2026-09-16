@@ -3,8 +3,9 @@
 [한국어](COMMANDS.ko.md) | English | [README](../README.md)
 
 This document lists the commands currently available in the `unity-bridge` CLI.
-The backend options describe unreleased **0.3.0-alpha.1**; published **v0.2.3**
-continues to use direct Connector communication.
+The backend options describe **v0.3.0-rc.1**; stable **v0.2.3** continues to use
+direct Connector communication. See [RC installation](INSTALL.md#prerelease)
+for the tagged installer and matching Unity package.
 
 ## Basic Form
 

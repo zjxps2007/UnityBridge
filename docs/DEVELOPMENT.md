@@ -25,8 +25,10 @@ adapter APIs exported by `unity_bridge`. The existing `cli.build_parser` and
 
 ## Independent Host And Compiler
 
-The current branch is unreleased **0.3.0-alpha.1**; public **v0.2.3** remains the
-stable baseline. The service runs outside Unity, while the Connector still owns
+The current branch targets prerelease **0.3.0-rc.1**; **v0.2.3** remains the
+stable baseline. The RC stays on `codex/external-host-compiler`, separate from `main`.
+Use the [tagged RC installer](INSTALL.md#prerelease) for packaged testing.
+The service runs outside Unity, while the Connector still owns
 Unity API execution on the main thread. A reference context includes the domain
 and reference generation, actual DLL paths/MVIDs, and explicit C# language version.
 No .NET 10 framework references are substituted for Unity's references.
@@ -178,7 +180,8 @@ alone do not establish whole-command improvement.
 
 Keep the [initial v0.2.3 comparison](HOST_VALIDATION.md) as historical evidence;
 later branch changes and their checks are recorded in the
-[follow-up optimization report](HOST_OPTIMIZATION.md).
+[follow-up optimization report](HOST_OPTIMIZATION.md). Those reports describe
+the measured alpha commits preceding this RC; do not relabel their versions or samples.
 
 ## Heartbeat publication
 
