@@ -1,20 +1,6 @@
-from .adapter import UnityActionResult
-from .adapter import UnityBridgeAdapter
-from .client import CommandResponse
-from .client import DiscoveryError
-from .client import Instance
-from .client import UnityClient
-from .client import UnityBridgeError
-from .client import UnityConnectionError
-from .client import UnityHttpError
-from .client import discover_instance
-from .client import find_active_by_port
-from .client import find_by_port
-from .client import scan_instances
-from .client import send_command
-from .client import wait_for_state
+"""Public Python API, loaded on demand for short-lived CLI invocations."""
 
-__version__ = "0.3.0-rc.1"
+__version__ = "0.3.0-rc.2"
 
 __all__ = [
     "CommandResponse",
@@ -34,3 +20,20 @@ __all__ = [
     "wait_for_state",
     "__version__",
 ]
+
+
+def __getattr__(name):
+    if name not in __all__ or name == "__version__":
+        raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+    if name in {"UnityActionResult", "UnityBridgeAdapter"}:
+        from . import adapter
+        value = getattr(adapter, name)
+    else:
+        from . import client
+        value = getattr(client, name)
+    globals()[name] = value
+    return value
+
+
+def __dir__():
+    return sorted(set(globals()) | set(__all__))

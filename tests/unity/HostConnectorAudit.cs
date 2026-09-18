@@ -37,6 +37,8 @@ public static class HostConnectorAudit
                 File.WriteAllText(Path.Combine(root, "host-audit-readiness.json"), JsonConvert.SerializeObject(new
                 {
                     accepted = rejection == null, instance = capture.Invoke(null, null), rejection,
+                    operations = JToken.Parse(SessionState.GetString("UnityBridge.OperationReceipts", "[]")),
+                    compiling = EditorApplication.isCompiling, updating = EditorApplication.isUpdating,
                 }));
             }
             catch (Exception error)

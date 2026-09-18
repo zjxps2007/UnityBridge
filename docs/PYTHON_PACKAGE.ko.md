@@ -5,7 +5,7 @@
 Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/프로그램 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.
 
-정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 **0.3.0-rc.1 프리릴리스**
+정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 **0.3.0-rc.2 프리릴리스**
 기능입니다. Python 패키지만 설치하면 .NET이나 Roslyn
 워커를 다운로드하지 않습니다.
 
@@ -35,16 +35,16 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
 
-**v0.3.0-rc.1** Python 패키지는 RC 태그를 직접 지정합니다.
+**v0.3.0-rc.2** Python 패키지는 RC 태그를 직접 지정합니다.
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.1"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.2"
 ```
 
 Unity Package Manager에도 같은 태그의 URL을 사용합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
 ```
 
 이 명령은 컴파일러 런타임을 설치하지 않습니다. 일치하는 호스트가 등록되지 않으면
@@ -192,6 +192,23 @@ Unity Connector를 함께 업데이트해야 합니다. 스크립트를 변경�
 인자를 사용할 수 있습니다.
 
 ## 업데이트
+
+### RC2 대기 개선
+
+RC2의 `refresh_assets`, `reserialize_assets`, `editor_play`,
+`editor_stop`은 `stable_sec=None` / `poll_interval_sec=None`을 자동 기본값으로
+사용합니다. 작업 ID가 있으면 해당 작업의 완료를 50ms마다 직접 확인하고 추가
+안정화 시간을 두지 않습니다. 작업 ID가 없으면 기존 0.5초 조회·안정화 기본값을
+사용합니다. 재생 상태에는 ready 안정화 시간을 적용하지 않습니다. 명시한 숫자 인자는
+기본값보다 우선합니다. 작업 기록 유실·프로세스 교체·취소 시 변경 명령을 재실행하지
+않고 오류로 보고합니다. 빠른 완료 확인에는 같은 브랜치의 Connector가 필요합니다.
+
+반복 호출에서는 한 Python 프로세스에서 `UnityClient` 또는 `UnityBridgeAdapter`를
+재사용하세요. 다른 언어에서는 [JSONL CLI 세션](COMMANDS.ko.md#rc2-연속-명령과-작업-완료-확인)을
+사용하면 명령마다 CLI를 시작하는 비용을 줄일 수 있습니다. 공개 패키지 import는
+기존과 호환됩니다.
+
+### 패키지 업데이트
 
 Python 패키지 설치에서는 `unity-bridge update`가 pip로 패키지를 다시 설치합니다. Unity Connector용
 Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/manifest.json`은 자동으로 수정하지

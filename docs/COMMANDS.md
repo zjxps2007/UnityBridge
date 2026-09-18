@@ -3,9 +3,50 @@
 [한국어](COMMANDS.ko.md) | English | [README](../README.md)
 
 This document lists the commands currently available in the `unity-bridge` CLI.
-The backend options describe **v0.3.0-rc.1**; stable **v0.2.3** continues to use
+The backend options describe **v0.3.0-rc.2**; stable **v0.2.3** continues to use
 direct Connector communication. See [RC installation](INSTALL.md#prerelease)
 for the tagged installer and matching Unity package.
+
+## RC2: Persistent Session And Operation Completion
+
+The following changes are included in RC2. Start
+`unity-bridge --project <path> --no-update-check session`, keep its
+stdin open, and send one JSON object per line:
+
+```json
+{"id":1,"args":["status"]}
+{"id":2,"args":["exec","--code","return 42;"]}
+```
+
+Each command finishes before the next starts. A response is flushed immediately:
+
+```json
+{"id":2,"exit_code":0,"result":{"success":true,"message":"...","data":42},"error":null}
+```
+
+`result` contains the usual JSON command output; `error` contains stderr, or
+`null`. IDs may be strings, integers, or null. EOF ends the session. Invalid input
+returns exit code 2 for that request and does not close the session. Input is
+limited to 1 MiB of characters per line. Commands inherit the session's project,
+port, backend, timeout and instances directory, with per-request overrides.
+Discovery is refreshed for each request. `session`, `update`, `_host` and
+`--stdin` are rejected inside a session; use `exec --code` or `--code-file`.
+Requests always use JSON output, so the existing JSON update-notice exemption
+applies. Normal CLI update behavior is unchanged.
+
+With a matching Connector, `refresh --wait`, `reserialize --wait`, and
+`editor play|stop --wait` confirm the returned operation ID through a live Unity
+response. The default receipt polling interval is 50 ms with no added stability
+window. Compile completion also waits for the required domain reload; play/stop
+waits for its corresponding event. A stale `ready` snapshot cannot complete a
+different operation. A lost or cancelled receipt is reported without replaying
+the action. Commands without a receipt retain the existing heartbeat wait and
+0.5-second stability window for ready states. Explicit `--stable-sec` values
+remain supported; editor/reserialize also accept `--poll-interval-sec`.
+Standalone `wait-ready` and low-level Python snapshot semantics are unchanged.
+Live confirmation probes use at most one second per read, within the original
+wait deadline, so a connection to a replaced listener cannot consume the whole
+wait. Only state reads are retried.
 
 ## Basic Form
 
@@ -280,6 +321,12 @@ unity-bridge exec --code "return Unity.Entities.World.All.Count;" --using Unity.
 Use inline `--code` for short snippets. For multi-line C# or code containing
 characters that shells often interpret, prefer `--file`/`--code-file` or
 `--stdin`.
+
+RC2 accelerates ordinary `exec` invocations when a
+compatible host is already running; no command changes are needed. It retains
+the original timeout and never re-executes a request after a lost response.
+Older hosts and explicit compiler overrides use the existing route. Standalone
+pipe input/output is UTF-8. See [measured scope](EXEC_OPTIMIZATION.md).
 
 On the host backend, a separate Roslyn worker compiles against Unity's actual
 reference DLLs and supported language version. Unity executes the emitted code

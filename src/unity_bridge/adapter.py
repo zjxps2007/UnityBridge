@@ -26,6 +26,7 @@ from .client import wait_for_state
 DEFAULT_TEST_TIMEOUT_SEC = 600
 DEFAULT_TEST_POLL_INTERVAL_SEC = 0.5
 DISRUPTIVE_SEND_TIMEOUT_MS = 10_000
+LIVE_PROBE_TIMEOUT_MS = 1_000
 TEST_FRAMEWORK_MISSING_MESSAGE = (
     "'run_tests' is not available.\n"
     "Install the Unity Test Framework package:\n"
@@ -114,8 +115,8 @@ class UnityBridgeAdapter:
         compile: str = "none",
         wait: bool = False,
         timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
-        stable_sec: float = 0.5,
-        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+        stable_sec: float | None = None,
+        poll_interval_sec: float | None = None,
     ) -> UnityActionResult:
         payload = _compact(
             {
@@ -140,12 +141,9 @@ class UnityBridgeAdapter:
         if not wait or not response.success:
             return result
 
-        ready = wait_for_ready(
-            lambda: self._resolve_same_project(target),
-            timeout_sec=timeout_sec,
-            poll_interval_sec=poll_interval_sec,
-            after_timestamp=target.timestamp,
-            stable_sec=stable_sec,
+        ready = self._wait_after_operation(
+            response, target, "ready", timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec, stable_sec=stable_sec,
         )
         return _with_data(
             result,
@@ -185,7 +183,7 @@ class UnityBridgeAdapter:
                     "get_editor_state",
                     {"request_id": request_id},
                     instance=instance,
-                    timeout_ms=max(1, min(self.client.timeout_ms, int(remaining * 1000))),
+                    timeout_ms=max(1, min(LIVE_PROBE_TIMEOUT_MS, self.client.timeout_ms, int(remaining * 1000))),
                 )
             except UnityConnectionError as exc:
                 # A reload may close the connection or move the project's port.
@@ -194,6 +192,8 @@ class UnityBridgeAdapter:
                 raise DiscoveryError("timed out waiting for live Unity state")
             if response.completion_unknown:
                 raise DiscoveryError("Unity closed the connection before confirming readiness")
+            if _live_control_retryable(response):
+                raise DiscoveryError(response.message)
             if not response.success:
                 if response.message == "Unknown command: get_editor_state":
                     raise UnityBridgeError(
@@ -331,7 +331,7 @@ class UnityBridgeAdapter:
         *,
         wait: bool = False,
         timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
-        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+        poll_interval_sec: float | None = None,
     ) -> UnityActionResult:
         return self.manage_editor(
             "play",
@@ -345,8 +345,8 @@ class UnityBridgeAdapter:
         *,
         wait: bool = False,
         timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
-        stable_sec: float = 0.5,
-        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+        stable_sec: float | None = None,
+        poll_interval_sec: float | None = None,
     ) -> UnityActionResult:
         return self.manage_editor(
             "stop",
@@ -363,8 +363,8 @@ class UnityBridgeAdapter:
         action = action.lower()
         wait = params.pop("wait", None)
         timeout_sec = int(params.pop("timeout_sec", DEFAULT_READY_TIMEOUT_SEC))
-        stable_sec = float(params.pop("stable_sec", 0.5 if action == "stop" else 0))
-        poll_interval_sec = float(params.pop("poll_interval_sec", DEFAULT_POLL_INTERVAL_SEC))
+        stable_sec = params.pop("stable_sec", None)
+        poll_interval_sec = params.pop("poll_interval_sec", None)
         payload = {"action": action, **params}
         if wait is not None:
             payload["wait_for_completion"] = False if wait and action in {"play", "stop"} else bool(wait)
@@ -381,14 +381,9 @@ class UnityBridgeAdapter:
             if not response.success:
                 return result
             target_state = "playing" if action == "play" else "ready"
-            reached = wait_for_state(
-                lambda: self._resolve_same_project(target),
-                target_state,
-                timeout_sec=timeout_sec,
-                poll_interval_sec=poll_interval_sec,
-                after_timestamp=target.timestamp,
-                stable_sec=stable_sec,
-                timeout_label=f"editor {action}",
+            reached = self._wait_after_operation(
+                response, target, target_state, timeout_sec=timeout_sec,
+                poll_interval_sec=poll_interval_sec, stable_sec=stable_sec,
             )
             return _with_data(
                 result,
@@ -413,8 +408,8 @@ class UnityBridgeAdapter:
         *,
         wait: bool = False,
         timeout_sec: int = DEFAULT_READY_TIMEOUT_SEC,
-        stable_sec: float = 0.5,
-        poll_interval_sec: float = DEFAULT_POLL_INTERVAL_SEC,
+        stable_sec: float | None = None,
+        poll_interval_sec: float | None = None,
     ) -> UnityActionResult:
         if paths is None:
             payload: dict[str, Any] = {}
@@ -435,12 +430,9 @@ class UnityBridgeAdapter:
         )
         if not response.success:
             return result
-        ready = wait_for_ready(
-            lambda: self._resolve_same_project(target),
-            timeout_sec=timeout_sec,
-            poll_interval_sec=poll_interval_sec,
-            after_timestamp=target.timestamp,
-            stable_sec=stable_sec,
+        ready = self._wait_after_operation(
+            response, target, "ready", timeout_sec=timeout_sec,
+            poll_interval_sec=poll_interval_sec, stable_sec=stable_sec,
         )
         return _with_data(
             result,
@@ -503,6 +495,66 @@ class UnityBridgeAdapter:
             response=response,
         )
 
+    def _wait_after_operation(self, response: CommandResponse, target: Instance, state: str, *,
+                              timeout_sec: int, poll_interval_sec: float | None,
+                              stable_sec: float | None) -> Instance:
+        operation_id = response.data.get("operation_id") if isinstance(response.data, dict) else None
+        if not isinstance(operation_id, str) or not operation_id:
+            return wait_for_state(
+                lambda: self._resolve_same_project(target), state, timeout_sec=timeout_sec,
+                poll_interval_sec=DEFAULT_POLL_INTERVAL_SEC if poll_interval_sec is None else float(poll_interval_sec),
+                after_timestamp=target.timestamp,
+                stable_sec=(0 if state == "playing" else .5) if stable_sec is None else float(stable_sec),
+            )
+
+        deadline = time.monotonic() + timeout_sec
+
+        def completed_operation() -> Instance:
+            instance = self._resolve_same_project(target)
+            if target.pid > 0 and instance.pid != target.pid:
+                raise UnityBridgeError("Unity restarted before operation completion could be confirmed")
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                raise DiscoveryError("timed out waiting for Unity operation completion")
+            request_id = uuid.uuid4().hex
+            try:
+                # An accepted read on the old listener can survive its shutdown.
+                # Bound each read so rediscovery gets another chance after reload;
+                # only this idempotent control is retried, never the mutation.
+                result = self.client.call("get_editor_state", {"request_id": request_id, "operation_id": operation_id},
+                                          instance=instance, timeout_ms=max(1, min(LIVE_PROBE_TIMEOUT_MS, self.client.timeout_ms, int(remaining * 1000))))
+            except UnityConnectionError as exc:
+                raise DiscoveryError(str(exc)) from exc
+            if result.completion_unknown:
+                raise DiscoveryError("Unity reloaded during operation confirmation")
+            if _live_control_retryable(result):
+                raise DiscoveryError(result.message)
+            if not result.success:
+                raise UnityBridgeError(f"Unity operation confirmation failed: {result.message}")
+            data = result.data
+            if (not isinstance(data, dict) or data.get("requestId") != request_id
+                    or not isinstance(data.get("instance"), dict) or not isinstance(data.get("operation"), dict)
+                    or data["operation"].get("id") != operation_id):
+                raise UnityBridgeError("Unity returned an invalid operation confirmation")
+            if data["operation"].get("state") == "unknown":
+                raise UnityBridgeError("Unity no longer has this operation receipt; the command was not repeated")
+            if data["operation"].get("state") == "cancelled":
+                raise UnityBridgeError("Unity cancelled the editor operation")
+            if data["operation"].get("state") != "completed":
+                raise DiscoveryError("Unity operation is still pending")
+            live = Instance.from_dict(data["instance"])
+            if (Path(live.project_path) != Path(target.project_path) or live.port != instance.port
+                    or live.pid != instance.pid or live.timestamp <= 0):
+                raise UnityBridgeError("Unity operation response belongs to a different instance")
+            if time.monotonic() >= deadline:
+                raise DiscoveryError("timed out waiting for Unity operation completion")
+            return live
+
+        return wait_for_state(completed_operation, state, timeout_sec=timeout_sec,
+                              poll_interval_sec=.05 if poll_interval_sec is None else float(poll_interval_sec),
+                              stable_sec=0 if stable_sec is None else float(stable_sec),
+                              timeout_label="Unity operation completion")
+
     def _send_disruptive_command(
         self,
         command: str,
@@ -529,6 +581,15 @@ class UnityBridgeAdapter:
 
     def _disruptive_send_timeout_ms(self) -> int:
         return max(1_000, min(self.client.timeout_ms, DISRUPTIVE_SEND_TIMEOUT_MS))
+
+
+def _live_control_retryable(response: CommandResponse) -> bool:
+    # Only read-only probes use this classification. A short probe can expire
+    # while an old listener closes, or arrive before host renegotiation finishes.
+    return (not response.success and isinstance(response.data, dict)
+            and response.data.get("completion") == "not_started"
+            and response.data.get("reason") in {"expired", "not_ready", "stale_domain", "stale_references",
+                                               "unsupported_connector", "host_stopping", "queue_full"})
 
 
 def _compact(params: dict[str, Any]) -> dict[str, Any]:

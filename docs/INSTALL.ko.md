@@ -5,11 +5,16 @@
 이 문서는 standalone CLI 설치, Unity 패키지 버전 고정, 업데이트, release asset을 다룹니다.
 Python 패키지 모드는 [PYTHON_PACKAGE.ko.md](PYTHON_PACKAGE.ko.md)에 따로 정리했습니다.
 
-정식 버전은 **v0.2.3**입니다. 아래의 독립 호스트는 **v0.3.0-rc.1 프리릴리스**에
+정식 버전은 **v0.2.3**입니다. 아래의 독립 호스트는 **v0.3.0-rc.2 프리릴리스**에
 포함됩니다. [RC 설치 안내](#프리릴리스)에 따라 버전을 직접 지정하세요.
 기본 설치는 계속 정식 버전을 선택합니다.
 
 ## Unity 패키지
+
+RC2에는 RC1 이후 속도 개선을 포함합니다.
+CLI와 Connector를 모두 RC2 태그로 설치하세요. ReadyToRun 빌드로
+묶음 용량은 달라지지만 설치·압축 해제 방식은 같으며, standalone 사용자가 Python이나
+.NET SDK를 따로 설치할 필요는 없습니다. [측정 결과](SPEED_FOLLOWUP.ko.md)를 참고하세요.
 
 Unity Editor에서 `Window > Package Manager > + > Add package from git URL...`을 열고
 아래 URL을 붙여넣습니다.
@@ -74,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.
 
 ## 호스트 포함 프리릴리스 빌드
 
-v0.3.0-rc.1 묶음에는 .NET 10 런타임과 Roslyn 컴파일러가 포함됩니다. 설치기는
+v0.3.0-rc.2 묶음에는 .NET 10 런타임과 Roslyn 컴파일러가 포함됩니다. 설치기는
 워커 실행을 확인하고 CLI·워커의 정확한 경로를 `~/.unity-bridge/host/`에 등록합니다.
 Unity Hub가 CLI의 PATH 설정을 물려받을 필요가 없습니다. `compiler/`를 포함한 런타임
 폴더 전체를 유지하세요. 사용자 PC에 .NET 런타임이나 SDK를 별도로 설치할 필요는
@@ -164,7 +169,7 @@ CLI 업데이터는 Unity 패키지 참조를 자동으로 변경하지 않습�
 
 ## 프리릴리스
 
-**v0.3.0-rc.1**은 설치 스크립트와 배포 파일을 모두 같은 태그로 지정합니다.
+**v0.3.0-rc.2**은 설치 스크립트와 배포 파일을 모두 같은 태그로 지정합니다.
 v0.2.3 이하에서 올라올 때도 아래 설치기를 사용하세요. 기존 업데이터가 내려받는
 `main` 설치기는 새 호스트를 등록하지 않습니다. 기존 CLI를 사용자 지정 경로에
 설치했다면 설치 명령에 `-InstallDir <기존-설치-폴더>` 또는
@@ -174,34 +179,34 @@ Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.1
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.sh -o /tmp/unity-bridge-install-rc.sh
-sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.1
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.2/install.sh -o /tmp/unity-bridge-install-rc.sh
+sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.2
 ```
 
 Unity Package Manager에도 같은 태그의 Git URL을 사용합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
 ```
 
-Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.3.0-rc.1`을 확인합니다.
+Unity 컴파일이 끝나면 `unity-bridge status`에서 `Connector: 0.3.0-rc.2`을 확인합니다.
 CLI 버전은 다음 명령으로 확인하세요.
 
 ```text
-unity-bridge update --check --ref v0.3.0-rc.1
+unity-bridge update --check --ref v0.3.0-rc.2
 ```
 
 RC CLI를 설치한 뒤 업데이트하거나 재설치할 때도 RC 참조를 명시하세요.
 
 ```text
-unity-bridge update --ref v0.3.0-rc.1
+unity-bridge update --ref v0.3.0-rc.2
 ```
 
 RC 업데이터는 해당 태그의 설치기를 사용하고 현재 설치 경로를 유지합니다.

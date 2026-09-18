@@ -1,111 +1,118 @@
-# UnityBridge v0.3.0-rc.1 — prerelease
+# UnityBridge v0.3.0-rc.2 — prerelease
 
-This release candidate is published from `codex/external-host-compiler` without
-merging it into `main`. The latest stable release remains
-[v0.2.3](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3).
-CLI, Python source and Unity Connector versions are `0.3.0-rc.1`; Python package
-metadata may display the equivalent normalized version `0.3.0rc1`.
+RC2 reduces CLI startup and repeated-command overhead while keeping the CLI and
+resident host in Python. It also improves operation completion checks and compiler
+startup. This release comes from `codex/external-host-compiler`; the latest stable
+release remains [v0.2.3](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3).
 
-## Changes
+CLI, Python source and Unity Connector versions are **0.3.0-rc.2**. Python package
+metadata may display the equivalent normalized version `0.3.0rc2`.
 
-- Add a persistent Python host and a bundled .NET 10/Roslyn compiler. Unity starts
-  the registered host asynchronously, which prepares compiler references and exits
-  after 30 seconds without live Editors or pending work. Users of standalone
-  bundles do not need to install Python or the .NET SDK.
-- Compile snippets outside Unity, then invoke them on Unity's main thread. Reuse
-  compilation preparation, validate actual reference MVIDs, and emit a unique
-  assembly identity for each execution. Results and static state are not cached.
-- Keep HTTP I/O off the Editor update loop while preserving main-thread tool
-  invocation and result serialization. Prepare reference identities once per
-  negotiated context and avoid duplicate DLL image reads/copies.
-- Preserve per-project mutation order, validate deadlines after the execution
-  lock, cancel queued work from a stopped listener, and never replay a command
-  after an ambiguous lost response. Live readiness remains distinct from host health.
-- Keep the legacy route and explicit `--csc`/`--dotnet` overrides. Select
-  `--backend auto|host|legacy` or `UNITY_BRIDGE_BACKEND`. Both transports stay on
-  loopback without environment proxies or redirects.
-- Include compiler timeout/recovery, stale host PID recovery, installer rollback,
-  authenticated host communication and fixes for worker timeout races.
+## Changes since RC1
 
-## Install or upgrade to this RC
+- Forward eligible single `exec` calls to the running host without loading the
+  full CLI in each caller. Reuse the existing parser, output, discovery and
+  per-project execution queue in the host. Preserve authentication, original
+  deadlines, compiler overrides, older-host fallback and no replay after an
+  ambiguous response. Standalone streams use UTF-8, including Windows pipes.
+- Load optional CLI modules and only the requested command parser on demand.
+  Add a sequential JSONL `session` command for integrations that keep one CLI
+  process open across requests.
+- Wake host discovery on authenticated Connector state-change notifications,
+  retaining periodic discovery and checking changed ports before dispatch.
+- Confirm `refresh --wait`, `reserialize --wait` and `editor play|stop --wait`
+  using operation IDs and live Unity events, including across domain reloads.
+  Confirmed operations need no fixed settling delay. Older Connectors retain
+  conservative waits; lost or cancelled operations are not replayed.
+- Publish the compiler with ReadyToRun and account for shared reference images
+  once in the compilation cache. Repeated snippets still emit unique assemblies
+  and execute again; return values and snippet static state are not reused.
+- Keep automatic-update checks and stable/prerelease selection unchanged.
 
-Use the installer **from this RC tag**, including for the first upgrade from
-v0.2.3. A stable installer may install the new bundle without its host setup.
-For a custom existing installation, add `-InstallDir PATH` or `--install-dir PATH`.
+The external host and bundled .NET 10/Roslyn compiler introduced in RC1 remain.
+Unity API work still executes on the Unity main thread. Standalone users do not
+need to install Python or a .NET SDK separately.
+
+## Install or upgrade
+
+Use the installer and Connector from the **RC2 tag**. For a custom installation,
+append `-InstallDir PATH` on Windows or `--install-dir PATH` on macOS/Linux.
 
 Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.1
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.sh -o /tmp/unity-bridge-install-rc.sh
-sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.1
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.2/install.sh -o /tmp/unity-bridge-install-rc.sh
+sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.2
 ```
 
-Also update the Unity Package Manager Git URL:
+From an existing RC installation, the CLI can also update with:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+unity-bridge update --ref v0.3.0-rc.2
 ```
 
-After Unity finishes importing/compiling, verify `Connector: 0.3.0-rc.1` in
-`unity-bridge status` and check the CLI:
+Update the Unity Package Manager Git URL separately:
 
 ```text
-unity-bridge update --check --ref v0.3.0-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
 ```
 
-The CLI updater does not update the Unity package. Once running this RC, use
-`unity-bridge update --ref v0.3.0-rc.1` to retain the RC channel. An unqualified
-standalone `update` installs the latest stable release, even when an RC is installed.
-Keep the executable beside its `_unity_bridge_runtime_<build-id>` directory.
+After Unity finishes importing, verify `Connector: 0.3.0-rc.2` in
+`unity-bridge status`, and run `unity-bridge update --check --ref v0.3.0-rc.2`
+to check the CLI. The updater does not modify the Unity package. An unqualified
+standalone `update` selects the latest stable release, including when an RC is
+installed. Keep the executable beside its `_unity_bridge_runtime_<build-id>` folder.
 
-Python-only installation is also available, but does not bundle/register the
-compiler host automatically:
+Python package installation is available but does not automatically bundle or
+register the compiler host:
 
 ```sh
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.1"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.2"
 ```
 
-## Validation and limits
+## Validation and measured scope
 
-Local RC preparation ran 167 Python checks (166 passed and one Windows symlink
-privilege skip) and passed 14 native checks each in Unity 2021.3.19f1 and
-6000.3.13f1. The compiler has 13 real Roslyn regression cases. Tagged release CI reruns client/installer/compiler
-checks, then verifies all five platform archives before publication:
-Windows x64, Linux x64/ARM64, macOS Intel/Apple Silicon.
+Local validation passed 195 of 196 Python tests, with one Windows symlink
+permission skip, and 15 compiler regression scenarios. Real Unity 2021.3.19f1
+and 6000.3.13f1 each passed 18 checks, including static-state isolation, compiler
+error recovery, reference changes, reloads and expiry without late side effects.
+All 14 fast-route tests passed with source Python and the extracted Windows bundle.
+Release CI reruns client/installer/compiler tests and verifies extracted bundles
+for Windows x64, Linux x64/ARM64, and macOS Intel/Apple Silicon before publication.
 
-Matched Windows batch-mode measurements against the earlier development build
-reduced prepared `exec` median latency from about 250 ms to 122–124 ms, and
-`tools` from about 250 ms to 109 ms. All ordinary-command p95 gates passed.
-These measurements predate the RC version bump; they are not a GUI FPS or
-prompt-to-answer guarantee. See the
-[detailed report](https://github.com/zjxps2007/UnityBridge/blob/v0.3.0-rc.1/docs/HOST_OPTIMIZATION.md)
-for sample counts, first-start timing, memory and installation costs.
+Before the RC2 version bump, matched Windows batch-mode measurements found that
+the Python fast route reduced prepared `exec` p50 by **17–28%** and p95 by
+**21–23%** relative to the immediately preceding unreleased optimized build.
+Ordinary-command p95 remained within the allowed increase of
+`max(5% of baseline, 10 ms)`. Service startup itself did not improve in that
+comparison. The broader RC1 comparison also covers compiler startup, operation
+waits and persistent sessions. These are empty-project measurements, not a GUI
+frame-rate or agent-prompt-to-answer guarantee:
 
-Project source changes still require Unity compilation/domain reload. Already
-running arbitrary C# cannot be forcibly cancelled. The bundled compiler needs a
-.NET 10 supported OS and adds installation size/resident memory. Unity 2020.3
-has source/API compatibility evidence only; no native 2020.3 run was available.
+- [RC1 follow-up measurements](https://github.com/zjxps2007/UnityBridge/blob/v0.3.0-rc.2/docs/SPEED_FOLLOWUP.md)
+- [Python exec measurements](https://github.com/zjxps2007/UnityBridge/blob/v0.3.0-rc.2/docs/EXEC_OPTIMIZATION.md)
+
+ReadyToRun increases bundle size. The bundled compiler needs a .NET 10 supported
+OS. Project source changes still require Unity compilation/domain reload, and
+arbitrary C# already executing in Unity cannot be forcibly cancelled. Unity
+2020.3 has source/API compatibility evidence; no native 2020.3 run was available.
 
 ## 한국어 안내
 
-- 현재 개발 브랜치를 배포하는 **v0.3.0-rc.1 프리릴리즈**입니다. main은 병합하지
-  않았으며 최신 정식 버전은 v0.2.3으로 유지됩니다.
-- 독립 Python 호스트·Roslyn 워커를 추가하고, 네트워크 대기와 중복 참조 처리를
-  줄였습니다. Unity API 호출과 결과 직렬화는 메인 스레드에서 수행합니다.
-- 기존 v0.2.3에서 처음 올릴 때는 위의 **RC 태그 설치기**를 사용하세요. 사용자
-  지정 설치 위치가 있다면 같은 경로를 명시하세요. Unity 패키지 URL도 별도로
-  `#v0.3.0-rc.1`로 바꿔야 합니다.
-- 이후 RC를 지정해 업데이트하려면 `--ref v0.3.0-rc.1`을 사용합니다. 버전 없는
-  일반 업데이트는 RC에서도 최신 정식 버전으로 돌아갈 수 있습니다.
-- Python 메타데이터의 `0.3.0rc1`은 `0.3.0-rc.1`과 같은 버전입니다. Python만
-  설치하면 독립 컴파일러가 자동으로 포함·등록되지는 않습니다.
-- [한글 측정·검증 보고서](https://github.com/zjxps2007/UnityBridge/blob/v0.3.0-rc.1/docs/HOST_OPTIMIZATION.ko.md)에
-  실제 응답 시간, 첫 시작 비용, 메모리와 검증 범위를 정리했습니다.
+- **v0.3.0-rc.2 프리릴리즈**입니다. 개발 브랜치에서 배포하며 정식 버전은 v0.2.3입니다.
+- CLI와 호스트를 Python으로 유지해 단일 `exec`의 초기화 비용을 줄였습니다.
+  JSONL 연속 명령, 실제 작업 완료 확인, 상태 변경 알림, ReadyToRun과 캐시 개선도 포함합니다.
+- CLI와 Unity Connector를 모두 RC2로 갱신하세요. CLI 업데이트는
+  `unity-bridge update --ref v0.3.0-rc.2`, Unity 패키지는 위 Git URL을 사용합니다.
+- 자동 업데이트 동작은 그대로이며, 버전 없는 업데이트는 정식 버전을 선택합니다.
+- 준비된 `exec`의 개선과 서비스 첫 시작은 구분해야 합니다. 실측 조건과 비용은
+  [RC1 이후 검증](https://github.com/zjxps2007/UnityBridge/blob/v0.3.0-rc.2/docs/SPEED_FOLLOWUP.ko.md)과
+  [Python exec 검증](https://github.com/zjxps2007/UnityBridge/blob/v0.3.0-rc.2/docs/EXEC_OPTIMIZATION.ko.md)에 기록했습니다.

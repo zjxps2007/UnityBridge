@@ -2,12 +2,15 @@
 
 [한국어](DEVELOPMENT.ko.md) | English
 
-The public entry point remains `unity_bridge.cli:main`. Installed commands,
-`python -m unity_bridge`, and the standalone build all use this function.
-Implementation modules live in `src/unity_bridge/_cli/`.
+The public `unity_bridge.cli:main` function remains compatible. Installed commands,
+`python -m unity_bridge`, and standalone builds enter `_bootstrap:main`, which
+selects the lightweight exec route or calls the existing CLI. Both routes remain
+Python; the existing Roslyn worker handles C# compilation.
 
 | File | Responsibility |
 |---|---|
+| `_bootstrap.py`, `_fast_exec.py` | Minimal entry point, conservative exec eligibility, caller input and authenticated host connection. |
+| `_wire.py` | Deadline-bounded, size-limited frames for the private CLI connection. |
 | `cli.py` | Select the built-in or direct-tool route, create the client, print the result, and choose the exit code. |
 | `_cli/arguments.py` | Built-in options and help; direct-tool flags, repeated values, positionals, and JSON parameters. |
 | `_cli/commands.py` | Map parsed built-in options to `UnityClient` and `UnityBridgeAdapter` calls; read C# code input. |
@@ -15,8 +18,10 @@ Implementation modules live in `src/unity_bridge/_cli/`.
 | `_cli/updates.py` | Python package updates, scheduling standalone updates, remote versions, and daily notice caching. |
 | `_cli/standalone.py` | Platform/architecture selection and platform-specific installer command construction. |
 | `_cli/versions.py` | Shared version parsing and comparison. |
+| `_cli/session.py` | Sequential JSONL commands, bounded input and per-request CLI output. |
 | `host/` | Optional local service, authenticated transport, project queues, runtime registration, and compiler process supervision. |
 | `host/context.py` | Prepare reference identity and project metadata once for each negotiated Unity context. |
+| `host/cli_server.py`, `host/cli_request.py` | Authenticate lightweight CLI requests; use the existing parser, client discovery, adapter, queue and renderer in the host. |
 | `compiler-worker/` (repository root) | Independent Roslyn compiler, its private JSONL protocol, and compiler regression scenarios. |
 
 The `_cli` package is internal. Python integrations should use the client and
@@ -25,7 +30,47 @@ adapter APIs exported by `unity_bridge`. The existing `cli.build_parser` and
 
 ## Independent Host And Compiler
 
-The current branch targets prerelease **0.3.0-rc.1**; **v0.2.3** remains the
+RC2 changes load package exports and optional CLI modules on
+demand, and cache only the selected command parser. The public full parser remains
+available. A session reuses process/module/parser initialization, not discovery
+results or mutation responses. Automatic update policy is unchanged.
+
+For a compatible, already running host, `_fast_exec.py` reads caller input and
+sends one request to `cliPort` in the private host registry. It does not load
+the full CLI/client/adapter in the short-lived process. The service uses the
+normal parser with request-local output, resolves relative paths against the
+caller's cwd, and submits to the same per-project FIFO queue. No global cwd,
+environment or output stream is swapped in the multithreaded host.
+
+This loopback IPv4 transport has CLI protocol 1, a four-byte big-endian length
+prefix, a 32 MiB message limit, and the existing user-scoped authentication token.
+It carries the original absolute command deadline. Before submission, unsupported
+syntax, older hosts, compiler overrides and connection failure use the full CLI;
+stdin already read locally is restored for that fallback. After any frame-write
+attempt, a lost or invalid response is `unknown` and is never replayed. Host
+unavailability does not imply Unity readiness. Unity heartbeat PID/port retain
+their existing meaning. Automatic-update checks that are due still run through
+the normal CLI. `UNITY_BRIDGE_DISABLE_FAST_EXEC=1` disables this optimization for
+diagnosis. Source Python APIs and JSONL sessions retain their existing paths.
+Standalone standard streams use UTF-8, including on Windows when piped.
+
+Connector heartbeat changes send a coalesced, authenticated `/changed` hint from
+a background thread. The host wakes its discovery scan; the heartbeat file remains
+authoritative, and periodic scanning still recovers missed hints. Before dispatch,
+a changed target port forces a fresh scan even if the previous listener is alive.
+`EditorOperations.cs` persists bounded operation receipts in `SessionState` through
+reloads. Completion requires the import/compile/reload or play-mode events for that
+operation. Ambiguous code imports retain conservative waiting or lose the receipt;
+they do not fabricate successful completion.
+
+Compiler publication now uses ReadyToRun by default; pass `--no-ready-to-run` to
+`build-compiler.py` for an equivalent JIT comparison build. It still ships a .NET
+runtime and Roslyn, and does not precompile user snippets. See
+[speed validation](SPEED_FOLLOWUP.md) for the startup/size tradeoff. Compilation
+cache weights count shared reference images once across retained entries and keep
+per-snippet estimates separately. The 256 MiB accounting limit is not an RSS cap.
+
+The current branch targets prerelease **0.3.0-rc.2**; **v0.2.3** remains the
 stable baseline. The RC stays on `codex/external-host-compiler`, separate from `main`.
 Use the [tagged RC installer](INSTALL.md#prerelease) for packaged testing.
 The service runs outside Unity, while the Connector still owns

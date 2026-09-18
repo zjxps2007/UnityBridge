@@ -101,6 +101,19 @@ jobs:
           run("_host", "check-worker", "--worker", str(worker.resolve()))
           with tempfile.TemporaryDirectory() as instances:
               assert json.loads(run("--json", "--no-update-check", "--instances-dir", instances, "instances")) == []
+              session = subprocess.run(
+                  [executable, "--no-update-check", "--instances-dir", instances, "session"],
+                  input='{"id":1,"args":["instances"]}\n{"id":2,"args":["instances"]}\n',
+                  capture_output=True, text=True, timeout=60)
+              session.check_returncode()
+              replies = [json.loads(line) for line in session.stdout.splitlines()]
+              assert [reply["id"] for reply in replies] == [1, 2], replies
+              assert all(reply["exit_code"] == 0 and reply["result"] == [] for reply in replies), replies
+          # Exercise the extracted executable's private exec transport as well
+          # as source Python, using an isolated host and fixture Connector.
+          subprocess.run(
+              [sys.executable, "-m", "unittest", "tests.test_fast_exec"], check=True,
+              env=dict(os.environ, UNITY_BRIDGE_TEST_CLI_EXE=executable), timeout=120)
           result = json.loads(run("--json", "update", "--check", "--ref", os.environ["BUILD_REF"]))
           assert result["mode"] == "standalone", result
           assert result["current_version"] == __version__, result

@@ -70,6 +70,13 @@ the supplied executable so Unity's automatic launch is also tested. The stale
 registry option verifies recovery when an old host PID belongs to another live
 process. Repeat on Unity 2021 with a separate output directory.
 
+Post-RC1 validation also checks the persistent JSONL CLI and operation receipts
+for no-op refresh/reserialize, compilation/domain reload and play/stop. The full
+compiler context is saved locally for matched worker-startup measurements.
+The lightweight exec route is also exercised with UTF-8 files/stdin, custom
+usings, static-state isolation, compiler errors, reloads and queued timeouts
+that must not cause late side effects.
+
 `scripts/benchmark-host.py` measures standalone subprocess-to-response latency
 against `v0.2.3` in baseline/candidate/candidate/baseline order. Use matching
 Python/PyInstaller builds. It records cold service startup separately from
@@ -85,6 +92,14 @@ To compare two external-host builds, add `--baseline-host --baseline-ref <commit
 and supply the matching baseline executable. Both variants then register/start
 their own host and perform the same cold and prewarm-only sequences. Without
 this flag the baseline retains the legacy path used for the v0.2.3 comparison.
+For a CLI/host-only comparison, add `--baseline-working-tree-connector` to use
+identical current Connector sources with both executables. Keep a copy of the
+actual baseline bundle; a git ref alone does not capture uncommitted changes.
+
+`--extended` adds waited no-op refresh, eight rotating snippets over two passes,
+and persistent-session response times. Session startup/first response and later
+commands are reported separately. These runs are sequential; do not run other
+benchmarks or builds concurrently when collecting latency evidence.
 
 The result file records the ordinary-command gate: candidate p95 may not exceed
 baseline by more than `max(5% of baseline, 10 ms)`. A functional pass alone does

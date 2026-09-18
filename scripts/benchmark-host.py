@@ -74,10 +74,13 @@ def main():
     parser.add_argument("--baseline-ref", default="v0.2.3")
     parser.add_argument("--baseline-host", action="store_true",
                         help="Use the external host in both builds (baseline defaults to legacy)")
+    parser.add_argument("--baseline-working-tree-connector", action="store_true",
+                        help="Use the current Connector for both executables to isolate CLI/host changes.")
     parser.add_argument("--variants", nargs="+", choices=["baseline", "candidate"],
                         default=["baseline", "candidate", "candidate", "baseline"])
     parser.add_argument("--samples", default=40, type=int)
     parser.add_argument("--exec-samples", default=20, type=int)
+    parser.add_argument("--extended", action="store_true", help="Also measure operation waits, rotating snippets, and candidate JSONL sessions.")
     parser.add_argument("--output", required=True, type=Path)
     args = parser.parse_args()
     output = args.output.resolve()
@@ -86,32 +89,34 @@ def main():
         parser.error("Use an empty output directory to preserve previous evidence")
     unity = args.unity_editor.resolve()
     results = {"unity_version": args.unity_version, "baseline_ref": args.baseline_ref,
-               "baseline_host": args.baseline_host, "sessions": [],
+               "baseline_host": args.baseline_host, "baseline_working_tree_connector": args.baseline_working_tree_connector,
+               "sessions": [],
                "scope": "Windows, empty projects, batchmode/nographics, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms"}
     files = subprocess.check_output(["git", "ls-tree", "-r", "--name-only", args.baseline_ref,
                                      "unity-bridge-connector/Editor"], cwd=REPO, text=True).splitlines()
     candidate_files = [p.relative_to(REPO).as_posix() for p in (REPO / "unity-bridge-connector/Editor").rglob("*") if p.is_file()]
     for number, variant in enumerate(args.variants, 1):
+        current_connector = variant == "candidate" or args.baseline_working_tree_connector
         use_host = variant == "candidate" or args.baseline_host
         folder = output / f"{number}-{variant}"
         project = folder / "UnityProject"
         editor = project / "Assets/Editor"
         editor.mkdir(parents=True)
         package_name = "unity-bridge-connector/package.json"
-        package = json.loads((REPO / package_name).read_text() if variant == "candidate" else
+        package = json.loads((REPO / package_name).read_text() if current_connector else
                              subprocess.check_output(["git", "show", f"{args.baseline_ref}:{package_name}"], cwd=REPO))
         package.pop("dependencies", None)
         package_root = project / "Packages" / package["name"]
         package_root.mkdir(parents=True)
         save(package_root / "package.json", package)
         hashes = {}
-        for name in candidate_files if variant == "candidate" else files:
+        for name in candidate_files if current_connector else files:
             relative = Path(name).relative_to("unity-bridge-connector/Editor")
             if "TestRunner" in relative.parts or relative.name == "TestRunner.meta":
                 continue
             destination = package_root / "Editor" / relative
             destination.parent.mkdir(parents=True, exist_ok=True)
-            data = (REPO / name).read_bytes() if variant == "candidate" else subprocess.check_output(
+            data = (REPO / name).read_bytes() if current_connector else subprocess.check_output(
                 ["git", "show", f"{args.baseline_ref}:{name}"], cwd=REPO)
             destination.write_bytes(data)
             if destination.suffix == ".cs":
@@ -220,6 +225,38 @@ def main():
                 assert call("unique_exec", "exec", "--code", f"return {i} + 100;", backend=backend)["data"] == i + 100
                 assert call("repeat_exec", "exec", "--code", "return 123;", backend=backend)["data"] == 123
             row["exec_editor_gaps"] = call("frame_exec_stop", "call", "host_performance_audit", "--params", '{"action":"stop"}', backend=backend)["data"]["gaps_ms"]
+            if args.extended:
+                for _ in range(8):
+                    call("refresh_wait", "refresh", "--wait", backend=backend)
+                row["rotating_cache_hits"] = []
+                for cycle in range(2):
+                    for index in range(8):
+                        assert call("rotating_exec", "exec", "--code", f"return {9000 + index};", backend=backend)["data"] == 9000 + index
+                        if use_host:
+                            row["rotating_cache_hits"].append(bool(host_request("/health")["compiler"].get("cache_hit")))
+                if variant == "candidate":
+                    started = time.perf_counter()
+                    session = subprocess.Popen([str(executable), "--json", "--project", str(project), "--backend", "host", "session"],
+                                               env=env, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                                               text=True, encoding="utf-8", creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                    try:
+                        for index in range(21):
+                            if index:
+                                started = time.perf_counter()
+                            session.stdin.write(json.dumps({"id": index, "args": ["console", "--count", "1", "--type", "error"]}) + "\n")
+                            session.stdin.flush()
+                            response = json.loads(session.stdout.readline())
+                            elapsed = (time.perf_counter() - started) * 1000
+                            assert response["id"] == index and response["exit_code"] == 0, response
+                            row["calls"].append({"name": "session_first" if index == 0 else "session_console", "ms": elapsed})
+                        session.stdin.close()
+                        assert session.wait(timeout=10) == 0, session.stderr.read()
+                    finally:
+                        if session.poll() is None:
+                            session.kill()
+                            session.wait(timeout=10)
+                        for stream in (session.stdin, session.stdout, session.stderr):
+                            stream.close()
             row["unity_working_set_bytes"] = working_set(unity_process.pid)
             if use_host:
                 info = host_request("/health")
@@ -255,6 +292,11 @@ def main():
         sessions = [row for row in results["sessions"] if row["variant"] == variant]
         summary[variant] = {name: stats([c["ms"] for row in sessions for c in row["calls"] if c["name"] == name])
                             for name in ("status", "console", "tools", "unique_exec", "repeat_exec", "first_exec", "warmed_new_snippet", "prewarm_only_first_exec")}
+        if args.extended:
+            for name in ("refresh_wait", "rotating_exec", "session_first", "session_console"):
+                values = [c["ms"] for row in sessions for c in row["calls"] if c["name"] == name]
+                if values:
+                    summary[variant][name] = stats(values)
         summary[variant]["cold_service_to_first_result"] = stats([r["cold_service_to_first_result_ms"] for r in sessions])
         summary[variant]["idle_editor_gaps"] = stats([g for r in sessions for g in r["idle_editor_gaps"]])
         summary[variant]["exec_editor_gaps"] = stats([g for r in sessions for g in r["exec_editor_gaps"]])

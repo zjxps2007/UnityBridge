@@ -2,12 +2,15 @@
 
 한국어 | [English](DEVELOPMENT.md)
 
-공개 진입점은 기존과 같은 `unity_bridge.cli:main`입니다. 설치된 명령,
-`python -m unity_bridge`, standalone 실행 파일이 모두 이 함수를 사용합니다.
-내부 구현은 `src/unity_bridge/_cli/`에 있습니다.
+공개 함수 `unity_bridge.cli:main`은 호환성을 유지합니다. 설치된 명령,
+`python -m unity_bridge`, standalone 실행 파일은 `_bootstrap:main`에서 경량 exec
+경로나 기존 CLI를 선택합니다. 두 경로 모두 Python이며 C# 컴파일은 기존 Roslyn
+워커가 담당합니다.
 
 | 파일 | 역할 |
 |---|---|
+| `_bootstrap.py`, `_fast_exec.py` | 경량 진입점, exec 적용 조건, 호출자 입력과 인증한 호스트 연결을 처리합니다. |
+| `_wire.py` | 내부 CLI 통신의 메시지 크기와 남은 제한 시간을 확인합니다. |
 | `cli.py` | 기본 명령과 직접 도구 호출을 구분하고, 클라이언트 생성·결과 출력·종료 코드를 처리합니다. |
 | `_cli/arguments.py` | 기본 명령의 옵션·도움말과 직접 호출의 플래그·반복 값·위치 인자·JSON 매개변수를 해석합니다. |
 | `_cli/commands.py` | 해석한 옵션을 `UnityClient`와 `UnityBridgeAdapter` 호출로 연결하고 C# 코드 입력을 읽습니다. |
@@ -15,8 +18,10 @@
 | `_cli/updates.py` | Python 패키지 업데이트, standalone 업데이트 예약, 원격 버전 조회, 일일 알림 캐시를 처리합니다. |
 | `_cli/standalone.py` | 플랫폼·아키텍처를 선택하고 운영체제별 설치기 실행 명령을 만듭니다. |
 | `_cli/versions.py` | 공통 버전 해석과 비교를 담당합니다. |
+| `_cli/session.py` | JSONL 순차 요청, 입력 크기 제한, 요청별 CLI 출력을 처리합니다. |
 | `host/` | 선택적 로컬 서비스, 인증 통신, 프로젝트별 대기열, 런타임 등록과 컴파일러 프로세스를 관리합니다. |
 | `host/context.py` | 협상한 Unity 참조 정보마다 참조 식별값과 프로젝트 정보를 한 번 준비합니다. |
+| `host/cli_server.py`, `host/cli_request.py` | 경량 CLI 요청을 인증하고 호스트 안에서 기존 parser·탐색·adapter·대기열·출력을 사용합니다. |
 | 저장소 루트의 `compiler-worker/` | 독립 Roslyn 컴파일러, 내부 JSONL 프로토콜과 컴파일러 회귀 검증을 포함합니다. |
 
 `_cli`는 내부 구현입니다. Python 프로그램에서 연동할 때는 `unity_bridge`가
@@ -25,7 +30,43 @@
 
 ## 독립 호스트와 컴파일러
 
-현재 브랜치는 **0.3.0-rc.1 프리릴리스**를 대상으로 하며 정식 기준 버전은 **v0.2.3**입니다.
+RC2는 공개 export와 선택 기능 모듈을 필요할 때 로드하고 선택한
+명령의 parser만 캐시합니다. 기존 전체 parser API도 유지합니다. 세션은 프로세스·모듈·parser
+초기화를 재사용하며 Unity 탐색 결과나 변경 명령 응답을 재사용하지 않습니다.
+자동 업데이트 정책은 그대로입니다.
+
+호환 호스트가 실행 중이면 `_fast_exec.py`가 호출자의 입력을 읽고 호스트 레지스트리의
+`cliPort`로 요청 하나를 보냅니다. 짧게 실행되는 프로세스는 전체 CLI·client·adapter를
+로드하지 않습니다. 서비스는 요청별 출력을 갖는 기존 parser를 사용하고 상대 경로는
+호출자 작업 폴더 기준으로 해석하며 기존 프로젝트별 FIFO 대기열에 넣습니다.
+여러 요청을 처리하는 호스트에서 전역 작업 폴더·환경 변수·출력 스트림을 바꾸지 않습니다.
+
+내부 통신은 고정 IPv4 루프백, CLI 프로토콜 1, 4바이트 big-endian 길이 접두부,
+메시지당 32 MiB 제한과 기존 사용자 전용 인증 토큰을 사용합니다. 원래 명령의 절대
+제한 시간을 전달합니다. 지원하지 않는 구문·구버전 호스트·컴파일러 직접 지정·연결 실패는
+전송 전에 기존 CLI로 돌아가며 이미 읽은 stdin도 복구합니다. 프레임 전송을 시도한 뒤
+응답이 유실되거나 잘못되면 `unknown`으로 표시하고 다시 실행하지 않습니다.
+호스트 연결 상태를 Unity 준비 완료로 간주하지 않으며 Unity Heartbeat PID·포트의
+의미도 유지합니다. 자동 업데이트 확인 시기가 되면 기존 CLI에서 그대로 확인합니다.
+진단 시 `UNITY_BRIDGE_DISABLE_FAST_EXEC=1`로 경량 경로를 끌 수 있습니다.
+Python API와 JSONL 세션은 기존 경로를 유지합니다. Standalone의 표준 입출력은
+Windows 파이프를 포함해 UTF-8을 사용합니다.
+
+Connector는 Heartbeat 변경 시 백그라운드에서 인증한 `/changed` 알림을 합쳐 보냅니다.
+호스트는 탐색을 즉시 깨우되 실제 정보는 Heartbeat 파일에서 읽고 주기 탐색도 유지합니다.
+전달 직전 대상 포트가 바뀌면 이전 listener가 살아 있어도 파일을 다시 확인합니다.
+`EditorOperations.cs`는 제한된 수의 작업 기록을 `SessionState`에 저장해 리로드를
+넘겨 유지합니다. 완료는 해당 import·컴파일·리로드 또는 재생 상태 이벤트로 확인합니다.
+코드 import 완료가 불명확하면 기존 대기로 돌아가거나 작업 기록 유실을 보고합니다.
+
+컴파일러는 기본적으로 ReadyToRun으로 배포 빌드합니다. 같은 코드의 JIT 비교 빌드는
+`build-compiler.py --no-ready-to-run`을 사용하세요. .NET 런타임과 Roslyn은 여전히
+동봉하며 사용자 C# 코드를 미리 컴파일하는 기능은 아닙니다. 시작 속도와 용량은
+[검증 보고서](SPEED_FOLLOWUP.ko.md)에 기록합니다. 컴파일 캐시는 여러 항목이 공유하는
+참조 이미지를 한 번만 계산하고 코드별 추정 비용을 더합니다. 256 MiB 계산 한도는
+실제 프로세스 메모리 상한이 아닙니다.
+
+현재 브랜치는 **0.3.0-rc.2 프리릴리스**를 대상으로 하며 정식 기준 버전은 **v0.2.3**입니다.
 RC는 `main`과 분리한 `codex/external-host-compiler`에 유지합니다. 배포 묶음을
 시험하려면 [해당 태그의 RC 설치기](INSTALL.ko.md#프리릴리스)를 사용하세요.
 서비스는 Unity 밖에서 실행되며, Unity API 실행은 계속 Connector의 메인 스레드에서

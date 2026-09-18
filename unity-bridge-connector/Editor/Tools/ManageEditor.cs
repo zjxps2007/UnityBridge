@@ -50,14 +50,19 @@ namespace UnityBridgeConnector.Tools
                 case "play":
                     if (!EditorApplication.isPlaying)
                     {
+                        var operationId = EditorOperations.Begin("play");
                         UnityBridgeConnector.Heartbeat.MarkEnteringPlayMode();
-                        EditorApplication.isPlaying = true;
-                        if (waitForCompletion)
+                        try
                         {
-                            await WaitForPlayModeStateAsync(PlayModeStateChange.EnteredPlayMode, TimeSpan.FromSeconds(PlayModeTimeoutSeconds));
-                            return new SuccessResponse("Entered play mode (confirmed).");
+                            EditorApplication.isPlaying = true;
+                            if (waitForCompletion)
+                            {
+                                await WaitForPlayModeStateAsync(PlayModeStateChange.EnteredPlayMode, TimeSpan.FromSeconds(PlayModeTimeoutSeconds));
+                                return new SuccessResponse("Entered play mode (confirmed).", new { operation_id = operationId });
+                            }
+                            return new SuccessResponse("Entered play mode.", new { operation_id = operationId });
                         }
-                        return new SuccessResponse("Entered play mode.");
+                        catch { EditorOperations.Abandon(operationId); throw; }
                     }
                     return new SuccessResponse("Already in play mode.");
 
@@ -72,14 +77,19 @@ namespace UnityBridgeConnector.Tools
                 case "stop":
                     if (EditorApplication.isPlaying)
                     {
+                        var operationId = EditorOperations.Begin("stop");
                         UnityBridgeConnector.Heartbeat.MarkExitingPlayMode();
-                        EditorApplication.isPlaying = false;
-                        if (waitForCompletion)
+                        try
                         {
-                            await WaitForPlayModeStateAsync(PlayModeStateChange.EnteredEditMode, TimeSpan.FromSeconds(PlayModeTimeoutSeconds));
-                            return new SuccessResponse("Exited play mode (confirmed).");
+                            EditorApplication.isPlaying = false;
+                            if (waitForCompletion)
+                            {
+                                await WaitForPlayModeStateAsync(PlayModeStateChange.EnteredEditMode, TimeSpan.FromSeconds(PlayModeTimeoutSeconds));
+                                return new SuccessResponse("Exited play mode (confirmed).", new { operation_id = operationId });
+                            }
+                            return new SuccessResponse("Exited play mode.", new { operation_id = operationId });
                         }
-                        return new SuccessResponse("Exited play mode.");
+                        catch { EditorOperations.Abandon(operationId); throw; }
                     }
                     return new SuccessResponse("Already stopped (not in play mode).");
 

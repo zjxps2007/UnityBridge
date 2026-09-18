@@ -24,7 +24,7 @@ release.
 
 ## Prerelease: Independent Host And Compiler
 
-**v0.3.0-rc.1** is the release candidate for the independent host and compiler;
+**v0.3.0-rc.2** is the release candidate for the independent host and compiler;
 the stable release remains **v0.2.3**. The quick-start commands below select stable.
 To try the RC, use its [tagged installer and matching Unity package](docs/INSTALL.md#prerelease).
 The RC is developed on `codex/external-host-compiler` and is not merged into `main`.
@@ -54,6 +54,18 @@ The [initial validation report](docs/HOST_VALIDATION.md) records the comparison
 with v0.2.3, including cold-start costs, memory use, and verification limits.
 The [follow-up optimization report](docs/HOST_OPTIMIZATION.md) records later
 changes measured on the alpha development commits preceding this RC.
+
+**RC2 includes the improvements after RC1**: lighter
+CLI startup, a persistent JSONL `session`, immediate host state-change hints,
+operation-specific completion checks, shared-reference cache accounting, and
+ReadyToRun compiler publishing.
+See the [measurements and tradeoffs](docs/SPEED_FOLLOWUP.md). Automatic update
+checks keep their existing behavior.
+
+RC2 also keeps the CLI and host in Python while reducing single `exec`
+startup work when a compatible host is running. Existing command syntax and
+per-request execution are preserved. See the [exec comparison](docs/EXEC_OPTIMIZATION.md)
+for the separate follow-up measurement collected before the RC2 version bump.
 
 ## Quick Start
 

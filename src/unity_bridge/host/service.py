@@ -93,8 +93,11 @@ class HostService:
         self.projects: dict[tuple[str, int], Project] = {}
         self.projects_lock = threading.Lock()
         self.registry_lock = threading.Lock()
+        self.scan_lock = threading.Lock()
+        self.discovery_wakeup = threading.Event()
         self.stopping = threading.Event()
         self.server: ThreadingHTTPServer | None = None
+        self.cli_server = None
         self.last_registry = None
         self.last_active = time.monotonic()
         self.compiler_error = ""
@@ -121,7 +124,9 @@ class HostService:
                                         "prewarmState": project.prewarm_state,
                                         "prewarmError": project.prewarm_error})
             targets.sort(key=lambda p: (p["projectPath"], p["pid"]))
-            value = {"protocol": PROTOCOL, "runtimeId": self.descriptor["runtimeId"],
+            value = {"protocol": PROTOCOL, "cliProtocol": 1,
+                     "cliPort": self.cli_server.server_address[1] if self.cli_server else 0,
+                     "runtimeId": self.descriptor["runtimeId"],
                      "version": self.descriptor["version"], "pid": os.getpid(), "port": self.port,
                      "token": self.descriptor["token"], "instancesDir": str(self.instances_dir.resolve()),
                      "projects": targets}
@@ -173,7 +178,10 @@ class HostService:
         finally:
             with project.condition:
                 project.negotiating = False
-                project.next_negotiate = time.monotonic() + 1.
+                changed = Project.key(project.snapshot) != key
+                project.next_negotiate = 0. if changed else time.monotonic() + 1.
+            if changed:
+                self.discovery_wakeup.set()
             self._write_registry()
 
     def _prewarm_context(self, project: Project, context: PreparedContext, key: tuple) -> None:
@@ -193,6 +201,11 @@ class HostService:
         self._write_registry()
 
     def scan_once(self) -> None:
+        # Notifications and requests may refresh discovery alongside the watchdog.
+        with self.scan_lock:
+            self._scan_once()
+
+    def _scan_once(self) -> None:
         found: set[tuple[str, int]] = set()
         stopped: set[tuple[str, int]] = set()
         try:
@@ -222,6 +235,8 @@ class HostService:
                     self.projects[key] = project
             start_negotiation = False
             with project.condition:
+                if Project.key(project.snapshot) != Project.key(snapshot):
+                    project.next_negotiate = 0.
                 project.snapshot, project.alive = snapshot, True
                 project.condition.notify_all()
                 if (project.context_key != Project.key(snapshot) and not project.negotiating
@@ -252,6 +267,7 @@ class HostService:
 
     def _scan_loop(self) -> None:
         while not self.stopping.is_set():
+            self.discovery_wakeup.clear()
             try:
                 active = load_launcher(self.root)
                 if active and active["runtimeId"] != self.descriptor["runtimeId"] and not self.has_work():
@@ -266,7 +282,7 @@ class HostService:
             except OSError:
                 # Transient file replacement/permissions do not terminate the control service.
                 pass
-            self.stopping.wait(self.scan_interval)
+            self.discovery_wakeup.wait(self.scan_interval)
 
     def _wait_context(self, project: Project, job: Job) -> PreparedContext | None:
         with project.condition:
@@ -314,6 +330,7 @@ class HostService:
             project.context_key = None
             project.next_negotiate = 0.
             project.condition.notify_all()
+        self.discovery_wakeup.set()
 
     def _execute(self, project: Project, job: Job) -> None:
         command = str(job.payload["command"])
@@ -433,6 +450,14 @@ class HostService:
         key = (normalized_project(target["projectPath"]), target["pid"])
         with self.projects_lock:
             project = self.projects.get(key)
+        target_port = target.get("port")
+        if project is None or (isinstance(target_port, int) and target_port != project.snapshot.get("port")):
+            # The caller can see a new heartbeat before an asynchronous notification
+            # arrives. Re-read authoritative files before dispatch; never trust a
+            # supplied port or retry a POST that may already have executed.
+            self.scan_once()
+            with self.projects_lock:
+                project = self.projects.get(key)
         if project is None:
             return not_started("unsupported_connector", "The host has not negotiated this Unity Connector")
         signature = hashlib.sha256(json.dumps({"command": command, "params": payload.get("params"), "target": key},
@@ -494,6 +519,7 @@ class HostService:
 
     def request_stop(self) -> None:
         self.stopping.set()
+        self.discovery_wakeup.set()
         for project in self._project_list():
             with project.condition:
                 for job in project.pending:
@@ -551,6 +577,11 @@ class HostService:
                         self.reply(200, not_started("host_stopping", "Host is stopping"))
                     else:
                         self.reply(200, service.submit(payload))
+                elif self.path == "/changed":
+                    # An authenticated hint only: the discovery thread verifies the
+                    # heartbeat, PID and negotiated context before trusting changes.
+                    service.discovery_wakeup.set()
+                    self.reply(200, {"accepted": True})
                 else:
                     self.reply(404, {"error": "Unknown host operation"})
 
@@ -568,6 +599,11 @@ class HostService:
         return Handler
 
     def serve(self) -> None:
+        from .cli_server import create_cli_server
+        self.cli_server = create_cli_server(self)
+        cli_thread = threading.Thread(target=self.cli_server.serve_forever, daemon=True,
+                                      name="unity-host-cli")
+        cli_thread.start()
         self.server = ThreadingHTTPServer(("127.0.0.1", 0), self._handler())
         self.server.daemon_threads = True
         self._write_registry()
@@ -585,6 +621,9 @@ class HostService:
         finally:
             self.stopping.set()
             self.server.server_close()
+            self.cli_server.shutdown()
+            self.cli_server.server_close()
+            cli_thread.join(2)
             self.compiler.close()
             path = endpoint_path(self.root, self.descriptor["runtimeId"])
             saved = read_json(path)

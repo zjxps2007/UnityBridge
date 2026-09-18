@@ -16,6 +16,11 @@ python scripts/build-compiler.py --runtime win-x64 --output build/compiler-publi
 `win-x64`, `linux-x64`, `linux-arm64`, `osx-x64`, and `osx-arm64`. Deploy the whole
 output directory, including its runtime and Roslyn libraries.
 
+RC2 builds enable `PublishReadyToRun` to reduce initial JIT
+work. Use `--no-ready-to-run` for matched comparisons. The bundled framework and
+Roslyn remain necessary; user snippets are still compiled at request time. Record
+both cold latency and size before changing this build policy on another platform.
+
 ## Private protocol, version 1
 
 Input and output are UTF-8 JSON Lines. There is exactly one response per input
@@ -83,7 +88,9 @@ again before loading bytes and executing on Unity's main thread.
 
 Metadata and compilation caches each have a 256 MiB estimated-retention budget,
 with 512 reference entries and 64 compilation entries respectively. Compilation
-weights conservatively include referenced images even when shared. Entries too
+weights include per-source estimates and count each shared reference image only
+once across retained compilations. Reference counts release that weight only when
+the last corresponding entry is evicted. Entries too
 large for a budget are processed without caching. These limits are not a hard
 process-memory cap: runtime, JIT, current compilation, and transient allocations
 are additional. Evicting worker cache entries does not unload DLLs already loaded

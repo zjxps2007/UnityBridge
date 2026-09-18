@@ -3,9 +3,47 @@
 한국어 | [English](COMMANDS.md) | [README](../README.ko.md)
 
 이 문서는 `unity-bridge` CLI에서 지금 사용할 수 있는 명령어를 정리합니다.
-실행 경로 옵션은 **v0.3.0-rc.1** 기능입니다. 정식 **v0.2.3**은 기존 Connector
+실행 경로 옵션은 **v0.3.0-rc.2** 기능입니다. 정식 **v0.2.3**은 기존 Connector
 직접 연결을 사용합니다. 같은 태그의 설치기와 Unity 패키지는
 [RC 설치 안내](INSTALL.ko.md#프리릴리스)를 참고하세요.
+
+## RC2: 연속 명령과 작업 완료 확인
+
+다음 기능은 RC2에 포함합니다.
+`unity-bridge --project <경로> --no-update-check session`을 시작하고 stdin을
+열어 둔 상태에서 한 줄에 JSON 요청 하나씩 보냅니다.
+
+```json
+{"id":1,"args":["status"]}
+{"id":2,"args":["exec","--code","return 42;"]}
+```
+
+명령은 순서대로 실행되며 각 응답은 완료 즉시 한 줄로 출력합니다.
+
+```json
+{"id":2,"exit_code":0,"result":{"success":true,"message":"...","data":42},"error":null}
+```
+
+`result`는 기존 명령의 JSON 출력이고 `error`는 stderr 또는 `null`입니다.
+ID는 문자열·정수·null을 지원하고 EOF에서 종료합니다. 잘못된 요청은 해당 줄만
+종료 코드 2로 응답하고 다음 요청을 계속 처리합니다. 입력 한 줄은 문자 수 기준
+1 MiB로 제한합니다. 프로젝트·포트·실행 경로·시간 제한·instances 디렉터리는
+세션 옵션을 상속하며 요청별로 덮어쓸 수 있습니다. Unity 정보는 요청마다 다시 찾습니다.
+세션 안의 `session`, `update`, `_host`, `--stdin`은 거부합니다. C# 입력은
+`exec --code` 또는 `--code-file`을 사용하세요. 요청은 항상 JSON 출력이므로
+기존 JSON 명령의 업데이트 알림 생략 규칙을 따릅니다. 일반 CLI의 업데이트 동작은 같습니다.
+
+같은 브랜치의 Connector에서는 `refresh --wait`, `reserialize --wait`,
+`editor play|stop --wait`가 반환된 작업 ID의 완료를 Unity에 직접 확인합니다.
+기본 조회 간격은 50ms이며 별도의 안정화 시간을 더하지 않습니다. 컴파일은 필요한
+도메인 리로드까지, 재생·정지는 해당 상태 이벤트까지 기다립니다. 이전 `ready`
+기록만으로 다른 작업의 완료를 판단하지 않습니다. 작업 기록 유실·취소는 오류로
+보고하며 명령을 재실행하지 않습니다. 작업 ID가 없으면 기존 Heartbeat 대기와
+ready 상태의 0.5초 안정화 방식을 유지합니다. 명시한 `--stable-sec`도 유지하며,
+editor/reserialize에서는 `--poll-interval-sec`를 지정할 수 있습니다.
+독립 `wait-ready`와 하위 Python API의 스냅샷 판정 의미는 바꾸지 않았습니다.
+직접 확인 요청은 전체 대기 제한 안에서 한 번에 최대 1초만 기다립니다. 리로드 전
+listener의 연결이 전체 시간을 소모하지 않도록 하며, 재시도하는 것은 상태 조회뿐입니다.
 
 ## 기본 형태
 
@@ -270,6 +308,11 @@ unity-bridge exec --code "return Unity.Entities.World.All.Count;" --using Unity.
 짧은 코드는 inline `--code`를 사용해도 됩니다. 여러 줄 C# 코드이거나 PowerShell이 해석하기 쉬운
 문자(`;`, 따옴표, 줄바꿈 등)가 들어간 코드는 `--file`/`--code-file` 또는 `--stdin`을
 권장합니다.
+
+RC2는 호환 호스트가 실행 중인 일반 `exec`의 초기화 비용을 줄입니다.
+명령 형식은 그대로이며 원래 제한 시간을 유지하고 응답 유실 후 재실행하지 않습니다.
+구버전 호스트나 컴파일러 직접 지정은 기존 경로를 사용합니다. Standalone 파이프
+입출력은 UTF-8입니다. [측정 범위](EXEC_OPTIMIZATION.ko.md)를 참고하세요.
 
 호스트 경로에서는 별도 Roslyn 워커가 실제 Unity 참조 DLL과 지원 언어 버전을 기준으로
 컴파일합니다. 결과 코드는 Unity 메인 스레드에서 실행합니다. 반복 코드는 컴파일 준비

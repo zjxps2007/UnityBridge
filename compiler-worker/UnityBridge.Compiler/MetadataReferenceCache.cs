@@ -7,9 +7,9 @@ namespace UnityBridge.Compiler;
 
 // Cache owned metadata images, never file handles. Callers still validate every
 // reference before using a cached compilation, even if its timestamp is unchanged.
-internal sealed class MetadataReferenceCache
+internal sealed class MetadataReferenceCache(int capacity = 512)
 {
-    private readonly BoundedCache<MetadataReferenceEntry> entries = new(512, 256L * 1024 * 1024);
+    private readonly BoundedCache<MetadataReferenceEntry> entries = new(capacity, 256L * 1024 * 1024);
 
     public MetadataReferenceEntry Get(string referencePath, Guid expectedMvid)
     {
@@ -43,6 +43,11 @@ internal sealed class MetadataReferenceCache
     }
 }
 
-internal sealed record MetadataReferenceEntry(string Identity, PortableExecutableReference Reference, long Weight);
+internal sealed record MetadataReferenceEntry(string Identity, PortableExecutableReference Reference, long Weight)
+{
+    // Reloading an evicted image allocates different bytes even if path/MVID match.
+    // Old compilations may still own the earlier image; charge both allocations.
+    public string RetentionId { get; } = Guid.NewGuid().ToString("N");
+}
 
 internal sealed class StaleReferenceException(string message) : Exception(message);

@@ -33,16 +33,27 @@ namespace UnityBridgeConnector.Tools
             else
                 paths = null;
 
-            if (paths == null || paths.Length == 0)
+            var operationId = EditorOperations.Begin("reserialize");
+            Heartbeat.MarkRefreshRequested();
+            try
             {
-                AssetDatabase.ForceReserializeAssets();
-                Debug.Log("[UnityBridge] ForceReserializeAssets: entire project");
-                return new SuccessResponse("Reserialized entire project");
+                if (paths == null || paths.Length == 0)
+                {
+                    AssetDatabase.ForceReserializeAssets();
+                    Debug.Log("[UnityBridge] ForceReserializeAssets: entire project");
+                    return new SuccessResponse("Reserialized entire project", new
+                    { operation_id = EditorOperations.FinishSynchronous(operationId) });
+                }
+                AssetDatabase.ForceReserializeAssets(paths);
+                Debug.Log($"[UnityBridge] ForceReserializeAssets: {string.Join(", ", paths)}");
+                return new SuccessResponse($"Reserialized {paths.Length} asset(s)", new
+                { paths, operation_id = EditorOperations.FinishSynchronous(operationId) });
             }
-
-            AssetDatabase.ForceReserializeAssets(paths);
-            Debug.Log($"[UnityBridge] ForceReserializeAssets: {string.Join(", ", paths)}");
-            return new SuccessResponse($"Reserialized {paths.Length} asset(s)", new { paths });
+            catch
+            {
+                EditorOperations.Abandon(operationId);
+                throw;
+            }
         }
     }
 }

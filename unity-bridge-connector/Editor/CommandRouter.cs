@@ -66,6 +66,7 @@ namespace UnityBridgeConnector
                 {
                     requestId = parameters?["request_id"]?.ToString(),
                     instance = Heartbeat.CaptureState(),
+                    operation = EditorOperations.Snapshot(parameters?["operation_id"]?.ToString()),
                 });
 
             var handler = ToolDiscovery.FindHandler(command);

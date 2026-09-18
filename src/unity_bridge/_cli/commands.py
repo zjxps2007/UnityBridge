@@ -5,7 +5,10 @@ import argparse
 import sys
 from pathlib import Path
 
-from ..adapter import UnityActionResult, UnityBridgeAdapter
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..adapter import UnityActionResult
 from ..client import CommandResponse, DiscoveryError, Instance, UnityClient
 from .arguments import parse_params
 
@@ -27,6 +30,7 @@ def execute_command(args: argparse.Namespace, client: UnityClient) -> UnityActio
     if args.command == "status":
         return client.status()
 
+    from ..adapter import UnityBridgeAdapter
     adapter = UnityBridgeAdapter(client=client)
     if args.command == "wait-ready":
         return adapter.wait_for_ready(timeout_sec=args.timeout_sec)

@@ -74,30 +74,39 @@ namespace UnityBridgeConnector.Tools
             }
 
             var compilePending = explicitCompileRequested || ContainsScriptCompilationPath(importedPaths);
+            var operationId = EditorOperations.Begin("refresh", explicitCompileRequested);
             if (compilePending)
                 Heartbeat.MarkCompileRequested();
             else
                 Heartbeat.MarkRefreshRequested();
 
-            if (importedPaths.Count == 0)
+            try
             {
-                AssetDatabase.Refresh(options);
-            }
-            else
-            {
-                foreach (var assetPath in importedPaths)
+                if (importedPaths.Count == 0)
                 {
-                    var importOptions = AssetDatabase.IsValidFolder(assetPath)
-                        ? options | ImportAssetOptions.ImportRecursive
-                        : options;
-                    AssetDatabase.ImportAsset(assetPath, importOptions);
+                    AssetDatabase.Refresh(options);
                 }
-            }
+                else
+                {
+                    foreach (var assetPath in importedPaths)
+                    {
+                        var importOptions = AssetDatabase.IsValidFolder(assetPath)
+                            ? options | ImportAssetOptions.ImportRecursive : options;
+                        AssetDatabase.ImportAsset(assetPath, importOptions);
+                    }
+                }
 
-            if (explicitCompileRequested)
+                if (explicitCompileRequested)
+                {
+                    CompilationPipeline.RequestScriptCompilation();
+                    compileRequested = true;
+                }
+                operationId = EditorOperations.FinishSynchronous(operationId);
+            }
+            catch
             {
-                CompilationPipeline.RequestScriptCompilation();
-                compileRequested = true;
+                EditorOperations.Abandon(operationId);
+                throw;
             }
 
             return new SuccessResponse("Refresh requested.", new
@@ -109,6 +118,7 @@ namespace UnityBridgeConnector.Tools
                 compile_requested = compileRequested,
                 compile_pending = compilePending,
                 force = force,
+                operation_id = operationId,
             });
         }
 

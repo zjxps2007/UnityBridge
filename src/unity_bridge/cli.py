@@ -2,9 +2,9 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
-from .adapter import UnityActionResult
 from .client import CommandResponse, UnityBridgeError, UnityClient
 from ._cli.arguments import (
     add_common_options,
@@ -12,6 +12,7 @@ from ._cli.arguments import (
     direct_json_requested,
     is_direct_tool_invocation,
     parse_direct_tool_args,
+    parser_for,
 )
 from ._cli.commands import execute_command
 from ._cli.output import (
@@ -33,17 +34,24 @@ def main(argv: list[str] | None = None) -> int:
     direct = is_direct_tool_invocation(argv)
     json_output = direct_json_requested(argv)
     try:
-        args = parse_direct_tool_args(argv) if direct else build_parser().parse_args(argv)
+        args = parse_direct_tool_args(argv) if direct else parser_for(argv).parse_args(argv)
         if not direct:
             json_output = args.json
 
-        if not direct:
+        if not direct and (args.command == "update" or (
+            not args.json and not args.no_update_check
+            and os.environ.get("UNITY_BRIDGE_SKIP_UPDATE_CHECK", "").strip().lower() not in {"1", "true", "yes", "on"}
+        )):
             # Help exits during argument parsing, before update modules are loaded.
             from ._cli.updates import maybe_print_update_notice, run_update
 
             maybe_print_update_notice(args)
             if args.command == "update":
                 return run_update(args)
+
+        if not direct and args.command == "session":
+            from ._cli.session import run_session
+            return run_session(args)
 
         client = _create_client(args)
         if direct:
@@ -56,8 +64,12 @@ def main(argv: list[str] | None = None) -> int:
             result = execute_command(args, client)
 
         print_result(result, json_output=args.json)
-        if isinstance(result, (CommandResponse, UnityActionResult)):
+        if isinstance(result, CommandResponse):
             return 0 if result.success else 1
+        if args.command not in {"instances", "status", "wait-ready"}:
+            from .adapter import UnityActionResult
+            if isinstance(result, UnityActionResult):
+                return 0 if result.success else 1
         return 0
     except UnityBridgeError as exc:
         print_error(exc, json_output=json_output)

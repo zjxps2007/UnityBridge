@@ -1,3 +1,3 @@
-from .cli import main
+from ._bootstrap import main
 
 raise SystemExit(main())

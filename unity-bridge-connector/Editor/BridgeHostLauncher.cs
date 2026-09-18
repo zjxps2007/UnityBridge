@@ -47,6 +47,53 @@ namespace UnityBridgeConnector
     {
         static double s_NextCheck;
         static int s_CheckRunning;
+        static int s_NotifyRunning;
+        static int s_NotifyPending;
+
+        internal static void NotifyStateChanged()
+        {
+            Interlocked.Exchange(ref s_NotifyPending, 1);
+            if (Interlocked.CompareExchange(ref s_NotifyRunning, 1, 0) != 0) return;
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    while (Interlocked.Exchange(ref s_NotifyPending, 0) != 0)
+                    {
+                        try
+                        {
+                            var launcher = BridgeHostConfiguration.ReadLauncher();
+                            var runtimeId = launcher?["runtimeId"]?.ToString();
+                            if (runtimeId == null || runtimeId.Length != 32 || !runtimeId.All(Uri.IsHexDigit)) continue;
+                            var path = Path.Combine(BridgeHostConfiguration.HostHome, "instances", runtimeId + ".json");
+                            if (!File.Exists(path)) continue;
+                            var endpoint = JObject.Parse(File.ReadAllText(path));
+                            var port = (int?)endpoint["port"] ?? 0;
+                            if (port <= 0 || port > 65535 || endpoint["runtimeId"]?.ToString() != runtimeId ||
+                                endpoint["token"]?.ToString() != launcher["token"]?.ToString()) continue;
+                            var request = (HttpWebRequest)WebRequest.Create("http://127.0.0.1:" + port + "/changed");
+                            request.Method = "POST";
+                            request.ContentType = "application/json";
+                            request.ContentLength = 2;
+                            request.Proxy = null;
+                            request.AllowAutoRedirect = false;
+                            request.KeepAlive = false;
+                            request.Timeout = request.ReadWriteTimeout = 1000;
+                            request.Headers["X-UnityBridge-Token"] = launcher["token"].ToString();
+                            using (var stream = request.GetRequestStream())
+                                stream.Write(new byte[] { (byte)'{', (byte)'}' }, 0, 2);
+                            using (request.GetResponse()) { }
+                        }
+                        catch (Exception) { /* Older/unavailable hosts retain periodic discovery. */ }
+                    }
+                }
+                finally
+                {
+                    Interlocked.Exchange(ref s_NotifyRunning, 0);
+                    if (Volatile.Read(ref s_NotifyPending) != 0) NotifyStateChanged();
+                }
+            });
+        }
 
         static BridgeHostLauncher()
         {

@@ -178,6 +178,39 @@ class HostServiceTests(unittest.TestCase):
         self.assertEqual(self.executed, ["mutate"] * 3)
         self.assertEqual(host_status(self.instance(), self.instances)["state"], "running")
 
+    def test_change_notification_wakes_long_periodic_scan(self):
+        self.service.scan_interval = 30
+        self.service.discovery_wakeup.set()
+        time.sleep(.06)
+        before = self.context_calls
+        self.snapshot["domainId"] = "notified-domain"
+        self.publish_snapshot()
+        with self.assertRaises(TransportError):
+            post(self.service.port, "invalid", "/changed", {}, 1)
+        self.assertTrue(post(self.service.port, self.token, "/changed", {}, 1)["accepted"])
+        eventually(lambda: self.context_calls > before, timeout=2)
+        self.assertTrue(self.call("after-notification")["success"])
+
+    def test_control_refreshes_stale_port_before_dispatch_without_periodic_scan(self):
+        self.service.scan_interval = 30
+        self.service.discovery_wakeup.set()
+        time.sleep(.06)
+        replacement = ThreadingHTTPServer(("127.0.0.1", 0), self.connector.RequestHandlerClass)
+        replacement.daemon_threads = True
+        threading.Thread(target=lambda: replacement.serve_forever(poll_interval=.01), daemon=True).start()
+        self.addCleanup(replacement.server_close)
+        self.addCleanup(replacement.shutdown)
+        self.snapshot["port"] = replacement.server_port
+        self.publish_snapshot()
+        # Keep the old listener alive: a request must select the new authoritative
+        # port, not rely on an old socket error to recover or replay.
+        with patch("unity_bridge.host.service.post", wraps=post) as sent:
+            result = self.call("get_editor_state", params={"request_id": "new-listener"})
+        self.assertEqual(result["data"]["requestId"], "new-listener")
+        controls = [call for call in sent.call_args_list if call.args[3].get("command") == "get_editor_state"]
+        self.assertEqual(len(controls), 1)
+        self.assertEqual(controls[0].args[0], replacement.server_port)
+
     def test_compile_preserves_fifo_while_live_control_query_bypasses_it(self):
         self.compiler.release.clear()
         with ThreadPoolExecutor(max_workers=2) as pool:

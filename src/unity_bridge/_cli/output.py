@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any
 
 from .. import __version__
-from ..adapter import UnityActionResult
 from ..client import CommandResponse, Instance, UnityBridgeError, UnityClient
 from .versions import version_key
 
@@ -27,12 +26,21 @@ def print_result(value: Any, *, json_output: bool) -> None:
     if isinstance(value, Instance):
         _print_instance(value)
         return
+    from ..adapter import UnityActionResult
     if isinstance(value, (CommandResponse, UnityActionResult)):
-        print(value.message)
-        if value.data is not None:
-            print(json.dumps(value.data, ensure_ascii=False, indent=2))
+        print(render_action_result(value, json_output=False), end="")
         return
     print(value)
+
+
+def render_action_result(value: Any, *, json_output: bool) -> str:
+    """Render a command without redirecting process-global output streams."""
+    if json_output:
+        return json.dumps(to_jsonable(value), ensure_ascii=False, indent=2) + "\n"
+    text = str(value.message) + "\n"
+    if value.data is not None:
+        text += json.dumps(value.data, ensure_ascii=False, indent=2) + "\n"
+    return text
 
 
 def _print_instance(instance: Instance) -> None:
@@ -100,6 +108,11 @@ def to_jsonable(value: Any) -> Any:
         if value.data is not None:
             payload["data"] = value.data
         return payload
+    if isinstance(value, list):
+        return [to_jsonable(item) for item in value]
+    if isinstance(value, Path):
+        return str(value)
+    from ..adapter import UnityActionResult
     if isinstance(value, UnityActionResult):
         payload = {
             "tool": value.tool,
@@ -111,10 +124,6 @@ def to_jsonable(value: Any) -> Any:
         if value.data is not None:
             payload["data"] = value.data
         return payload
-    if isinstance(value, Path):
-        return str(value)
-    if isinstance(value, list):
-        return [to_jsonable(item) for item in value]
     return value
 
 

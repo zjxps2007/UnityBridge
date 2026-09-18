@@ -195,6 +195,16 @@ def main():
         assert status == 200, value
         return value
 
+    def cli_exec(*arguments, stdin=None, timeout_ms=120000):
+        response = subprocess.run(cli + ["--json", "--no-update-check", "--project", str(project),
+                                        "--timeout-ms", str(timeout_ms), "exec", *arguments],
+                                  cwd=REPO, env=env, input=stdin, capture_output=True,
+                                  text=True, encoding="utf-8", timeout=60)
+        assert response.stdout, (response.returncode, response.stderr)
+        value = json.loads(response.stdout)
+        assert response.returncode == (0 if value.get("success") else 1), (value, response.stderr)
+        return value
+
     def check(name, function):
         started = time.perf_counter()
         row = {"name": name, "passed": False}
@@ -221,6 +231,7 @@ def main():
             assert results["host_pid"] != os.getpid(), "An unrelated live PID prevented host startup"
             results["stale_registry_recovery"] = {"unrelated_pid": os.getpid(), "host_pid": results["host_pid"], "passed": True}
         context = require_success(direct("bridge_context")[1])
+        save(output / "compiler-context.json", context)
         results["context_summary"] = {key: context[key] for key in ("domainId", "referenceGeneration", "languageVersion", "pid")}
         results["context_summary"]["reference_count"] = len(context["references"])
         check("connector_protocol_audit", lambda: require_success(host("host_connector_audit")))
@@ -242,16 +253,62 @@ def main():
         check("async_tool_and_result_getters_on_main_thread", main_thread_results)
 
         def cli_routing():
-            response = subprocess.run(cli + ["--json", "--no-update-check", "--project", str(project),
-                                             "exec", "--code", "return 20 + 22;"],
-                                      cwd=REPO, env=env, capture_output=True, text=True, encoding="utf-8", timeout=60)
-            assert response.returncode == 0, response.stderr
-            value = json.loads(response.stdout)
+            value = cli_exec("--code", "return 20 + 22;")
             assert require_success(value) == 42, value
             worker_state = health()["compiler"]
             assert worker_state.get("assembly_name"), "CLI bypassed external compiler host"
             return {"response": value, "compiler": worker_state}
         check("cli_uses_external_compiler", cli_routing)
+
+        def fast_cli_contracts():
+            assert endpoint().get("cliProtocol") == 1 and endpoint().get("cliPort"), endpoint()
+            code = 'return "한글 😀";'
+            code_file = output / "unicode snippet.cs"
+            code_file.write_text(code, encoding="utf-8")
+            assert require_success(cli_exec("--code-file", str(code_file))) == "한글 😀"
+            assert require_success(cli_exec("--stdin", stdin=code)) == "한글 😀"
+            assert require_success(cli_exec("--using", "System.Linq", "--code", "return new[] {1, 2, 3}.Sum();")) == 6
+            static_code = "return ++Counter; } public static int Counter; public static object Tail() { return null;"
+            counters = [require_success(cli_exec("--code", static_code)) for _ in range(2)]
+            assert counters == [1, 1], counters
+            failure = cli_exec("--code", "return MissingFastCliSymbol;")
+            assert failure["data"]["reason"] == "compile_error" and failure["data"]["completion"] == "not_started", failure
+            assert require_success(cli_exec("--code", "return 54;")) == 54
+            return {"file_stdin_unicode": True, "custom_using": True, "fresh_static_results": counters,
+                    "compile_error_recovery": True, "cli_protocol": endpoint()["cliProtocol"]}
+        check("fast_cli_inputs_static_state_and_error_recovery", fast_cli_contracts)
+
+        def operation_receipts():
+            completed = []
+            for command in (["refresh", "--wait"], ["reserialize", "--wait"],
+                            ["refresh", "--compile", "request", "--wait"]):
+                response = subprocess.run(cli + ["--json", "--project", str(project), *command, "--timeout-sec", "45"],
+                                          cwd=REPO, env=env, capture_output=True, text=True, encoding="utf-8", timeout=60)
+                if response.returncode:
+                    (project / "host-audit-readiness-request").write_text("diagnose", encoding="utf-8")
+                    results["operation_failure_diagnostic"] = wait_for(lambda: read(project / "host-audit-readiness.json"), 10)
+                assert response.returncode == 0, response.stderr
+                data = require_success(json.loads(response.stdout))
+                operation_id = data.get("operation_id")
+                assert operation_id and data["completion"] == "confirmed", data
+                live = require_success(host("get_editor_state", {"request_id": "receipt-audit", "operation_id": operation_id}))
+                assert live["operation"] == {"id": operation_id, "state": "completed"}, live
+                completed.append({"command": command, "operation_id": operation_id})
+            return completed
+        check("operation_receipts_without_fixed_settling_delay", operation_receipts)
+
+        def cli_session():
+            requests = [{"id": index, "args": command} for index, command in enumerate([
+                ["status"], ["exec", "--code", "return 19;"], ["get_editor_state"]])]
+            response = subprocess.run(cli + ["--json", "--project", str(project), "session"],
+                                      input="".join(json.dumps(request) + "\n" for request in requests),
+                                      cwd=REPO, env=env, capture_output=True, text=True, encoding="utf-8", timeout=60)
+            assert response.returncode == 0, response.stderr
+            rows = [json.loads(line) for line in response.stdout.splitlines()]
+            assert [row["id"] for row in rows] == [0, 1, 2] and all(row["exit_code"] == 0 for row in rows), rows
+            assert require_success(rows[1]["result"]) == 19, rows
+            return rows
+        check("persistent_cli_session", cli_session)
 
         def repeated_exec():
             values = [require_success(host("exec", {"code": "return 77;"})) for _ in range(2)]
@@ -297,6 +354,21 @@ def main():
             assert after == before + 1, (before, after)
             return {"before": before, "after": after, "control_state": control["instance"]["state"], "expired": expired}
         check("control_bypass_and_no_late_side_effect", queued_deadline)
+
+        def fast_cli_deadline():
+            marker = output / "expired-cli-mutation"
+            delayed = pool.submit(direct, "host_audit_delay", {"milliseconds": 1800})
+            time.sleep(.15)
+            code = f'System.IO.File.WriteAllText(@"{marker}", "late"); return true;'
+            expired = cli_exec("--code", code, timeout_ms=150)
+            assert expired["data"].get("completion") in {"not_started", "unknown"}, expired
+            require_success(delayed.result(timeout=5)[1])
+            # A fresh exec drains the same ordered queue before checking the
+            # marker, proving the expired mutation cannot execute afterwards.
+            assert require_success(cli_exec("--code", "return 17;")) == 17
+            assert not marker.exists(), "Expired fast CLI mutation executed late"
+            return {"response": expired, "late_mutation": False}
+        check("fast_cli_timeout_never_executes_late", fast_cli_deadline)
 
         def queued_listener_restart():
             before = require_success(direct("host_audit_counter", auth=False)[1])
@@ -358,15 +430,25 @@ def main():
             revision.write_text("public static class StartupRevision { public const int Value = 1; }\n", encoding="utf-8")
             requested = host("refresh_unity", {"paths": ["Assets/Editor/StartupRevision.cs"], "compile": "request"})
             assert requested.get("success"), requested
+            operation_id = require_success(requested)["operation_id"]
             wait_for(lambda: (value if (value := heartbeat()).get("domainId") != old and value.get("state") == "ready" else None), 60)
-            value = require_success(host("exec", {"code": "return StartupRevision.Value;"}))
+            value = require_success(cli_exec("--code", "return StartupRevision.Value;"))
             assert value == 1 and endpoint()["pid"] == results["host_pid"], (value, endpoint().get("pid"))
+            receipt = require_success(host("get_editor_state", {"operation_id": operation_id}))["operation"]
+            assert receipt == {"id": operation_id, "state": "completed"}, receipt
             return {"previous_domain": old, "new_domain": heartbeat()["domainId"], "host_pid": endpoint()["pid"], "revision": value}
         check("domain_reload_preserves_host", reload)
 
         def play_pause():
-            response = host("manage_editor", {"action": "play", "wait_for_completion": False})
-            assert response.get("success"), response
+            def waited_transition(action):
+                completed = subprocess.run(cli + ["--json", "--project", str(project), "editor", action,
+                                                  "--wait", "--timeout-sec", "60"],
+                                           cwd=REPO, env=env, capture_output=True, text=True, encoding="utf-8", timeout=75)
+                assert completed.returncode == 0, (completed.stdout, completed.stderr)
+                value = require_success(json.loads(completed.stdout))
+                assert value.get("operation_id") and value.get("completion") == "confirmed", value
+                return value
+            waited_transition("play")
             ready("playing", 60)
             assert require_success(host("exec", {"code": "return UnityEditor.EditorApplication.isPlaying;"})) is True
             observations = []
@@ -380,8 +462,7 @@ def main():
                 guard = wait_for(lambda: read(project / "host-audit-readiness.json"), 10)
                 assert guard.get("accepted") and guard["instance"]["state"] == expected, guard
                 observations.append({"event": event, "guard": guard})
-            response = host("manage_editor", {"action": "stop", "wait_for_completion": False})
-            assert response.get("success"), response
+            waited_transition("stop")
             ready(timeout=60)
             require_success(host("get_editor_state"))
             assert endpoint()["pid"] == results["host_pid"]

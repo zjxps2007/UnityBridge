@@ -7,7 +7,7 @@ Python package mode is for development and Python programs that need to import
 recommended because it does not require Python on the target machine.
 
 The stable version is **v0.2.3**. The independent-host options in
-this document describe prerelease **0.3.0-rc.1**. Installing the
+this document describe prerelease **0.3.0-rc.2**. Installing the
 Python package alone does not download .NET or the Roslyn worker.
 
 ## When To Use
@@ -36,16 +36,16 @@ Install a specific tag:
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
 
-For the **v0.3.0-rc.1** Python package, explicitly select the RC tag:
+For the **v0.3.0-rc.2** Python package, explicitly select the RC tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.1"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.2"
 ```
 
 Use the matching Unity Package Manager URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
 ```
 
 This does not install the compiler runtime. The `auto` backend keeps the direct
@@ -198,6 +198,24 @@ work and wait for readiness. The low-level `after_timestamp` and `stable_sec`
 arguments remain available for custom synchronization.
 
 ## Update
+
+### RC2 Waiting Improvements
+
+In RC2, `refresh_assets`, `reserialize_assets`,
+`editor_play`, and `editor_stop` accept `stable_sec=None` / `poll_interval_sec=None`
+as automatic defaults. With an operation receipt, the adapter confirms that
+specific operation live every 50 ms and adds no stability window. Without a
+receipt, the previous 0.5-second poll/stability defaults remain (play needs no
+ready stability window). Explicit numeric values override these defaults.
+Lost receipts, process replacement and cancellation fail without replaying a
+mutation. Use a matching local Connector to get the faster completion path.
+
+For repeated calls, keep one Python process and reuse `UnityClient` or
+`UnityBridgeAdapter`. Other languages can use the new
+[JSONL CLI session](COMMANDS.md#rc2-persistent-session-and-operation-completion)
+to avoid starting the CLI for every command. Public package imports stay compatible.
+
+### Updating The Package
 
 For Python package installs, `unity-bridge update` reinstalls the package with
 pip. It also prints the Unity Connector package URL, but it does not edit a

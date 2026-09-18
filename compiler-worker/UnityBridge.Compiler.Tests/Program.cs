@@ -22,11 +22,45 @@ try
     var engine = new CompilerEngine();
     var passed = 0;
 
+    Test("Shared metadata is charged once and released after its last cache owner", () =>
+    {
+        var cache = new BoundedCache<object>(4, 100);
+        var x = new[] { new KeyValuePair<string, long>("image-x", 80) };
+        cache.Add("a", new object(), 5, x);
+        cache.Add("b", new object(), 5, x);
+        Check(cache.TryGet("a", out _) && cache.TryGet("b", out _), "Shared images must not evict each other.");
+        cache.Add("c", new object(), 30, [new KeyValuePair<string, long>("image-y", 60)]);
+        Check(!cache.TryGet("a", out _) && !cache.TryGet("b", out _) && cache.TryGet("c", out _), "Unique images remain bounded.");
+        cache.Add("d", new object(), 10);
+        cache.Add("e", new object(), 11);
+        Check(!cache.TryGet("c", out _) && cache.TryGet("d", out _) && cache.TryGet("e", out _), "Evicting the last image owner releases its accounting.");
+        cache.Add("e", new object(), 5, x);
+        Check(cache.TryGet("d", out _) && cache.TryGet("e", out _), "Replacement updates shared retention.");
+        cache.Add("oversized", new object(), 21, x);
+        Check(!cache.TryGet("oversized", out _), "An oversized entry is never cached.");
+    });
+
     Test("Ping and protocol negotiation", () =>
     {
         var ping = engine.Process(new CompileRequest { Protocol = 1, Operation = "ping", RequestId = "ping-1" });
         Check(ping.Success && ping.RequestId == "ping-1" && ping.CompilerVersion.StartsWith("roslyn-5.0.0/"), "Ping correlation/version.");
         Check(engine.Process(new CompileRequest { Protocol = 2, Operation = "ping" }).ErrorCode == "unsupported_protocol", "Reject incompatible protocols.");
+    });
+
+    Test("Reloaded metadata images are not undercounted as shared allocations", () =>
+    {
+        var metadata = new MetadataReferenceCache(capacity: 1);
+        var identity = Identity(fixturePath);
+        var old = metadata.Get(identity.Path, Guid.Parse(identity.Mvid));
+        Check(ReferenceEquals(old, metadata.Get(identity.Path, Guid.Parse(identity.Mvid))), "A retained image is shared.");
+        var other = Identity(framework[0]);
+        metadata.Get(other.Path, Guid.Parse(other.Mvid));
+        var reloaded = metadata.Get(identity.Path, Guid.Parse(identity.Mvid));
+        Check(old.Identity == reloaded.Identity && old.RetentionId != reloaded.RetentionId, "Reloaded bytes have separate retention identities.");
+        var cache = new BoundedCache<object>(4, old.Weight + 20);
+        cache.Add("old", old, 5, [new KeyValuePair<string, long>(old.RetentionId, old.Weight)]);
+        cache.Add("new", reloaded, 5, [new KeyValuePair<string, long>(reloaded.RetentionId, reloaded.Weight)]);
+        Check(!cache.TryGet("old", out _) && cache.TryGet("new", out _), "Duplicated live images are charged separately.");
     });
 
     Test("Compile explicit Unity references and unicode source", () =>

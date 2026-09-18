@@ -7,7 +7,7 @@ updates, and release assets. Python package mode is documented separately in
 [PYTHON_PACKAGE.md](PYTHON_PACKAGE.md).
 
 The stable release is **v0.2.3**. The independent host described below is part of
-the **v0.3.0-rc.1 prerelease**. Install it explicitly using the [RC instructions](#prerelease);
+the **v0.3.0-rc.2 prerelease**. Install it explicitly using the [RC instructions](#prerelease);
 default installation continues to select stable.
 
 ## Unity Package
@@ -79,7 +79,7 @@ curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/main/install.
 
 ## Host-Enabled Prerelease Builds
 
-The v0.3.0-rc.1 bundles also contain a self-contained .NET 10/Roslyn
+The v0.3.0-rc.2 bundles also contain a self-contained .NET 10/Roslyn
 compiler. The installer checks the worker and registers the exact CLI and worker
 paths under `~/.unity-bridge/host/`; Unity Hub does not need to inherit a CLI PATH
 entry. Keep the entire runtime directory, including `compiler/`. The user does
@@ -174,7 +174,7 @@ Unity package reference automatically.
 
 ## Prerelease
 
-For **v0.3.0-rc.1**, use both the installer script and release assets from that tag.
+For **v0.3.0-rc.2**, use both the installer script and release assets from that tag.
 This is also the upgrade path from v0.2.3 or older: their updater downloads the
 `main` installer, which does not register the new host. If the existing CLI lives
 in a custom directory, add `-InstallDir <existing-directory>` or
@@ -184,35 +184,35 @@ Windows PowerShell:
 
 ```powershell
 $script = Join-Path $env:TEMP 'unity-bridge-install-rc.ps1'
-iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.ps1 -OutFile $script
-powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.1
+iwr https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.2/install.ps1 -OutFile $script
+powershell -NoProfile -ExecutionPolicy Bypass -File $script -Version v0.3.0-rc.2
 ```
 
 macOS/Linux:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.1/install.sh -o /tmp/unity-bridge-install-rc.sh
-sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.1
+curl -fsSL https://raw.githubusercontent.com/zjxps2007/UnityBridge/v0.3.0-rc.2/install.sh -o /tmp/unity-bridge-install-rc.sh
+sh /tmp/unity-bridge-install-rc.sh --version v0.3.0-rc.2
 ```
 
 Pin the Unity Package Manager Git URL to the same tag:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
 ```
 
 After Unity finishes compiling, `unity-bridge status` should show
-`Connector: 0.3.0-rc.1`. Check the CLI with:
+`Connector: 0.3.0-rc.2`. Check the CLI with:
 
 ```text
-unity-bridge update --check --ref v0.3.0-rc.1
+unity-bridge update --check --ref v0.3.0-rc.2
 ```
 
 Once the RC CLI is installed, keep the explicit RC reference when updating or
 reinstalling it:
 
 ```text
-unity-bridge update --ref v0.3.0-rc.1
+unity-bridge update --ref v0.3.0-rc.2
 ```
 
 The RC updater selects the installer from that tag and preserves the current
@@ -251,6 +251,12 @@ supply a token with read access to the repository contents. It is optional and
 applies to version checks; the CLI sends it only to the initial GitHub API request.
 
 ## Release Assets
+
+RC2 includes the post-RC1 speed changes. Install both the CLI and Connector from
+the RC2 tag to use them. ReadyToRun
+compiler publication changes bundle size, but the extraction and installation
+procedure is unchanged and users still do not install Python or a .NET SDK for
+standalone bundles. See [measured tradeoffs](SPEED_FOLLOWUP.md).
 
 Standalone installation requires the GitHub Release to contain the matching
 asset for your platform:

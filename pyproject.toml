@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "unity-bridge"
-version = "0.3.0-rc.1"
+version = "0.3.0-rc.2"
 description = "Python client for controlling the Unity Editor through a local HTTP connector."
 readme = "README.md"
 requires-python = ">=3.10"
@@ -20,8 +20,8 @@ build = [
 ]
 
 [project.scripts]
-unity-bridge = "unity_bridge.cli:main"
-unity_bridge = "unity_bridge.cli:main"
+unity-bridge = "unity_bridge._bootstrap:main"
+unity_bridge = "unity_bridge._bootstrap:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

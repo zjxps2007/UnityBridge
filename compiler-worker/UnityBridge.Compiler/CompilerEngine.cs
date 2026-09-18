@@ -17,7 +17,7 @@ public sealed class CompilerEngine
         "UnityEditor.SceneManagement", "UnityEditorInternal",
     ];
     private readonly MetadataReferenceCache references = new();
-    // Weight includes references (conservatively counting shared images more than once).
+    // Bound compilation count and shared metadata retention independently of cache hits.
     private readonly BoundedCache<CompilationEntry> compilations = new(64, 256L * 1024 * 1024);
 
     public CompileResponse Process(CompileRequest request)
@@ -96,8 +96,11 @@ public sealed class CompilerEngine
                     ["CS1702"] = ReportDiagnostic.Suppress,
                 });
             var compilation = CSharpCompilation.Create(NewAssemblyName(), [tree], referenceEntries.Select(entry => entry.Reference), options);
-            cached = new CompilationEntry(compilation, referenceEntries.Sum(entry => entry.Weight) + source.Length * 2L);
-            compilations.Add(compilationKey, cached, cached.Weight);
+            // Syntax/semantic structures cost more than just UTF-16 source. This
+            // remains a conservative retention estimate, not an RSS measurement.
+            cached = new CompilationEntry(compilation, 64 * 1024L + source.Length * 16L,
+                referenceEntries.Select(entry => new KeyValuePair<string, long>(entry.RetentionId, entry.Weight)).ToArray());
+            compilations.Add(compilationKey, cached, cached.Weight, cached.SharedReferences);
         }
 
         if (!request.FreshIdentity && cached!.EmittedBytes is not null)
@@ -120,7 +123,7 @@ public sealed class CompilerEngine
         {
             cached.EmittedBytes = image;
             cached.Diagnostics = diagnostics;
-            compilations.Add(compilationKey, cached, cached.Weight + image.LongLength);
+            compilations.Add(compilationKey, cached, cached.Weight + image.LongLength, cached.SharedReferences);
         }
         return Succeed(request, target.AssemblyName!, image, diagnostics, cacheHit, false);
     }
@@ -158,10 +161,11 @@ public sealed class CompilerEngine
             ReferenceGeneration = request.ReferenceGeneration, Diagnostics = diagnostics ?? [],
         };
 
-    private sealed class CompilationEntry(CSharpCompilation compilation, long weight)
+    private sealed class CompilationEntry(CSharpCompilation compilation, long weight, KeyValuePair<string, long>[] sharedReferences)
     {
         public CSharpCompilation Compilation { get; } = compilation;
         public long Weight { get; } = weight;
+        public KeyValuePair<string, long>[] SharedReferences { get; } = sharedReferences;
         public byte[]? EmittedBytes { get; set; }
         public CompilerDiagnostic[] Diagnostics { get; set; } = [];
     }

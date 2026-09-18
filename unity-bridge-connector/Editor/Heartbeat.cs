@@ -19,6 +19,7 @@ namespace UnityBridgeConnector
         static string s_LastAttemptedState;
         static bool s_LastAttemptedCompileErrors;
         static int s_LastAttemptedPort;
+        static long s_LastAttemptedReferenceGeneration = -1;
         const double REFRESH_GRACE_SECONDS = 1.0;
         const double COMPILE_GRACE_SECONDS = 5.0;
         const double PLAYMODE_GRACE_SECONDS = 5.0;
@@ -113,6 +114,13 @@ namespace UnityBridgeConnector
             Write();
         }
 
+        internal static void PublishCompletedOperation()
+        {
+            s_ForcedState = null;
+            s_RefreshRequestTime = s_CompileRequestTime = s_PlayModeTransitionTime = 0;
+            Write();
+        }
+
         static void Tick()
         {
             if (!HttpServer.IsRunning) return;
@@ -124,7 +132,8 @@ namespace UnityBridgeConnector
             var port = HttpServer.Port;
             // Check cheap state fields each tick; serialize/write only when due or changed.
             if (now - s_LastWrite < INTERVAL && state == s_LastAttemptedState &&
-                compileErrors == s_LastAttemptedCompileErrors && port == s_LastAttemptedPort)
+                compileErrors == s_LastAttemptedCompileErrors && port == s_LastAttemptedPort &&
+                BridgeProtocol.ReferenceGeneration == s_LastAttemptedReferenceGeneration)
                 return;
             Write(state, compileErrors, port);
         }
@@ -195,14 +204,18 @@ namespace UnityBridgeConnector
             if (AssetDatabase.IsAssetImportWorkerProcess()) return;
 
             // Failed writes also count as attempts so transient I/O failures cannot busy-loop.
+            var changed = state != s_LastAttemptedState || compileErrors != s_LastAttemptedCompileErrors ||
+                port != s_LastAttemptedPort || BridgeProtocol.ReferenceGeneration != s_LastAttemptedReferenceGeneration;
             s_LastWrite = EditorApplication.timeSinceStartup;
             s_LastAttemptedState = state;
             s_LastAttemptedCompileErrors = compileErrors;
             s_LastAttemptedPort = port;
+            s_LastAttemptedReferenceGeneration = BridgeProtocol.ReferenceGeneration;
             try
             {
                 Directory.CreateDirectory(s_Dir);
                 AtomicFile.WriteAllText(GetFilePath(), JsonConvert.SerializeObject(CaptureState(state, compileErrors, port)));
+                if (changed) BridgeHostLauncher.NotifyStateChanged();
             }
             catch
             {
@@ -249,6 +262,7 @@ namespace UnityBridgeConnector
         {
             if (EditorApplication.isCompiling) return "compiling";
             if (EditorApplication.isUpdating) return "refreshing";
+            if (EditorOperations.PendingState != null) return EditorOperations.PendingState;
             if (EditorApplication.isPlaying)
                 return EditorApplication.isPaused ? "paused" : "playing";
             return "ready";

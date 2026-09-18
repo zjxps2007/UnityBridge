@@ -13,6 +13,7 @@ def main() -> int:
     parser.add_argument("--dotnet", default="dotnet", help="Path to the .NET 10 SDK executable.")
     parser.add_argument("--runtime", required=True, choices=("win-x64", "linux-x64", "linux-arm64", "osx-x64", "osx-arm64"))
     parser.add_argument("--output", required=True, type=Path, help="Destination for the complete self-contained worker directory.")
+    parser.add_argument("--no-ready-to-run", action="store_true", help="Disable precompiled worker code for comparison builds.")
     args = parser.parse_args()
     root = Path(__file__).resolve().parents[1]
     sdk = shutil.which(args.dotnet) or args.dotnet
@@ -24,6 +25,7 @@ def main() -> int:
         sdk, "publish", str(root / "compiler-worker" / "UnityBridge.Compiler" / "UnityBridge.Compiler.csproj"),
         "--configuration", "Release", "--runtime", args.runtime, "--self-contained", "true",
         "--output", str(output), "-p:PublishSingleFile=false", "-p:PublishTrimmed=false",
+        "-p:PublishReadyToRun=" + ("false" if args.no_ready_to_run else "true"),
     ], cwd=root, env=environment, check=True)
     executable = output / ("UnityBridge.Compiler.exe" if args.runtime.startswith("win-") else "UnityBridge.Compiler")
     if not executable.is_file():
