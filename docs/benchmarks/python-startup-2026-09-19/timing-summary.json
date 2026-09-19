@@ -1,0 +1,3760 @@
+{
+  "scope": "Instrumented diagnostic only. Includes prewarm/control/user requests; phases can overlap. Not acceptance data.",
+  "clock": "Windows shared QPC; Python ns, Unity ticks/frequency. process_to_python_entry uses parent launch observer and child entry.",
+  "records": 895,
+  "rows": [
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "6a11ebdab9794f0e82b29e0edca7e183",
+      "ms": 28.429,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "6a11ebdab9794f0e82b29e0edca7e183",
+      "ms": 5.3536,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "0585c99cc86f45139baaabe4f3a3e24c",
+      "ms": 0.414,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "0585c99cc86f45139baaabe4f3a3e24c",
+      "ms": 2.467,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "0585c99cc86f45139baaabe4f3a3e24c",
+      "ms": 0.2184,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "0585c99cc86f45139baaabe4f3a3e24c",
+      "ms": 0.4231,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "2049c12653be42bbb52d6143586a80a1",
+      "ms": 0.2548,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "2049c12653be42bbb52d6143586a80a1",
+      "ms": 0.4475,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "2049c12653be42bbb52d6143586a80a1",
+      "ms": 0.19,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "2049c12653be42bbb52d6143586a80a1",
+      "ms": 0.4297,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "cadeab139a3b440c972682a75ea7c628",
+      "ms": 0.2018,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "cadeab139a3b440c972682a75ea7c628",
+      "ms": 0.4495,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "a3b277f673b2420c9d47793480154296",
+      "ms": 0.23,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "a3b277f673b2420c9d47793480154296",
+      "ms": 0.5002,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "a3b277f673b2420c9d47793480154296",
+      "ms": 0.1783,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "a3b277f673b2420c9d47793480154296",
+      "ms": 0.2798,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "0293bd87f4f0487d985aea6f25d3ef89",
+      "ms": 0.181,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "0293bd87f4f0487d985aea6f25d3ef89",
+      "ms": 5.6614,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "0293bd87f4f0487d985aea6f25d3ef89",
+      "ms": 1.2965,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "0293bd87f4f0487d985aea6f25d3ef89",
+      "ms": 0.426,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "0b4abea18874418f98481f138967e0c9",
+      "ms": 0.2049,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "0b4abea18874418f98481f138967e0c9",
+      "ms": 0.1909,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "0b4abea18874418f98481f138967e0c9",
+      "ms": 0.7944,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "0b4abea18874418f98481f138967e0c9",
+      "ms": 0.3726,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "9fe7532c1f194a45a7603263dee0d28a",
+      "ms": 0.1836,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "9fe7532c1f194a45a7603263dee0d28a",
+      "ms": 1.9637,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "9fe7532c1f194a45a7603263dee0d28a",
+      "ms": 0.756,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "9fe7532c1f194a45a7603263dee0d28a",
+      "ms": 0.4523,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "3c43c1aaf851468aa5bc4d8b4664d9ce",
+      "ms": 0.177,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "3c43c1aaf851468aa5bc4d8b4664d9ce",
+      "ms": 2.4557,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "3c43c1aaf851468aa5bc4d8b4664d9ce",
+      "ms": 2.3731,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "3c43c1aaf851468aa5bc4d8b4664d9ce",
+      "ms": 0.5042,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "8ce063e810f2499485e357a980a7bf06",
+      "ms": 0.2086,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "8ce063e810f2499485e357a980a7bf06",
+      "ms": 0.4459,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "d3f95a5851b74587aea821761a5a4bda",
+      "ms": 0.1737,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "d3f95a5851b74587aea821761a5a4bda",
+      "ms": 0.2598,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "d3f95a5851b74587aea821761a5a4bda",
+      "ms": 0.1498,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "d3f95a5851b74587aea821761a5a4bda",
+      "ms": 0.3934,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "ab9631b52fcd4f18bbf2567fc52491f6",
+      "ms": 0.1674,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "ab9631b52fcd4f18bbf2567fc52491f6",
+      "ms": 0.1382,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "ab9631b52fcd4f18bbf2567fc52491f6",
+      "ms": 0.1836,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "ab9631b52fcd4f18bbf2567fc52491f6",
+      "ms": 0.337,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "846602ba65e84ebb9e6fa1706ddb6a1e",
+      "ms": 0.2307,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "846602ba65e84ebb9e6fa1706ddb6a1e",
+      "ms": 0.3841,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "8fec3482e2364e88bc9f05b99f05bfa4",
+      "ms": 0.1653,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "8fec3482e2364e88bc9f05b99f05bfa4",
+      "ms": 0.2311,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "8fec3482e2364e88bc9f05b99f05bfa4",
+      "ms": 0.1946,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "8fec3482e2364e88bc9f05b99f05bfa4",
+      "ms": 0.3486,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "26f14d3b98534feb9f5dd7891ef098b9",
+      "ms": 0.1694,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "26f14d3b98534feb9f5dd7891ef098b9",
+      "ms": 0.1306,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "26f14d3b98534feb9f5dd7891ef098b9",
+      "ms": 0.2129,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "26f14d3b98534feb9f5dd7891ef098b9",
+      "ms": 0.3854,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "0046015c6b1e4d9e89a02856ebae7293",
+      "ms": 0.174,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "0046015c6b1e4d9e89a02856ebae7293",
+      "ms": 0.3562,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "ab5bea00fccf412c88aeffe86e172c88",
+      "ms": 0.1882,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "ab5bea00fccf412c88aeffe86e172c88",
+      "ms": 0.1389,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "ab5bea00fccf412c88aeffe86e172c88",
+      "ms": 0.1682,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "ab5bea00fccf412c88aeffe86e172c88",
+      "ms": 0.3733,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "62290d2aabbc45f79aeb9670a6f46c4d",
+      "ms": 0.188,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "62290d2aabbc45f79aeb9670a6f46c4d",
+      "ms": 0.4725,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "62290d2aabbc45f79aeb9670a6f46c4d",
+      "ms": 0.1832,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "62290d2aabbc45f79aeb9670a6f46c4d",
+      "ms": 0.3786,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "8b3e36181e4f4749887424304a3d8384",
+      "ms": 0.1778,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "8b3e36181e4f4749887424304a3d8384",
+      "ms": 0.5778,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "8b3e36181e4f4749887424304a3d8384",
+      "ms": 0.1849,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "8b3e36181e4f4749887424304a3d8384",
+      "ms": 0.4019,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "789ca3b559ac4ea88863d6276ac4a22b",
+      "ms": 0.1689,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "789ca3b559ac4ea88863d6276ac4a22b",
+      "ms": 0.5315,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "789ca3b559ac4ea88863d6276ac4a22b",
+      "ms": 0.2113,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "789ca3b559ac4ea88863d6276ac4a22b",
+      "ms": 0.4263,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "faabc10ac8264c438405c93725820eec",
+      "ms": 0.1782,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "faabc10ac8264c438405c93725820eec",
+      "ms": 1.6061,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "faabc10ac8264c438405c93725820eec",
+      "ms": 0.1864,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "faabc10ac8264c438405c93725820eec",
+      "ms": 0.4122,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "f47c66b9b0454adbadfc18a6b58baf3f",
+      "ms": 0.1893,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "f47c66b9b0454adbadfc18a6b58baf3f",
+      "ms": 0.494,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "f47c66b9b0454adbadfc18a6b58baf3f",
+      "ms": 0.1872,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "f47c66b9b0454adbadfc18a6b58baf3f",
+      "ms": 0.3952,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "3e5136601944481bbd3163ef3c3afef9",
+      "ms": 0.1649,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "3e5136601944481bbd3163ef3c3afef9",
+      "ms": 0.4878,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "3e5136601944481bbd3163ef3c3afef9",
+      "ms": 0.1783,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "3e5136601944481bbd3163ef3c3afef9",
+      "ms": 0.3985,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "cdc3ff8cbe964a59a1e483dab41d49d1",
+      "ms": 0.1713,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "cdc3ff8cbe964a59a1e483dab41d49d1",
+      "ms": 0.5249,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "cdc3ff8cbe964a59a1e483dab41d49d1",
+      "ms": 0.2478,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "cdc3ff8cbe964a59a1e483dab41d49d1",
+      "ms": 0.4355,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "1cf9c06f1aae4c8bbb17d6663793aee9",
+      "ms": 0.201,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "1cf9c06f1aae4c8bbb17d6663793aee9",
+      "ms": 11.8786,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "1cf9c06f1aae4c8bbb17d6663793aee9",
+      "ms": 2.8619,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "1cf9c06f1aae4c8bbb17d6663793aee9",
+      "ms": 0.5221,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "bb22fd7aff6a49a0836722312b1ab414",
+      "ms": 0.1798,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "bb22fd7aff6a49a0836722312b1ab414",
+      "ms": 0.3876,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "3706363b13fa4c4cad390ae849388fd7",
+      "ms": 0.1636,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "3706363b13fa4c4cad390ae849388fd7",
+      "ms": 5.8801,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "3706363b13fa4c4cad390ae849388fd7",
+      "ms": 0.2292,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "3706363b13fa4c4cad390ae849388fd7",
+      "ms": 0.3792,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "b83317b807974eb9906509326f384895",
+      "ms": 0.1875,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "b83317b807974eb9906509326f384895",
+      "ms": 0.3505,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "cd628dcf71cf4d10a63b29f16d73f5f9",
+      "ms": 0.1784,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "cd628dcf71cf4d10a63b29f16d73f5f9",
+      "ms": 5.8409,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "cd628dcf71cf4d10a63b29f16d73f5f9",
+      "ms": 0.441,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "cd628dcf71cf4d10a63b29f16d73f5f9",
+      "ms": 0.41,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "29af63436da2497fb40fc483004acb3b",
+      "ms": 0.1841,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "29af63436da2497fb40fc483004acb3b",
+      "ms": 0.3353,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "5bbd591d16514dbb8a73c0e23b8942ed",
+      "ms": 0.1866,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "5bbd591d16514dbb8a73c0e23b8942ed",
+      "ms": 5.2331,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "5bbd591d16514dbb8a73c0e23b8942ed",
+      "ms": 0.2714,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "5bbd591d16514dbb8a73c0e23b8942ed",
+      "ms": 0.3403,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "a7d86cce0a574f6ba094dd50f6e71964",
+      "ms": 0.1638,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "a7d86cce0a574f6ba094dd50f6e71964",
+      "ms": 0.4545,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "4fa88bf489e247c1a1046aa6a50bec22",
+      "ms": 0.2583,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "4fa88bf489e247c1a1046aa6a50bec22",
+      "ms": 5.4438,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "4fa88bf489e247c1a1046aa6a50bec22",
+      "ms": 0.3052,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "4fa88bf489e247c1a1046aa6a50bec22",
+      "ms": 0.3365,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "9a9da7c03c494a9c9cf331164c41e143",
+      "ms": 0.1728,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "9a9da7c03c494a9c9cf331164c41e143",
+      "ms": 0.4182,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "86c3e051e46446afa22544dcce75b59e",
+      "ms": 0.1717,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "86c3e051e46446afa22544dcce75b59e",
+      "ms": 5.4196,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "86c3e051e46446afa22544dcce75b59e",
+      "ms": 0.3901,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "86c3e051e46446afa22544dcce75b59e",
+      "ms": 0.339,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "63c7f6185ef04ff8abf2d774353bf57e",
+      "ms": 0.1696,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "63c7f6185ef04ff8abf2d774353bf57e",
+      "ms": 0.4486,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "2005f28395654dfd8582371cd2bf21c0",
+      "ms": 3.4232,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "2005f28395654dfd8582371cd2bf21c0",
+      "ms": 6.24,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "2005f28395654dfd8582371cd2bf21c0",
+      "ms": 0.203,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "2005f28395654dfd8582371cd2bf21c0",
+      "ms": 0.269,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "a06f55864b6b4936a1f197a0f113a928",
+      "ms": 0.1837,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "a06f55864b6b4936a1f197a0f113a928",
+      "ms": 0.3553,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "52ab08dd43274567908b6a9dec9dd9e4",
+      "ms": 0.1897,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "52ab08dd43274567908b6a9dec9dd9e4",
+      "ms": 7.3204,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "52ab08dd43274567908b6a9dec9dd9e4",
+      "ms": 0.2129,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "52ab08dd43274567908b6a9dec9dd9e4",
+      "ms": 0.2966,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "2722c7b235c747bda390259a0663d05f",
+      "ms": 0.1782,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "2722c7b235c747bda390259a0663d05f",
+      "ms": 0.3457,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "f37b99edc03a49269d13a7fbc014d210",
+      "ms": 0.193,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "f37b99edc03a49269d13a7fbc014d210",
+      "ms": 0.4776,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "f37b99edc03a49269d13a7fbc014d210",
+      "ms": 0.1899,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "f37b99edc03a49269d13a7fbc014d210",
+      "ms": 0.4469,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "b779a3eade10446b8f6dc1092e11a057",
+      "ms": 0.2429,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "b779a3eade10446b8f6dc1092e11a057",
+      "ms": 0.6956,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "b779a3eade10446b8f6dc1092e11a057",
+      "ms": 0.188,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "b779a3eade10446b8f6dc1092e11a057",
+      "ms": 0.387,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "82ecfe86982b4f4dbab7046bf16cbac1",
+      "ms": 0.1608,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "82ecfe86982b4f4dbab7046bf16cbac1",
+      "ms": 0.5398,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "82ecfe86982b4f4dbab7046bf16cbac1",
+      "ms": 0.1907,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "82ecfe86982b4f4dbab7046bf16cbac1",
+      "ms": 0.3566,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "fac865b9c17f444f9e14aa75e79d3976",
+      "ms": 0.1852,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "fac865b9c17f444f9e14aa75e79d3976",
+      "ms": 0.5624,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "fac865b9c17f444f9e14aa75e79d3976",
+      "ms": 0.2036,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "fac865b9c17f444f9e14aa75e79d3976",
+      "ms": 0.47,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "1525a3623be846c7b756399f196dc0ab",
+      "ms": 0.1799,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "1525a3623be846c7b756399f196dc0ab",
+      "ms": 0.4785,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "1525a3623be846c7b756399f196dc0ab",
+      "ms": 0.2649,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "1525a3623be846c7b756399f196dc0ab",
+      "ms": 0.4,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "e4cb3ea471784e7f9cb6e492c15fab1d",
+      "ms": 0.1843,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "e4cb3ea471784e7f9cb6e492c15fab1d",
+      "ms": 0.4868,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "e4cb3ea471784e7f9cb6e492c15fab1d",
+      "ms": 0.1801,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "e4cb3ea471784e7f9cb6e492c15fab1d",
+      "ms": 0.3595,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "de49a20ec34a42f8879ec5c4713e3619",
+      "ms": 0.3272,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "de49a20ec34a42f8879ec5c4713e3619",
+      "ms": 0.496,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "de49a20ec34a42f8879ec5c4713e3619",
+      "ms": 0.1862,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "de49a20ec34a42f8879ec5c4713e3619",
+      "ms": 0.436,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "dbb3b2bee0d245438bca1a015b0552f2",
+      "ms": 0.1879,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "dbb3b2bee0d245438bca1a015b0552f2",
+      "ms": 0.5007,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "dbb3b2bee0d245438bca1a015b0552f2",
+      "ms": 0.181,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "dbb3b2bee0d245438bca1a015b0552f2",
+      "ms": 0.3566,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "d8c8271683004af8a009f5978c145f2e",
+      "ms": 0.1929,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "d8c8271683004af8a009f5978c145f2e",
+      "ms": 0.4687,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "d8c8271683004af8a009f5978c145f2e",
+      "ms": 0.1796,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "d8c8271683004af8a009f5978c145f2e",
+      "ms": 0.3939,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "5c0a6001825743f2974421d681806c0f",
+      "ms": 0.193,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "5c0a6001825743f2974421d681806c0f",
+      "ms": 0.51,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "5c0a6001825743f2974421d681806c0f",
+      "ms": 0.185,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "5c0a6001825743f2974421d681806c0f",
+      "ms": 0.4622,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "78eea99d9648423aab3d0fb75d3bd8b8",
+      "ms": 0.343,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "78eea99d9648423aab3d0fb75d3bd8b8",
+      "ms": 0.4806,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "78eea99d9648423aab3d0fb75d3bd8b8",
+      "ms": 0.2195,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "78eea99d9648423aab3d0fb75d3bd8b8",
+      "ms": 0.4506,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "788d20750ca64795bb1fb7739f65a178",
+      "ms": 0.1823,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "788d20750ca64795bb1fb7739f65a178",
+      "ms": 0.4799,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "788d20750ca64795bb1fb7739f65a178",
+      "ms": 0.1784,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "788d20750ca64795bb1fb7739f65a178",
+      "ms": 0.3876,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "74eeef82e09c414e9d68c2e6d165d594",
+      "ms": 0.176,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "74eeef82e09c414e9d68c2e6d165d594",
+      "ms": 0.5137,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "74eeef82e09c414e9d68c2e6d165d594",
+      "ms": 0.1814,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "74eeef82e09c414e9d68c2e6d165d594",
+      "ms": 0.4446,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "ccf9bd18f4d546ae948c55303a1b9b6c",
+      "ms": 0.1701,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "ccf9bd18f4d546ae948c55303a1b9b6c",
+      "ms": 0.5893,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "ccf9bd18f4d546ae948c55303a1b9b6c",
+      "ms": 0.1934,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "ccf9bd18f4d546ae948c55303a1b9b6c",
+      "ms": 0.5049,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "d4a74228e8bd47b4af2e5b2e7cb3ce32",
+      "ms": 0.1677,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "d4a74228e8bd47b4af2e5b2e7cb3ce32",
+      "ms": 0.6427,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "d4a74228e8bd47b4af2e5b2e7cb3ce32",
+      "ms": 0.2015,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "d4a74228e8bd47b4af2e5b2e7cb3ce32",
+      "ms": 1.5992,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "1426aabe5f9a4c73b67c26a66e5c676b",
+      "ms": 0.1665,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "1426aabe5f9a4c73b67c26a66e5c676b",
+      "ms": 0.5007,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "1426aabe5f9a4c73b67c26a66e5c676b",
+      "ms": 0.1801,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "1426aabe5f9a4c73b67c26a66e5c676b",
+      "ms": 0.3618,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "7b4af338933946ec9926476cacee0465",
+      "ms": 0.1664,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "7b4af338933946ec9926476cacee0465",
+      "ms": 0.5592,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "7b4af338933946ec9926476cacee0465",
+      "ms": 0.1678,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "7b4af338933946ec9926476cacee0465",
+      "ms": 0.4705,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "3e1b5f057b75494ebc482071b8a7b7b4",
+      "ms": 0.1509,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "3e1b5f057b75494ebc482071b8a7b7b4",
+      "ms": 0.1797,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "3e1b5f057b75494ebc482071b8a7b7b4",
+      "ms": 0.1571,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "3e1b5f057b75494ebc482071b8a7b7b4",
+      "ms": 0.4235,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "1641f69c6b7b4a68b78ea77fa02d3439",
+      "ms": 0.1716,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "1641f69c6b7b4a68b78ea77fa02d3439",
+      "ms": 0.1643,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "1641f69c6b7b4a68b78ea77fa02d3439",
+      "ms": 0.1426,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "1641f69c6b7b4a68b78ea77fa02d3439",
+      "ms": 0.3056,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "6599841687d7497698aa0b66b3ecf55b",
+      "ms": 0.1471,
+      "operation": null
+    },
+    {
+      "stage": "unity_execution",
+      "pid": 53236,
+      "request_id": "6599841687d7497698aa0b66b3ecf55b",
+      "ms": 0.1891,
+      "operation": null
+    },
+    {
+      "stage": "unity_serialization",
+      "pid": 53236,
+      "request_id": "6599841687d7497698aa0b66b3ecf55b",
+      "ms": 0.1667,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "6599841687d7497698aa0b66b3ecf55b",
+      "ms": 0.2903,
+      "operation": null
+    },
+    {
+      "stage": "unity_main_thread_queue",
+      "pid": 53236,
+      "request_id": "benchmark-context",
+      "ms": 0.2102,
+      "operation": null
+    },
+    {
+      "stage": "unity_result_send",
+      "pid": 53236,
+      "request_id": "benchmark-context",
+      "ms": 0.3665,
+      "operation": null
+    },
+    {
+      "stage": "host_cli_import",
+      "pid": 9648,
+      "request_id": null,
+      "ms": 9.7905,
+      "operation": null
+    },
+    {
+      "stage": "host_cli_import",
+      "pid": 13404,
+      "request_id": null,
+      "ms": 10.7707,
+      "operation": null
+    },
+    {
+      "stage": "compiler_process_spawn",
+      "pid": 13404,
+      "request_id": null,
+      "ms": 5.8394,
+      "operation": null
+    },
+    {
+      "stage": "host_initialize_to_listening",
+      "pid": 13404,
+      "request_id": null,
+      "ms": 41.2238,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 13404,
+      "request_id": "4c32b5023df04ac29eac2b7e23e4de60",
+      "ms": 234.9049,
+      "operation": null
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 38864,
+      "request_id": null,
+      "ms": 55.5642,
+      "operation": "first_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 38864,
+      "request_id": null,
+      "ms": 0.5079,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 13404,
+      "request_id": "0585c99cc86f45139baaabe4f3a3e24c",
+      "ms": 0.3533,
+      "operation": null
+    },
+    {
+      "stage": "reference_negotiation",
+      "pid": 13404,
+      "request_id": "6a11ebdab9794f0e82b29e0edca7e183",
+      "ms": 81.7093,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 13404,
+      "request_id": "9ac3f634c12e48c4af745c8a5e345ac0",
+      "ms": 98.7598,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 13404,
+      "request_id": "0585c99cc86f45139baaabe4f3a3e24c",
+      "ms": 27.146,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 38864,
+      "request_id": null,
+      "ms": 8.052,
+      "operation": "first_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 30328,
+      "request_id": null,
+      "ms": 59.4916,
+      "operation": "warmed_new_snippet"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 30328,
+      "request_id": null,
+      "ms": 0.5155,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 13404,
+      "request_id": "2049c12653be42bbb52d6143586a80a1",
+      "ms": 0.2731,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 13404,
+      "request_id": "d6572675747644c19e46c913840f2a22",
+      "ms": 15.4024,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 13404,
+      "request_id": "2049c12653be42bbb52d6143586a80a1",
+      "ms": 3.8333,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 30328,
+      "request_id": null,
+      "ms": 8.702,
+      "operation": "warmed_new_snippet"
+    },
+    {
+      "stage": "host_cli_import",
+      "pid": 48268,
+      "request_id": null,
+      "ms": 11.1473,
+      "operation": null
+    },
+    {
+      "stage": "host_cli_import",
+      "pid": 24900,
+      "request_id": null,
+      "ms": 10.7779,
+      "operation": null
+    },
+    {
+      "stage": "compiler_process_spawn",
+      "pid": 24900,
+      "request_id": null,
+      "ms": 5.3809,
+      "operation": null
+    },
+    {
+      "stage": "host_initialize_to_listening",
+      "pid": 24900,
+      "request_id": null,
+      "ms": 40.2005,
+      "operation": null
+    },
+    {
+      "stage": "reference_negotiation",
+      "pid": 24900,
+      "request_id": "cadeab139a3b440c972682a75ea7c628",
+      "ms": 21.3984,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "3d581423bfb64336a46aed30f5a96528",
+      "ms": 289.6104,
+      "operation": null
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 16832,
+      "request_id": null,
+      "ms": 54.5626,
+      "operation": "prewarm_only_first_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 16832,
+      "request_id": null,
+      "ms": 0.5346,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "a3b277f673b2420c9d47793480154296",
+      "ms": 0.4093,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "79cd7806b8374c9b94175d94add8ab0b",
+      "ms": 18.8234,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "a3b277f673b2420c9d47793480154296",
+      "ms": 22.1149,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 16832,
+      "request_id": null,
+      "ms": 7.5942,
+      "operation": "prewarm_only_first_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 3168,
+      "request_id": null,
+      "ms": 52.9481,
+      "operation": "frame_idle_start"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 3168,
+      "request_id": null,
+      "ms": 0.5273,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 3168,
+      "request_id": null,
+      "ms": 6.5981,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "0293bd87f4f0487d985aea6f25d3ef89",
+      "ms": 0.2438,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "0293bd87f4f0487d985aea6f25d3ef89",
+      "ms": 8.8248,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 3168,
+      "request_id": null,
+      "ms": 10.6991,
+      "operation": "frame_idle_start"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 50800,
+      "request_id": null,
+      "ms": 54.902,
+      "operation": "frame_idle_stop"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 50800,
+      "request_id": null,
+      "ms": 0.4666,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 50800,
+      "request_id": null,
+      "ms": 6.5893,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "0b4abea18874418f98481f138967e0c9",
+      "ms": 0.2471,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "0b4abea18874418f98481f138967e0c9",
+      "ms": 18.762,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 50800,
+      "request_id": null,
+      "ms": 10.1439,
+      "operation": "frame_idle_stop"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 42648,
+      "request_id": null,
+      "ms": 53.2497,
+      "operation": "status"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 42648,
+      "request_id": null,
+      "ms": 0.4632,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 42648,
+      "request_id": null,
+      "ms": 6.6983,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 42648,
+      "request_id": null,
+      "ms": 7.5044,
+      "operation": "status"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 19148,
+      "request_id": null,
+      "ms": 51.2297,
+      "operation": "console"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 19148,
+      "request_id": null,
+      "ms": 0.4686,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "9fe7532c1f194a45a7603263dee0d28a",
+      "ms": 0.1821,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "9fe7532c1f194a45a7603263dee0d28a",
+      "ms": 4.328,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 19148,
+      "request_id": null,
+      "ms": 7.0336,
+      "operation": "console"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 38992,
+      "request_id": null,
+      "ms": 52.6428,
+      "operation": "tools"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 38992,
+      "request_id": null,
+      "ms": 0.5133,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "3c43c1aaf851468aa5bc4d8b4664d9ce",
+      "ms": 0.244,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "3c43c1aaf851468aa5bc4d8b4664d9ce",
+      "ms": 6.7623,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 38992,
+      "request_id": null,
+      "ms": 7.0684,
+      "operation": "tools"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 10196,
+      "request_id": null,
+      "ms": 52.1381,
+      "operation": "instances"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 10196,
+      "request_id": null,
+      "ms": 0.4504,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 10196,
+      "request_id": null,
+      "ms": 6.4852,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 10196,
+      "request_id": null,
+      "ms": 6.8729,
+      "operation": "instances"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 37912,
+      "request_id": null,
+      "ms": 52.0303,
+      "operation": "wait_ready"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 37912,
+      "request_id": null,
+      "ms": 0.4723,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 37912,
+      "request_id": null,
+      "ms": 7.2517,
+      "operation": "wait_ready"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 13612,
+      "request_id": null,
+      "ms": 50.1483,
+      "operation": "status"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 13612,
+      "request_id": null,
+      "ms": 0.58,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 13612,
+      "request_id": null,
+      "ms": 6.4608,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 13612,
+      "request_id": null,
+      "ms": 7.9195,
+      "operation": "status"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 6400,
+      "request_id": null,
+      "ms": 54.9338,
+      "operation": "console"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 6400,
+      "request_id": null,
+      "ms": 0.5055,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "d3f95a5851b74587aea821761a5a4bda",
+      "ms": 0.2515,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "d3f95a5851b74587aea821761a5a4bda",
+      "ms": 2.3258,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 6400,
+      "request_id": null,
+      "ms": 7.369,
+      "operation": "console"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 31804,
+      "request_id": null,
+      "ms": 53.1249,
+      "operation": "tools"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 31804,
+      "request_id": null,
+      "ms": 0.9236,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "ab9631b52fcd4f18bbf2567fc52491f6",
+      "ms": 0.2224,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "ab9631b52fcd4f18bbf2567fc52491f6",
+      "ms": 1.9598,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 31804,
+      "request_id": null,
+      "ms": 7.3806,
+      "operation": "tools"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 2768,
+      "request_id": null,
+      "ms": 51.9785,
+      "operation": "instances"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 2768,
+      "request_id": null,
+      "ms": 0.4764,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 2768,
+      "request_id": null,
+      "ms": 6.6256,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 2768,
+      "request_id": null,
+      "ms": 6.964,
+      "operation": "instances"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 42144,
+      "request_id": null,
+      "ms": 52.9605,
+      "operation": "wait_ready"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 42144,
+      "request_id": null,
+      "ms": 0.8141,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 42144,
+      "request_id": null,
+      "ms": 7.0091,
+      "operation": "wait_ready"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 39800,
+      "request_id": null,
+      "ms": 51.4249,
+      "operation": "status"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 39800,
+      "request_id": null,
+      "ms": 3.6225,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 39800,
+      "request_id": null,
+      "ms": 6.6608,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 39800,
+      "request_id": null,
+      "ms": 7.535,
+      "operation": "status"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 43828,
+      "request_id": null,
+      "ms": 50.042,
+      "operation": "console"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 43828,
+      "request_id": null,
+      "ms": 0.4689,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "8fec3482e2364e88bc9f05b99f05bfa4",
+      "ms": 0.2349,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "8fec3482e2364e88bc9f05b99f05bfa4",
+      "ms": 1.9707,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 43828,
+      "request_id": null,
+      "ms": 6.9556,
+      "operation": "console"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 4816,
+      "request_id": null,
+      "ms": 51.0636,
+      "operation": "tools"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 4816,
+      "request_id": null,
+      "ms": 0.5356,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "26f14d3b98534feb9f5dd7891ef098b9",
+      "ms": 0.2278,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "26f14d3b98534feb9f5dd7891ef098b9",
+      "ms": 1.9421,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 4816,
+      "request_id": null,
+      "ms": 6.8444,
+      "operation": "tools"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 44824,
+      "request_id": null,
+      "ms": 50.0438,
+      "operation": "instances"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 44824,
+      "request_id": null,
+      "ms": 0.4759,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 44824,
+      "request_id": null,
+      "ms": 6.9057,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 44824,
+      "request_id": null,
+      "ms": 6.9427,
+      "operation": "instances"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 26448,
+      "request_id": null,
+      "ms": 50.819,
+      "operation": "wait_ready"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 26448,
+      "request_id": null,
+      "ms": 0.5203,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 26448,
+      "request_id": null,
+      "ms": 7.0874,
+      "operation": "wait_ready"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 43772,
+      "request_id": null,
+      "ms": 51.5494,
+      "operation": "frame_exec_start"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 43772,
+      "request_id": null,
+      "ms": 0.4724,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 43772,
+      "request_id": null,
+      "ms": 6.5216,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "ab5bea00fccf412c88aeffe86e172c88",
+      "ms": 0.2422,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "ab5bea00fccf412c88aeffe86e172c88",
+      "ms": 2.0981,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 43772,
+      "request_id": null,
+      "ms": 9.5492,
+      "operation": "frame_exec_start"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 37712,
+      "request_id": null,
+      "ms": 52.4843,
+      "operation": "unique_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 37712,
+      "request_id": null,
+      "ms": 0.4938,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "62290d2aabbc45f79aeb9670a6f46c4d",
+      "ms": 0.2716,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "7cfdabe39b134156aea3560737a36f62",
+      "ms": 18.3967,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "62290d2aabbc45f79aeb9670a6f46c4d",
+      "ms": 2.4734,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 37712,
+      "request_id": null,
+      "ms": 7.207,
+      "operation": "unique_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 10984,
+      "request_id": null,
+      "ms": 51.828,
+      "operation": "repeat_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 10984,
+      "request_id": null,
+      "ms": 0.4709,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "8b3e36181e4f4749887424304a3d8384",
+      "ms": 0.2338,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "1cc7a0258a6c42c8a8f4a87c7a458bed",
+      "ms": 13.2282,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "8b3e36181e4f4749887424304a3d8384",
+      "ms": 2.5231,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 10984,
+      "request_id": null,
+      "ms": 7.4039,
+      "operation": "repeat_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 52848,
+      "request_id": null,
+      "ms": 53.37,
+      "operation": "unique_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 52848,
+      "request_id": null,
+      "ms": 0.526,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "789ca3b559ac4ea88863d6276ac4a22b",
+      "ms": 0.2423,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "a07000012c0f478380623e9449596a95",
+      "ms": 15.4884,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "789ca3b559ac4ea88863d6276ac4a22b",
+      "ms": 3.4937,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 52848,
+      "request_id": null,
+      "ms": 7.4941,
+      "operation": "unique_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 49956,
+      "request_id": null,
+      "ms": 50.2172,
+      "operation": "repeat_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 49956,
+      "request_id": null,
+      "ms": 0.5492,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "faabc10ac8264c438405c93725820eec",
+      "ms": 1.4167,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "bc498c37fdbb4950a10921b10d3e3c43",
+      "ms": 18.7845,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "faabc10ac8264c438405c93725820eec",
+      "ms": 3.5412,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 49956,
+      "request_id": null,
+      "ms": 7.2718,
+      "operation": "repeat_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 15796,
+      "request_id": null,
+      "ms": 52.4458,
+      "operation": "unique_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 15796,
+      "request_id": null,
+      "ms": 0.9357,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "f47c66b9b0454adbadfc18a6b58baf3f",
+      "ms": 0.2295,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "01fbc66112ec4d7e95dde65f3dc93ed9",
+      "ms": 27.4922,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "f47c66b9b0454adbadfc18a6b58baf3f",
+      "ms": 2.5777,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 15796,
+      "request_id": null,
+      "ms": 7.363,
+      "operation": "unique_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 53100,
+      "request_id": null,
+      "ms": 51.2781,
+      "operation": "repeat_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 53100,
+      "request_id": null,
+      "ms": 0.4683,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "3e5136601944481bbd3163ef3c3afef9",
+      "ms": 0.2375,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "417847431e154acba839a868c4cb90df",
+      "ms": 12.8874,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "3e5136601944481bbd3163ef3c3afef9",
+      "ms": 2.3284,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 53100,
+      "request_id": null,
+      "ms": 7.2537,
+      "operation": "repeat_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 33064,
+      "request_id": null,
+      "ms": 52.1265,
+      "operation": "frame_exec_stop"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 33064,
+      "request_id": null,
+      "ms": 0.4725,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 33064,
+      "request_id": null,
+      "ms": 6.6006,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "cdc3ff8cbe964a59a1e483dab41d49d1",
+      "ms": 0.2472,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "cdc3ff8cbe964a59a1e483dab41d49d1",
+      "ms": 2.3815,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 33064,
+      "request_id": null,
+      "ms": 9.416,
+      "operation": "frame_exec_stop"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 44772,
+      "request_id": null,
+      "ms": 52.2435,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 44772,
+      "request_id": null,
+      "ms": 0.5715,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 44772,
+      "request_id": null,
+      "ms": 6.7602,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "1cf9c06f1aae4c8bbb17d6663793aee9",
+      "ms": 0.2262,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "1cf9c06f1aae4c8bbb17d6663793aee9",
+      "ms": 16.4537,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 44772,
+      "request_id": null,
+      "ms": 9.8406,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 2860,
+      "request_id": null,
+      "ms": 51.598,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 2860,
+      "request_id": null,
+      "ms": 0.4875,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 2860,
+      "request_id": null,
+      "ms": 6.6064,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "3706363b13fa4c4cad390ae849388fd7",
+      "ms": 0.2286,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "3706363b13fa4c4cad390ae849388fd7",
+      "ms": 7.8194,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 2860,
+      "request_id": null,
+      "ms": 9.9885,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 15368,
+      "request_id": null,
+      "ms": 52.7718,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 15368,
+      "request_id": null,
+      "ms": 0.5203,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 15368,
+      "request_id": null,
+      "ms": 6.9025,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "cd628dcf71cf4d10a63b29f16d73f5f9",
+      "ms": 0.2855,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "cd628dcf71cf4d10a63b29f16d73f5f9",
+      "ms": 8.0353,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 15368,
+      "request_id": null,
+      "ms": 9.7447,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 13480,
+      "request_id": null,
+      "ms": 52.1086,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 13480,
+      "request_id": null,
+      "ms": 0.4659,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 13480,
+      "request_id": null,
+      "ms": 6.4401,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "5bbd591d16514dbb8a73c0e23b8942ed",
+      "ms": 0.2681,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "5bbd591d16514dbb8a73c0e23b8942ed",
+      "ms": 7.2532,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 13480,
+      "request_id": null,
+      "ms": 9.5461,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 49268,
+      "request_id": null,
+      "ms": 50.5484,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 49268,
+      "request_id": null,
+      "ms": 0.5333,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 49268,
+      "request_id": null,
+      "ms": 6.4029,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "4fa88bf489e247c1a1046aa6a50bec22",
+      "ms": 0.2592,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "4fa88bf489e247c1a1046aa6a50bec22",
+      "ms": 7.4855,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 49268,
+      "request_id": null,
+      "ms": 9.9463,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 6088,
+      "request_id": null,
+      "ms": 51.5455,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 6088,
+      "request_id": null,
+      "ms": 0.6886,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 6088,
+      "request_id": null,
+      "ms": 6.6015,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "86c3e051e46446afa22544dcce75b59e",
+      "ms": 0.2645,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "86c3e051e46446afa22544dcce75b59e",
+      "ms": 7.4311,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 6088,
+      "request_id": null,
+      "ms": 9.6677,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 38932,
+      "request_id": null,
+      "ms": 51.9412,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 38932,
+      "request_id": null,
+      "ms": 0.6579,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 38932,
+      "request_id": null,
+      "ms": 6.5305,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "2005f28395654dfd8582371cd2bf21c0",
+      "ms": 0.2498,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "2005f28395654dfd8582371cd2bf21c0",
+      "ms": 11.3969,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 38932,
+      "request_id": null,
+      "ms": 9.4967,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 40932,
+      "request_id": null,
+      "ms": 51.4949,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 40932,
+      "request_id": null,
+      "ms": 0.5903,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 40932,
+      "request_id": null,
+      "ms": 6.4921,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "52ab08dd43274567908b6a9dec9dd9e4",
+      "ms": 0.2855,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "52ab08dd43274567908b6a9dec9dd9e4",
+      "ms": 9.1243,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 40932,
+      "request_id": null,
+      "ms": 9.6049,
+      "operation": "refresh_wait"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 44160,
+      "request_id": null,
+      "ms": 53.642,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 44160,
+      "request_id": null,
+      "ms": 0.4709,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "f37b99edc03a49269d13a7fbc014d210",
+      "ms": 0.2828,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "10e485c1896449609b985ef3a2c4a2e4",
+      "ms": 13.3562,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "f37b99edc03a49269d13a7fbc014d210",
+      "ms": 2.5095,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 44160,
+      "request_id": null,
+      "ms": 7.1661,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 38192,
+      "request_id": null,
+      "ms": 58.4087,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 38192,
+      "request_id": null,
+      "ms": 0.4884,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "b779a3eade10446b8f6dc1092e11a057",
+      "ms": 0.2534,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "ec21ab76eef949439a3f25d8080adca8",
+      "ms": 11.9226,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "b779a3eade10446b8f6dc1092e11a057",
+      "ms": 2.6365,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 38192,
+      "request_id": null,
+      "ms": 7.425,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 2604,
+      "request_id": null,
+      "ms": 53.7149,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 2604,
+      "request_id": null,
+      "ms": 0.5671,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "82ecfe86982b4f4dbab7046bf16cbac1",
+      "ms": 0.3557,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "d04973ee23f8465fb78886b1893ac318",
+      "ms": 12.1449,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "82ecfe86982b4f4dbab7046bf16cbac1",
+      "ms": 2.4021,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 2604,
+      "request_id": null,
+      "ms": 7.9588,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 52944,
+      "request_id": null,
+      "ms": 53.1077,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 52944,
+      "request_id": null,
+      "ms": 0.4717,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "fac865b9c17f444f9e14aa75e79d3976",
+      "ms": 0.2232,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "86f5acdb54fc48c69e2d1fada2777fdd",
+      "ms": 11.2445,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "fac865b9c17f444f9e14aa75e79d3976",
+      "ms": 2.668,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 52944,
+      "request_id": null,
+      "ms": 7.2577,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 41016,
+      "request_id": null,
+      "ms": 53.1076,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 41016,
+      "request_id": null,
+      "ms": 0.8169,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "1525a3623be846c7b756399f196dc0ab",
+      "ms": 0.2228,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "0dfd14f2a458464eb488a2b968edb5e3",
+      "ms": 11.7924,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "1525a3623be846c7b756399f196dc0ab",
+      "ms": 2.4756,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 41016,
+      "request_id": null,
+      "ms": 7.2738,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 31872,
+      "request_id": null,
+      "ms": 55.1121,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 31872,
+      "request_id": null,
+      "ms": 0.5093,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "e4cb3ea471784e7f9cb6e492c15fab1d",
+      "ms": 0.324,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "6f225faaee2d4b1b8881a888760b3ee6",
+      "ms": 14.1681,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "e4cb3ea471784e7f9cb6e492c15fab1d",
+      "ms": 2.485,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 31872,
+      "request_id": null,
+      "ms": 7.5826,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 19468,
+      "request_id": null,
+      "ms": 54.9555,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 19468,
+      "request_id": null,
+      "ms": 0.4902,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "de49a20ec34a42f8879ec5c4713e3619",
+      "ms": 0.2831,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "69701423472e42cbaa04ff7241e02761",
+      "ms": 14.7201,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "de49a20ec34a42f8879ec5c4713e3619",
+      "ms": 2.897,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 19468,
+      "request_id": null,
+      "ms": 7.2803,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 52112,
+      "request_id": null,
+      "ms": 54.6729,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 52112,
+      "request_id": null,
+      "ms": 0.5492,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "dbb3b2bee0d245438bca1a015b0552f2",
+      "ms": 0.35,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "0031a8eef1d3493ba49ac22bc1ae045e",
+      "ms": 13.4318,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "dbb3b2bee0d245438bca1a015b0552f2",
+      "ms": 2.3666,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 52112,
+      "request_id": null,
+      "ms": 7.5388,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 26888,
+      "request_id": null,
+      "ms": 53.9368,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 26888,
+      "request_id": null,
+      "ms": 0.4788,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "d8c8271683004af8a009f5978c145f2e",
+      "ms": 0.3174,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "1edc6e6ff045459a810d83f4832173a3",
+      "ms": 12.3504,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "d8c8271683004af8a009f5978c145f2e",
+      "ms": 2.5094,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 26888,
+      "request_id": null,
+      "ms": 7.3578,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 43632,
+      "request_id": null,
+      "ms": 51.9786,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 43632,
+      "request_id": null,
+      "ms": 0.4862,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "5c0a6001825743f2974421d681806c0f",
+      "ms": 0.2663,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "52c228d410d34d9da729c8429f0165bf",
+      "ms": 13.4637,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "5c0a6001825743f2974421d681806c0f",
+      "ms": 2.5565,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 43632,
+      "request_id": null,
+      "ms": 7.3904,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 21688,
+      "request_id": null,
+      "ms": 52.7409,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 21688,
+      "request_id": null,
+      "ms": 0.4897,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "78eea99d9648423aab3d0fb75d3bd8b8",
+      "ms": 0.2637,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "117cf29cf7ab4ae1ac89aaf2ec7b9bae",
+      "ms": 12.2764,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "78eea99d9648423aab3d0fb75d3bd8b8",
+      "ms": 3.0178,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 21688,
+      "request_id": null,
+      "ms": 7.4503,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 13404,
+      "request_id": null,
+      "ms": 52.1375,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 13404,
+      "request_id": null,
+      "ms": 0.38,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "788d20750ca64795bb1fb7739f65a178",
+      "ms": 0.2769,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "be000360f9a5414f87689b60c9301b08",
+      "ms": 10.5207,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "788d20750ca64795bb1fb7739f65a178",
+      "ms": 2.3615,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 13404,
+      "request_id": null,
+      "ms": 7.2583,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 36064,
+      "request_id": null,
+      "ms": 65.8732,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 36064,
+      "request_id": null,
+      "ms": 0.5215,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "74eeef82e09c414e9d68c2e6d165d594",
+      "ms": 0.277,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "dd7786a39e8c45d2b810e5891bae2684",
+      "ms": 15.8064,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "74eeef82e09c414e9d68c2e6d165d594",
+      "ms": 3.5124,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 36064,
+      "request_id": null,
+      "ms": 7.3179,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 29908,
+      "request_id": null,
+      "ms": 53.6863,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 29908,
+      "request_id": null,
+      "ms": 0.49,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "ccf9bd18f4d546ae948c55303a1b9b6c",
+      "ms": 0.2378,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "1b24c52466364c1080df69dd94919462",
+      "ms": 16.5566,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "ccf9bd18f4d546ae948c55303a1b9b6c",
+      "ms": 2.7022,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 29908,
+      "request_id": null,
+      "ms": 8.0823,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 20124,
+      "request_id": null,
+      "ms": 53.8369,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 20124,
+      "request_id": null,
+      "ms": 0.487,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "d4a74228e8bd47b4af2e5b2e7cb3ce32",
+      "ms": 0.2781,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "dae4195584cb41baa4ffd5e8dc0b5524",
+      "ms": 18.1239,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "d4a74228e8bd47b4af2e5b2e7cb3ce32",
+      "ms": 2.5606,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 20124,
+      "request_id": null,
+      "ms": 7.6549,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "process_to_python_entry",
+      "pid": 52644,
+      "request_id": null,
+      "ms": 53.7429,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 52644,
+      "request_id": null,
+      "ms": 0.5569,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "1426aabe5f9a4c73b67c26a66e5c676b",
+      "ms": 0.2364,
+      "operation": null
+    },
+    {
+      "stage": "compiler_request_including_ipc",
+      "pid": 24900,
+      "request_id": "ea569598191e44d3972ff6d6fb33305b",
+      "ms": 11.0833,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "1426aabe5f9a4c73b67c26a66e5c676b",
+      "ms": 2.357,
+      "operation": null
+    },
+    {
+      "stage": "python_result_to_process_exit",
+      "pid": 52644,
+      "request_id": null,
+      "ms": 7.5101,
+      "operation": "rotating_exec"
+    },
+    {
+      "stage": "python_to_fast_import",
+      "pid": 52472,
+      "request_id": null,
+      "ms": 0.5199,
+      "operation": null
+    },
+    {
+      "stage": "full_cli_import",
+      "pid": 52472,
+      "request_id": null,
+      "ms": 6.6571,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "7b4af338933946ec9926476cacee0465",
+      "ms": 0.253,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "7b4af338933946ec9926476cacee0465",
+      "ms": 2.4446,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "3e1b5f057b75494ebc482071b8a7b7b4",
+      "ms": 0.2312,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "3e1b5f057b75494ebc482071b8a7b7b4",
+      "ms": 1.8085,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "1641f69c6b7b4a68b78ea77fa02d3439",
+      "ms": 0.2347,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "1641f69c6b7b4a68b78ea77fa02d3439",
+      "ms": 1.7369,
+      "operation": null
+    },
+    {
+      "stage": "host_execution_queue",
+      "pid": 24900,
+      "request_id": "6599841687d7497698aa0b66b3ecf55b",
+      "ms": 0.2562,
+      "operation": null
+    },
+    {
+      "stage": "unity_roundtrip",
+      "pid": 24900,
+      "request_id": "6599841687d7497698aa0b66b3ecf55b",
+      "ms": 1.7231,
+      "operation": null
+    }
+  ],
+  "summary": {
+    "compiler_process_spawn": {
+      "n": 2,
+      "p50_ms": 5.3809,
+      "p95_ms": 5.8394,
+      "max_ms": 5.8394
+    },
+    "compiler_request_including_ipc": {
+      "n": 27,
+      "p50_ms": 14.1681,
+      "p95_ms": 234.9049,
+      "max_ms": 289.6104
+    },
+    "full_cli_import": {
+      "n": 19,
+      "p50_ms": 6.6006,
+      "p95_ms": 6.9057,
+      "max_ms": 6.9057
+    },
+    "host_cli_import": {
+      "n": 4,
+      "p50_ms": 10.7707,
+      "p95_ms": 11.1473,
+      "max_ms": 11.1473
+    },
+    "host_execution_queue": {
+      "n": 47,
+      "p50_ms": 0.253,
+      "p95_ms": 0.3557,
+      "max_ms": 1.4167
+    },
+    "host_initialize_to_listening": {
+      "n": 2,
+      "p50_ms": 40.2005,
+      "p95_ms": 41.2238,
+      "max_ms": 41.2238
+    },
+    "process_to_python_entry": {
+      "n": 52,
+      "p50_ms": 52.4843,
+      "p95_ms": 58.4087,
+      "max_ms": 65.8732
+    },
+    "python_result_to_process_exit": {
+      "n": 52,
+      "p50_ms": 7.425,
+      "p95_ms": 9.9885,
+      "max_ms": 10.6991
+    },
+    "python_to_fast_import": {
+      "n": 53,
+      "p50_ms": 0.5079,
+      "p95_ms": 0.9236,
+      "max_ms": 3.6225
+    },
+    "reference_negotiation": {
+      "n": 2,
+      "p50_ms": 21.3984,
+      "p95_ms": 81.7093,
+      "max_ms": 81.7093
+    },
+    "unity_execution": {
+      "n": 47,
+      "p50_ms": 0.51,
+      "p95_ms": 6.24,
+      "max_ms": 11.8786
+    },
+    "unity_main_thread_queue": {
+      "n": 61,
+      "p50_ms": 0.1823,
+      "p95_ms": 0.343,
+      "max_ms": 28.429
+    },
+    "unity_result_send": {
+      "n": 61,
+      "p50_ms": 0.3939,
+      "p95_ms": 0.5049,
+      "max_ms": 5.3536
+    },
+    "unity_roundtrip": {
+      "n": 47,
+      "p50_ms": 2.5777,
+      "p95_ms": 18.762,
+      "max_ms": 27.146
+    },
+    "unity_serialization": {
+      "n": 47,
+      "p50_ms": 0.19,
+      "p95_ms": 1.2965,
+      "max_ms": 2.8619
+    }
+  }
+}

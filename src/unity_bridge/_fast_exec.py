@@ -1,6 +1,6 @@
-"""Python-only fast path through an authenticated, already running local host.
+"""Python-only fast CLI through an authenticated, already running local host.
 
-The check below admits only known exec syntax. The host still uses the public
+The check below admits only known command syntax. The host still uses the public
 argument parser, client discovery, adapter and ordered execution queue. Every
 unsupported case returns to the full CLI before transmitting a command.
 """
@@ -11,32 +11,40 @@ import time
 
 from . import __version__
 
+SUPPORTED_COMMANDS = ("exec", "instances", "status", "console", "tools", "wait-ready")
+
 
 def _enabled(name):
     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
 
 
 def _options(argv):
-    values = {"--project", "--port", "--timeout-ms", "--instances-dir", "--backend",
-              "--code", "--code-file", "--file", "--using"}
-    command, sources = False, 0
-    options = {"json": False, "no_update": False, "timeout": 120_000, "usings": []}
+    globals_ = {"--project", "--port", "--timeout-ms", "--instances-dir", "--backend"}
+    local = {"exec": {"--code", "--code-file", "--file", "--using"},
+             "console": {"--count", "--lines", "--type", "--stacktrace"},
+             "wait-ready": {"--timeout-sec"}}
+    command, sources = None, 0
+    options = {"json": False, "no_update": False, "timeout": 120_000, "usings": [], "kind": None}
     index = 0
     while index < len(argv):
         arg = argv[index]
         index += 1
-        if arg == "exec" and not command:
-            command = True
+        if arg in SUPPORTED_COMMANDS and command is None:
+            command = arg
+            options["command"] = arg
             continue
         if arg in {"--json", "--no-update-check"}:
             options["json" if arg == "--json" else "no_update"] = True
             continue
-        if arg == "--stdin" and command:
+        if arg == "--clear" and command == "console":
+            options["clear"] = True
+            continue
+        if arg == "--stdin" and command == "exec":
             options["kind"] = "stdin"
             sources += 1
             continue
         name, assigned, value = arg.partition("=")
-        if name not in values:
+        if name not in globals_ and name not in local.get(command, ()):
             return None
         if not assigned:
             if index == len(argv) or argv[index].startswith("--"):
@@ -44,28 +52,29 @@ def _options(argv):
             value = argv[index]
             index += 1
         if name in {"--code", "--code-file", "--file"}:
-            if not command:
-                return None
             options.update(kind=name, source=value)
             sources += 1
         elif name == "--using":
-            if not command:
-                return None
             options["usings"].append(value)
         elif name == "--backend":
             options["backend"] = value
             if value not in {"auto", "host"}:
                 return None
-        elif name in {"--port", "--timeout-ms"}:
+        elif name in {"--port", "--timeout-ms", "--timeout-sec"}:
             try:
                 number = int(value)
             except ValueError:
                 return None
-            if not 0 < number <= (65535 if name == "--port" else 86_400_000):
+            limit = {"--port": 65535, "--timeout-ms": 86_400_000, "--timeout-sec": 86400}[name]
+            if not 0 < number <= limit:
                 return None
             if name == "--timeout-ms":
                 options["timeout"] = number
-    return options if command and sources == 1 else None
+            elif name == "--timeout-sec":
+                options["wait_timeout"] = number * 1000
+    if command == "wait-ready":
+        options["timeout"] = options.get("wait_timeout", 300_000)
+    return options if command and (command != "exec" or sources == 1) else None
 
 
 def _read_json(path):
@@ -119,12 +128,13 @@ def _endpoint():
         return None
     if not isinstance(argv, list) or not argv or not isinstance(argv[0], str):
         return None
+    from ._runtime import executable_path, is_standalone
     try:
-        if not os.path.samefile(argv[0], sys.executable):
+        if not os.path.samefile(argv[0], executable_path()):
             return None
     except OSError:
         return None
-    if not getattr(sys, "frozen", False) and argv[1:3] != ["-m", "unity_bridge"]:
+    if not is_standalone() and argv[1:3] != ["-m", "unity_bridge"]:
         return None
     endpoint = _read_json(os.path.join(root, "instances", runtime + ".json"))
     if not endpoint:
@@ -147,13 +157,14 @@ def _update_due(options):
 
 
 def _unknown(options, code):
-    message = "exec sent to host; completion could not be confirmed"
-    data = {"accepted": True, "completion": "unknown", "command": "exec"}
+    command = options["command"]
+    message = f"{command} sent to host; completion could not be confirmed"
+    data = {"accepted": True, "completion": "unknown", "command": command}
     if options["json"]:
-        params = {"code": code}
+        params = {"code": code} if command == "exec" else {}
         if options["usings"]:
             params["usings"] = options["usings"]
-        print(json.dumps({"tool": "exec", "command": "exec", "params": params, "success": True,
+        print(json.dumps({"tool": command, "command": command, "params": params, "success": True,
                           "message": message, "data": data}, ensure_ascii=False, indent=2))
     else:
         print(message)
@@ -162,7 +173,16 @@ def _unknown(options, code):
 
 def try_exec(argv):
     options = _options(argv)
-    if options is None or _enabled("UNITY_BRIDGE_DISABLE_FAST_EXEC") or _update_due(options):
+    if options is None or _enabled("UNITY_BRIDGE_DISABLE_FAST_CLI"):
+        return None, None
+    # Snapshot-only commands are already cheap locally. The Windows RC2 A/B
+    # showed worse tail latency when forwarding them; retain the measured path
+    # by default, with an explicit switch for continued platform experiments.
+    if options['command'] in {'instances', 'status'} and not _enabled('UNITY_BRIDGE_FAST_SNAPSHOTS'):
+        return None, None
+    if _update_due(options):
+        return None, None
+    if options["command"] == "exec" and _enabled("UNITY_BRIDGE_DISABLE_FAST_EXEC"):
         return None, None
     backend = options.get("backend") or os.environ.get("UNITY_BRIDGE_BACKEND", "auto")
     if backend not in {"auto", "host"}:
@@ -170,17 +190,23 @@ def try_exec(argv):
     endpoint = _endpoint()
     if endpoint is None:
         return None, None
+    # RC2 endpoints support only exec and have no capability list. Never send a
+    # newly optimized command to an older host and fall back after submission.
+    if options["command"] not in endpoint.get("cliCommands", ["exec"]):
+        return None, None
     stdin_text = None
     try:
         if options["kind"] == "stdin":
             code = stdin_text = sys.stdin.read()
         elif options["kind"] == "--code":
             code = options["source"]
-        else:
+        elif options["kind"] is not None:
             with open(options["source"], encoding="utf-8") as stream:
                 code = stream.read()
+        else:
+            code = None
         timeout = options["timeout"] / 1000
-        deadline = time.monotonic() + timeout
+        deadline = time.perf_counter() + timeout
         payload = json.dumps({"cli_protocol": 1, "version": __version__, "argv": argv, "cwd": os.getcwd(),
                               "code": code, "token": endpoint["token"], "backend": backend,
                               "instances_dir": os.path.expanduser("~/.unity-bridge/instances"),

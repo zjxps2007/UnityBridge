@@ -1,0 +1,1016 @@
+{
+  "date_local": "2026-09-19",
+  "timezone": "Asia/Seoul",
+  "os": "Windows-11-10.0.26200-SP0",
+  "cpu": "AMD Ryzen 9 9950X3D 16-Core Processor",
+  "logical_cpus": 32,
+  "base_commit": "a33182088da808684bfa438623cfa651eadc7062",
+  "baseline_release": "https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.0-rc.2",
+  "python312_dll_sha256": {
+    "public_rc2": "9a0e3435aaa680d868150f87ab3e388ad2eebc22f87e036155c7b4eda8cd2120",
+    "candidate": "9a0e3435aaa680d868150f87ab3e388ad2eebc22f87e036155c7b4eda8cd2120"
+  },
+  "production_source_sha256": {
+    "compiler-worker/Directory.Build.props": "fb7470728cebcae753e43b8557056998ea87a397e4455e8404c2dfc447a8ca3b",
+    "compiler-worker/NuGet.Config": "aec93b5637ab6d62470979a008990a4a336a287ab83a3f2541849ae735674055",
+    "compiler-worker/README.md": "2f226affc7765e44c489d8245cf2ea43ba21dd08e582f77cdc7dc05b9e5c055e",
+    "compiler-worker/UnityBridge.Compiler.Tests/Program.cs": "c743a093fb5d38fccd66040c8a8c60cec67fc1697deccfe03f5a2b3d369a342a",
+    "compiler-worker/UnityBridge.Compiler.Tests/UnityBridge.Compiler.Tests.csproj": "96df08565de52073f456373a971fb9867eda12298cd81bf7ed6dc5759533b3ec",
+    "compiler-worker/UnityBridge.Compiler/AssemblyInfo.cs": "aec77843f9599c6975de480d999ba7eb4f27cbbf926393253ed552e3f01f59cd",
+    "compiler-worker/UnityBridge.Compiler/BoundedCache.cs": "9ba09789716228803f4b3fe154cab0c00596e7f16022f68b6e199c46cd567aa1",
+    "compiler-worker/UnityBridge.Compiler/CompilerEngine.cs": "bf8891351ad3c3d77b20eca775b5cf75f4be1a59725fc42eccf47431727f46ec",
+    "compiler-worker/UnityBridge.Compiler/MetadataReferenceCache.cs": "b8c73370bc079708667aca3651b35968f480a7be60ec12b1db45c0ac3610c457",
+    "compiler-worker/UnityBridge.Compiler/Program.cs": "caeab9fdba41019a4597f18e2de80735d97208b8b5adb1677306cdf0298e8288",
+    "compiler-worker/UnityBridge.Compiler/Protocol.cs": "d8f1fe3b8a915dc5168c4ee30a32f8cdc6a149267344e8cc7da2952ffca580ba",
+    "compiler-worker/UnityBridge.Compiler/UnityBridge.Compiler.csproj": "0a0473d17257bff61b87f76312c405b898216550ea39e47207cc979da90656cf",
+    "src/unity_bridge/__init__.py": "9d3f9d11c7fb54af620a3b2302bc897ec49143ef9c4b5a0c08a00d41b823fd5c",
+    "src/unity_bridge/__main__.py": "180fb86705b60648880286a65527bc8d49eea4f778aa34b32f5f8b858552eb2c",
+    "src/unity_bridge/_bootstrap.py": "ed81f32ec99d597dfa6bbcc39d56a513be4a8b07efcff2f980611b0fe5a0058a",
+    "src/unity_bridge/_cli/__init__.py": "49a5d8b5b4e47df5ebefaf91d53168ae9564690c3e02497cadf4d3e87a255552",
+    "src/unity_bridge/_cli/arguments.py": "145fb61c61255efc4a04cf3f6e437f1193b70db30214de4874053de22bbe46a6",
+    "src/unity_bridge/_cli/commands.py": "47612e2fde625b3e5a9e8cc09754621c7896bc9872c66ce72b050378c3267df6",
+    "src/unity_bridge/_cli/output.py": "b7df28f0ac3ecc3f300091b526a4cd74de327f69834b001b51c472e8c4495405",
+    "src/unity_bridge/_cli/session.py": "08012870a5d4c754fc5fd20a1f5146484db67d4a7a2e608cecd31c7d3aa7bbe3",
+    "src/unity_bridge/_cli/standalone.py": "2f86cddb6586eeb030c087e4a1feaca262a2ea91d387a8a7ac088d03181dc86e",
+    "src/unity_bridge/_cli/updates.py": "dd01fde104cc41d6d6335f380d81fac5a578859c413531b66d94d092e516ca8b",
+    "src/unity_bridge/_cli/versions.py": "4b44cffced39ed07d6aaddd595c4475d250d790e2b8bfd4387a357cf58adcf09",
+    "src/unity_bridge/_fast_exec.py": "66e4ef9b3b2abe786db52309a44b93a5c1cb53c295ff3a629e6630ed43ddb891",
+    "src/unity_bridge/_runtime.py": "1ab06d43edef47cbeb9f3678ddec334e82ef887b56cad48b3df6850474a5595e",
+    "src/unity_bridge/_timing.py": "abbb65fbaa845024301e0f722842c6ceb52788b39412afa7a5d66f0737056f46",
+    "src/unity_bridge/_wire.py": "70df439decd906513dbe12977bc50b655e2195258196083ab6977b0346274bfa",
+    "src/unity_bridge/adapter.py": "2193294de094d8a982455f319e74bcc2d7b3f3431cbdec32b0eccfa6bab01dfe",
+    "src/unity_bridge/cli.py": "6bdd52cf57723dcf8f9898d43f1628a51c0a06e8413bdee78ad46386e82ee1bc",
+    "src/unity_bridge/client.py": "b08d0bbdb0c1a6bdb9c5d338b86d3d442985918bab71fef4334b07c41d0f3dba",
+    "src/unity_bridge/host/__init__.py": "d1a7d6a399ceef556e72ac9e2c235497a4681cc03f83c6fd4f59b264fd2a2d5d",
+    "src/unity_bridge/host/__main__.py": "0472e2ffee01c7582c667fb3eb1ef01023e7d584f175cef8cb475e45e6bd1736",
+    "src/unity_bridge/host/cli.py": "a24beec12de8f4325caf66da0e2226e748a6d91ac0c7c2fcd560424077b399d8",
+    "src/unity_bridge/host/cli_request.py": "3c45a425cac0e4daecdfd0fe06083805b9e1cec16fc61fb81f3aa0d559900c4b",
+    "src/unity_bridge/host/cli_server.py": "c7b2b659ddc9bf94f4447c0616bb35bc1067ad0ca37ef8db725412031eef87c9",
+    "src/unity_bridge/host/compiler.py": "04282c3da154ca2253deda59d71ea1289c91ccc5e590be7ffe751e0c8dd9902d",
+    "src/unity_bridge/host/context.py": "68237a07c20a4d4c449b94f7b04ef5a0225700701618145afcf35f66f5e98eef",
+    "src/unity_bridge/host/registry.py": "9a0d3e9eff3d9bbca26a8759b33719db473fe878bb641e41884fd9e30a083edf",
+    "src/unity_bridge/host/service.py": "5c6f0ddf4ea76c3810f7c2e2392fda1b84248045a2a7ba05089914b2d09ca22f",
+    "src/unity_bridge/host/transport.py": "7050fda39f4a09be438d09ba1a04e8208a114d303d00c2c001e494d9166a2226",
+    "unity-bridge-connector/Editor.meta": "bac824cafb9e1f97d52d2fb3539c679157e437da13b9c21c9442970d7d6c67c3",
+    "unity-bridge-connector/Editor/Attributes.meta": "aa938651c7d7bda098ed5ce1265b0d147287a7e856edde114f97a75c67a293bc",
+    "unity-bridge-connector/Editor/Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+    "unity-bridge-connector/Editor/Attributes/UnityBridgeToolAttribute.cs.meta": "d257a20b80a8ba628f8076bd858a841739477909a3fc08941ae2e5f87ed4de6b",
+    "unity-bridge-connector/Editor/BridgeHostLauncher.cs": "d88a3f396079d01b2895d2a86584ba8502b68eb8f5c8079947f9c74c8054c86a",
+    "unity-bridge-connector/Editor/BridgeHostLauncher.cs.meta": "2e4c3712add938a1499aa83bc12e8771a7ac5aeed7d09b8256e23e32eaca8890",
+    "unity-bridge-connector/Editor/BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+    "unity-bridge-connector/Editor/BridgeProtocol.cs.meta": "01e93ca28528c83e8065d7437849ca75068d70cdfbc3494332275729f3b35132",
+    "unity-bridge-connector/Editor/BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+    "unity-bridge-connector/Editor/BridgeTiming.cs.meta": "9775da952493a18fab7e81138c9047a98bbde842df4f2f7f77b3531f3e0f06f8",
+    "unity-bridge-connector/Editor/CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+    "unity-bridge-connector/Editor/CommandRouter.cs.meta": "2f1d622d622148804f247c3abf93fcce6953eba691e7f3c07ecca7728e6b285a",
+    "unity-bridge-connector/Editor/Core.meta": "458365bedb033990518692f5c0d472ba1816620269f2f9a9cec1c4c16f6b4f95",
+    "unity-bridge-connector/Editor/Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+    "unity-bridge-connector/Editor/Core/AtomicFile.cs.meta": "f7895d71cc75c2cfda313ed1dc439a7f7f56cbae06430420a1ce1835edbba1d4",
+    "unity-bridge-connector/Editor/Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+    "unity-bridge-connector/Editor/Core/ParamCoercion.cs.meta": "ab686eef0a26fcf7a73b2a44485220b7b1a45261363c134825835392b2e47a01",
+    "unity-bridge-connector/Editor/Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+    "unity-bridge-connector/Editor/Core/Response.cs.meta": "88a11f12bfe0054f844dc535502196609cd5ba036c108b67deb452a5bd760f50",
+    "unity-bridge-connector/Editor/Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+    "unity-bridge-connector/Editor/Core/StringCaseUtility.cs.meta": "a9f7f8e1e1132855495864798ec343b31d3856c18d5fcc50cde74527186da6a3",
+    "unity-bridge-connector/Editor/Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+    "unity-bridge-connector/Editor/Core/ToolParams.cs.meta": "5a33536ed91f76d6407c14d1b1b44ce58066446b8de4e643d93abe00dd2cd259",
+    "unity-bridge-connector/Editor/EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+    "unity-bridge-connector/Editor/EditorOperations.cs.meta": "21ae30418dd9f307ff3c2b492dc824ecc5b90376065a943fce0f222bbc9fae7a",
+    "unity-bridge-connector/Editor/Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+    "unity-bridge-connector/Editor/Heartbeat.cs.meta": "d7e8dba9b8f4365a423afe4583137201556eb99a96511d212c65d14a8d6a39a3",
+    "unity-bridge-connector/Editor/HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+    "unity-bridge-connector/Editor/HttpServer.cs.meta": "9af28e26468dec1d6ec6bfb5ae2505bf3274395833eba6ca08506dd9adeb5533",
+    "unity-bridge-connector/Editor/TestRunner.meta": "3a666e29bac6d1f795bdb2c44f798e0b290e664454696ed45e2a194b90105e9a",
+    "unity-bridge-connector/Editor/TestRunner/RunTests.cs": "7328803e6e2f9a57d28f9f27687bcd5823691e62ebeade033b36695dec59c91f",
+    "unity-bridge-connector/Editor/TestRunner/RunTests.cs.meta": "dffa0d3137b9c5bac2a92d47d6fcf422474e2396186833ec72e900c063ad3510",
+    "unity-bridge-connector/Editor/TestRunner/TestRunnerState.cs": "d0a8d0a225ecddebb58981b7e97eeb9eb408889c0b6d9c36d8bef5e6c93cf682",
+    "unity-bridge-connector/Editor/TestRunner/TestRunnerState.cs.meta": "d07d427ff0652cd231c352c9049d65f45acfbb5e1b2b41f5850b558a48739f67",
+    "unity-bridge-connector/Editor/TestRunner/UnityBridgeConnector.TestRunner.asmdef": "448c1df685553bdf96a7c22227105e301b5dcea3a2ce6ce989d3cac3f9e8476c",
+    "unity-bridge-connector/Editor/TestRunner/UnityBridgeConnector.TestRunner.asmdef.meta": "3551d1bcb42e63da25c23a5eccbac881690c8c70cb55f0cbb808d5fd831cf180",
+    "unity-bridge-connector/Editor/ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+    "unity-bridge-connector/Editor/ToolDiscovery.cs.meta": "42e5f544ce0befd183ac80123b054c9d9f3db5ae2c6426ab21c02c8f95cd2d43",
+    "unity-bridge-connector/Editor/Tools.meta": "6c781bf00fe1439de549019f143b9764c3ca6e00e4c720d49ac005eade4d8e55",
+    "unity-bridge-connector/Editor/Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+    "unity-bridge-connector/Editor/Tools/EditorScreenshot.cs.meta": "9fed6c3c784dc0d0985513679c39e11d7648dd5af81c4da54faedbd89a458d27",
+    "unity-bridge-connector/Editor/Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+    "unity-bridge-connector/Editor/Tools/ExecuteCsharp.cs.meta": "282cb57c225b6be2549667dfe15ecc7b40c2143a8224972a8dcc3cfcffdad833",
+    "unity-bridge-connector/Editor/Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+    "unity-bridge-connector/Editor/Tools/ExecuteMenuItem.cs.meta": "c72d9a3725053fca69db5b30cf538f98c5508f3cb9d9fe2257e8f175264c29e0",
+    "unity-bridge-connector/Editor/Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+    "unity-bridge-connector/Editor/Tools/ManageEditor.cs.meta": "d80a22f713844c4e011acca419d7dad3cdc1036d28d1061182497c648d8e846f",
+    "unity-bridge-connector/Editor/Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+    "unity-bridge-connector/Editor/Tools/ManageProfiler.cs.meta": "704ee672163278d0d5220ff7e5a1bf67e9f7194215ff3e32f619bf6d463c4ce5",
+    "unity-bridge-connector/Editor/Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+    "unity-bridge-connector/Editor/Tools/ReadConsole.cs.meta": "17a8b55be68028eb0c0a9fccc6ab67dd5a8f56a394d96d2773580f3f4b6476b8",
+    "unity-bridge-connector/Editor/Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+    "unity-bridge-connector/Editor/Tools/RefreshUnity.cs.meta": "8545dd8a7297a5d3907348db571e31298961031807e71546fa68f1550eac4968",
+    "unity-bridge-connector/Editor/Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306",
+    "unity-bridge-connector/Editor/Tools/ReserializeAssets.cs.meta": "02f19a2c3f074b2fed719e70bc65f4932238624d6d246cf62b70943ab1de8f83",
+    "unity-bridge-connector/Editor/UnityBridgeConnector.asmdef": "fd09868f7b4ee9be6cfcd0b354397da3a4ac8ce857c5ea00c8d36c82a94f94f9",
+    "unity-bridge-connector/Editor/UnityBridgeConnector.asmdef.meta": "a9265f64f227a3c61a2d77a9977b93653bc886f1d42cf759f02dfd5c9cb86560",
+    "unity-bridge-connector/package.json": "474a77dca1fae034ab7eda09357eee87533f82441d4a998d55c5d29e7e50e2d0",
+    "unity-bridge-connector/package.json.meta": "efa5d5107511c3d7f27a9a08966419043ae609e27b0a26276740c874adae1848"
+  },
+  "selected_worker_sha256": "9e67796997e430efe119590fb7e1d62bb540a36dbcdcfe2d8ee34e8262cd2cdf",
+  "experiment_worker_sha256": "9c55f5c98fcf092d6a9ad4cb138f1a20e649e5062cad64b554c78e7ee2d40ac9",
+  "ci_status": "Not run for these changes: signed commit blocked by GPG pinentry timeout; no signing bypass authorized",
+  "performance_acceptance": "On hold: two valid foreground new-code exec cohorts regressed; identical-binary reruns pass but cause remains unresolved.",
+  "path_redaction": "Repository absolute path replaced with <repo>; no launcher/registry files or Unity license logs exported",
+  "files": [
+    {
+      "file": "accepted6.json",
+      "sha256": "13a678703118699df29c1b13493ea51505e68cde703fbbd6d076cade532a9b57",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted2021.json",
+      "sha256": "862a5c68fd4ca3bb01798b55dd185e3a33cf62227a4d3cb7a0dc1decb11e084a",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-large6.json",
+      "sha256": "eb28c941466bf7ae09c1c23c50f15d59a2195c0f4b032b057346abfdc341d9f5",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-large2021.json",
+      "sha256": "03f698b498c4b990c43a5171ca144166cf0d5f0fc4c9bac6915128c8f7988730",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-native6.json",
+      "sha256": "1dbc9faa376c5143942d86a2a86b3b9197a92f56b8f4ebd08414ef3dfa0c0c1b",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-native2021.json",
+      "sha256": "fa60615097208c5be5db7a86e3829515eb21f99bbcc258c265fdff59e328d0ab",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-install.json",
+      "sha256": "b5297d6b780d46ae285dd340af5600a95f9744e5e0320ae8287bf99f25a0f661",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-startup6.json",
+      "sha256": "e123a521084b876099c53899955428171529254a8072b5bd9345ac74f6ad2d70",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-startup2021.json",
+      "sha256": "e2bcd507977bd8c2b6844405d209db7f6a884e39bdf936bfe6ce789ee90f2ac6",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-startup-no-early.json",
+      "sha256": "d84d9396a7a24d21912cacfe6c07aab50c16910eb27f12a0130c100df747cb0d",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-startup-no-warmup.json",
+      "sha256": "b2e7174b2f61291fdb50b8027bbe76913f593ea7baa1c3986f28ca33f3466786",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-startup-smoke.json",
+      "sha256": "8b13e8b480a8b9d0d7590c4f22a853640dcf553a9632fa42fb17887f14d6d97d",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-timing.json",
+      "sha256": "c088d44c7b91dff16d8cfd7b91db6d0f5a2c62d501ca4026d4045ef770c71513",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "selected6.json",
+      "sha256": "beaeff74ee789e71bfd83948fbc303c1ac52dfc78efc11ac460daeb506638eb0",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "selected2021.json",
+      "sha256": "837fa4c4443273494e058ffbb8498df7d4132406a28927e434e0a391c77336e7",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "selected-native6.json",
+      "sha256": "1f398d8bfcb11b4b3020d716bb65c10235e5a399ddbd1b97bb60544cfd7cdd3d",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "selected-native2021.json",
+      "sha256": "59215214ae281b93f30636c90c35c296b1d58b89d0631ba7bca4832ad0475b5b",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "selected-install.json",
+      "sha256": "2cf209c700ac5517278b92542033b3fa4f5b3b976dff8b7a7620189c95701768",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "selected-startup6.json",
+      "sha256": "3586e696ef9c0077f92de9b23425ffb9e18bebe0ba216e06f30f7fb3cdc4eeaa",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "final6.json",
+      "sha256": "12c5a0867d5609fa2f9ddd9534c3bfac0c393a09fc8378addb09fbbd5b0a394d",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "final2021.json",
+      "sha256": "9c6e9665c54dc3abf2073474630e6b2a151543c4f6fd7a288423aa5962c92d75",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "runtime.json",
+      "sha256": "a1a159d9b0ce6ea1f17f1f1989b5bce08d672946722b5ceccd6a018710d907f7",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "packaging.json",
+      "sha256": "8864c3f1f23ea8b7f9fd7982b16554d446ae7653bc62584bd0cd3e143908282a",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "ablation-no-fast.json",
+      "sha256": "a5d083d8f56bde68e89bf46720a90cbad0c74f12709e4d11fe4ab3f9f71d4798",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "ablation-no-reuse.json",
+      "sha256": "7241887c13eaadac86899d0a88aeb7d2275ab52d656d05a3ea7742082326cec6",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "ablation-snapshots.json",
+      "sha256": "9ac46f481c8b255598b99d72b9b0e50ac5b4701b959494806344a6bc10f0b664",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "final-native6.json",
+      "sha256": "bf5197b733c4a13a3b6704b1f6088d2b2d493296e8d37f5f23b7b06aedd5588b",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "final-native2021.json",
+      "sha256": "d4a55bfac0be32d72498d5c5838f4cc144f0b09a996fa1a275acfb404025b01e",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "robust-native6.json",
+      "sha256": "39f7e68efa2d39c358a4a52e20838ec292d3a92596b66356b26f9d49ae76f9a4",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "robust-native2021.json",
+      "sha256": "90e7019aa2e23453df4c7375c1fd9ba3bf8ae576eda7c972344b340053358142",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "bundle-install.json",
+      "sha256": "6aea4bc8375e809b2342060d8ae54cba0d45a0001d408859c5971fadbbe2c297",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "diagnostic-gui6.json",
+      "sha256": "39cc850d40ce89acf329ed0c3f61da7bd06e6469d303f78a41cfe1976b29b01e",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "diagnostic-gui6-novel.json",
+      "sha256": "c0e6c7ed2e6d655d570a16a08dbfe1fe4c832feea50c9aecd84e8801dc61d020",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "diagnostic-gui-6-uninstrumented.json",
+      "sha256": "d86530bb06789370f9dfc0ed8f4b522da56361ed6151d78d8f8073b8ca389ec0",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "diagnostic-gui-2021-uninstrumented.json",
+      "sha256": "dede7d78815747a6212fea79784df1590f2e82045f5a317af1da31a4f1ca10df",
+      "role": "See bilingual report for cohort and acceptance status"
+    },
+    {
+      "file": "accepted-gui-6-foreground-verified.json",
+      "sha256": "abf998dc2e71eca64193fa4159f14616cdbddebfff15b24dd23621774d0d3749",
+      "role": "Valid slow foreground exec cohort. Regression unresolved despite passing reruns; historical gates omit exec."
+    },
+    {
+      "file": "gui-6-foreground.json",
+      "sha256": "018b694328ed01bd84fc19998697aa11eafdff731cc22176785d3948ec15250a",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "controlled-gui-6-foreground.json",
+      "sha256": "a6e159d41653366c7a198c54cd87d9fe96ee0d05bb2c2b69b2b897ee7b47c9cf",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "selected-gui-6-foreground.json",
+      "sha256": "ff041cf1887f11d8cf909956fc384d1a22e7460fc86dec72aaecc04083a08dcb",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "accepted-gui-6-foreground.json",
+      "sha256": "53216050d3dbf82c724bccb299aedfa260c016041852ed4498297b1db7bcc071",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "gui-6-background.json",
+      "sha256": "3dd1e307267875ac375a4a5214fc6adccab3ac57da86ebb0fdd6f868df2bdd25",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "controlled-gui-6-background.json",
+      "sha256": "ed7dc25078526be3080a1b7918277af00f8da0780828dc6c81a2c0845cd78c3b",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "selected-gui-6-background.json",
+      "sha256": "5d146205ff767ba6d3bbbea4ce3ff909546eb6b8cb219446f66ceaced025457d",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "accepted-gui-6-background.json",
+      "sha256": "819b26109dc5b38ec01def17203d2b7e575a47146da60fd7da249b1b225cddab",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "accepted-gui-2021-foreground-verified.json",
+      "sha256": "7b3982ba843703cf8b0bdfaa114b4e72eef01765aa4ffa6587bfb06a18bc87da",
+      "role": "Valid slow foreground exec cohort. Regression unresolved despite passing reruns; historical gates omit exec."
+    },
+    {
+      "file": "gui-2021-foreground.json",
+      "sha256": "ed888e4bd604508fc597b0e492c839db504eb542a8d2806bf88bebfe42673191",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "selected-gui-2021-foreground.json",
+      "sha256": "b632baee96a055a1e541a2b1cb055f381e3f5a860670ff423d3c1beb952f74e0",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "accepted-gui-2021-foreground.json",
+      "sha256": "1846ba86c0c28ff007109a18d01fbf22e16e977af1dcabf6672c32b10748ea85",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "gui-2021-background.json",
+      "sha256": "b530fbc21385207d4e6c662576b66842e4b6ce76e5847c7d9c5d36cd4eb21500",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "controlled-gui-2021-background.json",
+      "sha256": "5f6b9f82b2993be6fb7638b26654771da444eeda06cbbc7f50016f8f6e833b43",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "selected-gui-2021-background.json",
+      "sha256": "26146841c469de92178219aeffeeb242b99d9f90055994d74602d41e1ec374f2",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "accepted-gui-2021-background.json",
+      "sha256": "9134d877d98b2d2f8bd33872b67d3320ed514d79d6dc9b8a62df3696a4a3f4f2",
+      "role": "GUI; only focus-matched complete samples are valid for requested mode"
+    },
+    {
+      "file": "initial-bench6.json",
+      "sha256": "c722177ee53b6b96f0f551e69733dd321c523191b317a9d9382c20516c97b8cb",
+      "role": "Initial 3.12.13 all-fast experiment; bench6 candidate incomplete after harness cleanup failure; not final acceptance"
+    },
+    {
+      "file": "initial-bench6-candidate.json",
+      "sha256": "236b2ee0cb54f754c1241482a0c5254d40325a929d4489b68773ee3831dc3fa2",
+      "role": "Initial 3.12.13 all-fast experiment; bench6 candidate incomplete after harness cleanup failure; not final acceptance"
+    },
+    {
+      "file": "initial-bench2021.json",
+      "sha256": "7e6567a4f3bcb177a72758fc7c1dce91eea1cd8428967c7ff80bc92c58e8cd16",
+      "role": "Initial 3.12.13 all-fast experiment; bench6 candidate incomplete after harness cleanup failure; not final acceptance"
+    },
+    {
+      "file": "validation.json",
+      "sha256": "00fb3404f7fc3d27041c020880058f41bfeb2b737918611f83687b5c32274202",
+      "role": "Validation status, excluded attempts or diagnostic stage summary"
+    },
+    {
+      "file": "attempts.json",
+      "sha256": "b3a0d161410c8420eea1fc6bdbe64169472d6a2ed9e5fa58f65eaa413307f9f2",
+      "role": "Validation status, excluded attempts or diagnostic stage summary"
+    },
+    {
+      "file": "timing-summary.json",
+      "sha256": "e78ff8824121112cad1f2b5aadfee677e5f0cd4816cfc855f2d498e0e63b7eff",
+      "role": "Validation status, excluded attempts or diagnostic stage summary"
+    },
+    {
+      "file": "preparation.json",
+      "sha256": "a27c9c5d3a2602ca02a54968eb958892bc108408bdc20e807f6b55dbb6f169e1",
+      "role": "Component benchmark, not end-to-end"
+    },
+    {
+      "file": "session-output.json",
+      "sha256": "a0a40320cfc79e4d1a504837360cc26c162ef4b180e15404c5c0723b9f07b560",
+      "role": "Component benchmark, not end-to-end"
+    },
+    {
+      "file": "diagnostic-gui-worker.json",
+      "sha256": "5d65a799b01e47868b813f68fbaf832ae877339f31160806fe85bd754dec4bf0",
+      "role": "Component benchmark, not end-to-end"
+    },
+    {
+      "file": "build-accepted.json",
+      "sha256": "2af51b206a7298d273d7c1b887859a182cc3bec44723dd9326808b4f679243ea",
+      "role": "Build provenance; earlier files have fewer metadata fields"
+    },
+    {
+      "file": "build-selected.json",
+      "sha256": "3f4765dc29d285e2be910c0f754a788cf56bac391dd9a2f503ed4e7ef20b5283",
+      "role": "Build provenance; earlier files have fewer metadata fields"
+    },
+    {
+      "file": "build-final.json",
+      "sha256": "406e4cb8c8fa4cc6dfe829e7f2e9c2e548b59dffb9ca2883236920051a8c1f20",
+      "role": "Build provenance; earlier files have fewer metadata fields"
+    },
+    {
+      "file": "build-candidate312.json",
+      "sha256": "a1a8824f0f8c0b57ea4d059cd9e29c60971b31406aaada09ab24244c0684a7d3",
+      "role": "Build provenance; earlier files have fewer metadata fields"
+    },
+    {
+      "file": "build-candidate314.json",
+      "sha256": "e0528163fad85b9dbe1ecd811361193477cb76adb3680d9af1a1ce03e83b5e70",
+      "role": "Build provenance; earlier files have fewer metadata fields"
+    },
+    {
+      "file": "build-nuitka312.json",
+      "sha256": "239383d756ad0fe5aeb44d71e48f59bcf7390781a99c8835eaf66856b3efb8e9",
+      "role": "Build provenance; earlier files have fewer metadata fields"
+    },
+    {
+      "file": "controlled-source.json",
+      "sha256": "30f5be22e0b439594c36a2f6827877013ea49b41834caea434da59e1585bd4b7",
+      "role": "Staged source snapshot used by runtime and packaging cohorts"
+    },
+    {
+      "file": "controlled-source.patch",
+      "sha256": "0ab87aa84134b2cc23525a06bb339d7d87db81445d643f4f07193a22fec1f42c",
+      "role": "Controlled experiment source patch; apply to the base commit in controlled-source.json"
+    },
+    {
+      "file": "selected-source.patch",
+      "sha256": "4792d66d1e81a733e1d29f9e4e10736405569538019682f87a08ef4945ef6328",
+      "role": "Accepted production source patch relative to manifest base_commit"
+    },
+    {
+      "file": "timing-10196.jsonl",
+      "sha256": "da0a5a4cf165ee46b7e361002376a019b92a58ccc0e3368a59310ca03553350e",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-10984.jsonl",
+      "sha256": "375e5548bc9c8841ecb3110f6df65b62850f935f2503f1b971b0b472ea702032",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-13404.jsonl",
+      "sha256": "38fe428fb3c34564462d90b733ad38f5811b40b8a72631260f5b77a8a8edc436",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-13480.jsonl",
+      "sha256": "494f7c7fec171e8bb98da98d95ac6c007c017ab3bc670cb9c268e602b750528b",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-13612.jsonl",
+      "sha256": "7229e0663799c2c28b0c858ba573230adae8380fecdae072a8bbd9448f42d522",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-15368.jsonl",
+      "sha256": "6d1844a837c3c25bccf81558a6220da0125e8721fb9a1bf6faf59c4350ce83bf",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-15796.jsonl",
+      "sha256": "84cd8fd2c05302efab7807d7db73581a9f264769c0bd5d0608b144b9effd69bc",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-16832.jsonl",
+      "sha256": "27996c3efb60b96a284798a867c488040a22809c3ac124409591c07d18b21e6b",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-19148.jsonl",
+      "sha256": "6c988b26c58c912c7589ca9ddef1fe499b1ee9750536602fc541c269ad807be4",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-19468.jsonl",
+      "sha256": "ab3a9f77dcd42b5d4faea3905128c7e25d22b4d6c7f52496a78d0a9deef0c208",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-20124.jsonl",
+      "sha256": "4f8033ba67f3259dfb5988c17ab984a38807bc47171348be285970f9bbe3a956",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-21688.jsonl",
+      "sha256": "6d000e884a13d0c6895ec7f2c3f381fb39709eccee0a74747f9534e9127f703c",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-24900.jsonl",
+      "sha256": "d782f1699e20e686530172a8e8d3c01e5ce214af345ac81c429cc5f49b055723",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-2604.jsonl",
+      "sha256": "a01b5b5c09caddb310d0c2ce264bb10a086b6744ae80c69f0f0ff907c2925be3",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-26448.jsonl",
+      "sha256": "dd9cd2f78b2d1252c9ece85e011bed34a0f81a68790327e7578d52b34705a236",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-26888.jsonl",
+      "sha256": "3f090e6fcf1a4f2a1c83918f03bf8be5f71da700c5aa1c452549f9bb724edea4",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-2768.jsonl",
+      "sha256": "61de463dcdc1922b08b39f9e08ad409d3fcb71ec12433b314b81bfd28cd2eebe",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-2860.jsonl",
+      "sha256": "0acd2274e2aa20760ebf4a7e66e208db2e84ce3b01a1f572fc1b204a231d20cc",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-29908.jsonl",
+      "sha256": "c2a61756d1389c6cf6413c30b8af0da78d42dd6b8f656d7a2c706e62e784e88a",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-30328.jsonl",
+      "sha256": "e864696eec149ac50c953797c81d0db73cbbdc30f0199d9287d5b510a6328e57",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-3168.jsonl",
+      "sha256": "8b9a9805107133d6f7543a5fe1bad3b584efdb1c1e5fd712581064de26efa6ae",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-31804.jsonl",
+      "sha256": "e01c9fd02b478835dba6f35986d5b87703433b5c63d9dbd9f071e0caab2dc481",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-31872.jsonl",
+      "sha256": "b71c8b7027d8ebff8da1075b5646ea721635531c5ad6c495e54c2d8822a005b2",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-33064.jsonl",
+      "sha256": "fe50d529d156b04c9b71512fa4b50bdb8d44b71e02c558c78e017d5297101442",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-36064.jsonl",
+      "sha256": "7b1798e883a363f422663aae3c461c067ac49fcfdd61c1dbc4bc27615d59a4ab",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-37712.jsonl",
+      "sha256": "04f0bbc3f0472f384dbf7de91bbe6acccc62c7691b88b72878f6ec3263d36566",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-37912.jsonl",
+      "sha256": "4116cb9f3d848b360ac83a53d7c57d9f899e5da2137fde2734dfbdc21b530a69",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-38192.jsonl",
+      "sha256": "182c1cdbb232298c039055afb477b6a7969bddb05c9e8b07e4d74a922c29b588",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-38864.jsonl",
+      "sha256": "54c15407473480db1512406aa66a504804ce442630e9c0238369ecc35b27f7d1",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-38932.jsonl",
+      "sha256": "b2cefb68b74e5b3f574de0822780b4544644c08bbed00b25d2c04ccb70b862cd",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-38992.jsonl",
+      "sha256": "22ca979f6b15da9f6842eb259d7574e74534fbcca3d94a3b6df5db77a0651f50",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-39800.jsonl",
+      "sha256": "917fe594b2f442727934dd5cc4b9108ede14a85fc0018a6ce91684e98258739d",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-40932.jsonl",
+      "sha256": "033d61d33c646fcc759b25c9053ae2d4781eff082cc54d57f2b5a327f65c4346",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-41016.jsonl",
+      "sha256": "0bc52da28e376691ce3568bd467aad6db2bc18f930f9b41540e4e9b0a38b269b",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-42144.jsonl",
+      "sha256": "9147f9cc695c27f97b069755e94394ccfd941ac9852125c97a437501214b2b0f",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-42648.jsonl",
+      "sha256": "cd3f53ecfa63d0498afc23b1c88e7f3bb74b4a02bdc538b0e8f13591b97bf848",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-43632.jsonl",
+      "sha256": "03c139f7a96266c33df0cc7dd8c3bee8e05f56a46f38c56bd56084a49e68cb9d",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-43772.jsonl",
+      "sha256": "491b7c0efb4e79709132d0905576ae039a001c8c78813f9d51421872f9a8f880",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-43828.jsonl",
+      "sha256": "b4427b138f8431101f4c1571d92722e197d032d7b6f10a22e06c988765190aac",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-44160.jsonl",
+      "sha256": "09030b738754f567d782f829f44210cdc1fe8e9b653caaa5e96671f367f7a531",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-44772.jsonl",
+      "sha256": "46d83cdfa4d816f99d1a8994f8df0289e81895183401fa512273d1f5282e3be1",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-44824.jsonl",
+      "sha256": "514db638b60e21560fcdc0cfb74acebf2bdf7b1468925bf02d73ef1e81bfd128",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-4816.jsonl",
+      "sha256": "8702d2fb6c2baddda4250c3ddffceebc353399d5116ec2de32efe02c1a0b46ae",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-48268.jsonl",
+      "sha256": "3451ed2ffd2c14529d78484c81c45baa688455d28bd854d9ebc7277582914720",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-49268.jsonl",
+      "sha256": "3f1c5938dadfa2e5df6d578fca0a625413a3c6c053b47a19985d71c90b28eb5c",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-49956.jsonl",
+      "sha256": "f12feee0b751114f616c9daf32c35fec381bb892fb835fa84be0e075c55240c7",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-50800.jsonl",
+      "sha256": "7c1cab2a0d38991bd68b79ab3982cb6d900ecb1d4c60074367a0edce73e6b078",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-52112.jsonl",
+      "sha256": "d0bedc96db810dae414191e50593ae37ebbf864c3732e62a0cfacd0389ffef81",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-52472.jsonl",
+      "sha256": "67ab9a542cc97163480f59023f0a53f0fd5696e0cef7c156a2988ac9c0629ff4",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-52644.jsonl",
+      "sha256": "013733380402d8346a3b88732ca897409b6b63d5ddd540688a48fc08bfc39809",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-52848.jsonl",
+      "sha256": "4273d5873fb5fd7bc4ce7613aa98bcc5d56ff9e82a7de39415ac1d54f2802296",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-52944.jsonl",
+      "sha256": "79ea4afb5a7a1ebdb2070dd83abada92281ffedc3575cc41b41db20e48153357",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-53100.jsonl",
+      "sha256": "a3af21ee6e2bb57900588d607c7803841a266b9636b37517532d85bc792b0848",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-6088.jsonl",
+      "sha256": "4d06331bb8ca4d62a61f26e290136dbc8fac3b01dc0a25bbb71a551bf89dd6d8",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-6400.jsonl",
+      "sha256": "2d58f1b1a8aaffe7b47592c0dd5eb65e326a848557bedd83cd332d40e19295a2",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-9648.jsonl",
+      "sha256": "a2f929484a07020b1ae7eabf144d3b84b84ae7bb700693c0e8389f5a1c741478",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-10196.jsonl",
+      "sha256": "1d364ec4b903775640807cb2b33de1a8c059b8955693b66474c3aa786520f2a2",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-10984.jsonl",
+      "sha256": "00bb9609e79305647b3084767fbc30c4c136013651c14dc283ca757541427930",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-13404.jsonl",
+      "sha256": "f3a4c98a363d208c2480f03f8483a270c2efc6207eda498ff4e906515c8014d5",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-13480.jsonl",
+      "sha256": "a367971df517dc1da7f0dbd79d12ab13e7fa9110a095f9c1082a2d7424f0b2ae",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-13612.jsonl",
+      "sha256": "05362dd0c2d262273fde78a7aab0b50cfcc3ea329940527bb1d6b2889cef1aa7",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-15368.jsonl",
+      "sha256": "04a6a1e578501c21cf727470ea285ce1114a463186e25abf11a6f4037f18abbe",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-15796.jsonl",
+      "sha256": "77288c5b90052b088558a04c2080adca511ba20875062f0d48fcd233129de649",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-16832.jsonl",
+      "sha256": "48acc32e13fe78b32ac58ff05030fa8f06f2c1b19732cff90606ae7f897daeeb",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-19148.jsonl",
+      "sha256": "eccb8d03a56216d8afa4321e7fac3c2cfca91771d668c28a3cfd0db03226c1ce",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-19468.jsonl",
+      "sha256": "5fbc9b59b170247676c0be91b05c7028be5b05fa8033e8ca3245ed909ce9556d",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-20124.jsonl",
+      "sha256": "4e96ce2cd0b6040adc4e02656aeb191e2793a789ea4cb7f9576615ce20f1d915",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-21688.jsonl",
+      "sha256": "4d9be008199eb25c7ebac15686a5086843ce16ffb8cef47024730cac9e408975",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-2604.jsonl",
+      "sha256": "261395c1d752c422b3adc0a2b5efc1ee62db8984c0152eae139c0a53866842ff",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-26448.jsonl",
+      "sha256": "91d3726480524dc62dec58dcb7caf583fcdef7825e8611e8e6be3c2eb3245de5",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-26888.jsonl",
+      "sha256": "ac4d813ac7481da7b8bef7a94ae7c8ccd6cbead5df7716922b37b67567686e42",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-2768.jsonl",
+      "sha256": "05edf56865efcb38b4802b2e6c038489179d8a7774aeafffecc7c82011fff2cd",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-2860.jsonl",
+      "sha256": "68748fed1c8d4d814a814fdaf7283957135b12b0ab3acc9f2c10fdd15de077bd",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-29908.jsonl",
+      "sha256": "0baa6dc17d3184dfdb18e1be1827c5285a75c555543ffacaa2dfa21e437dbea4",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-30328.jsonl",
+      "sha256": "aa45cd99f9a9a771e5771b4dc4299108d61dacf45c48b02b988f6072f69e9cba",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-3168.jsonl",
+      "sha256": "95c8bc0906ca9697319b8901442ab921beefd37ccac73e4c29700738c71cb868",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-31804.jsonl",
+      "sha256": "842180c6fa1407a0d3331e78a671b6cb0dcdba2fd06740bcccba4790daa81551",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-31872.jsonl",
+      "sha256": "09e0f43b8e187debaed0b877898ad2c632c5521615921d8a5c04ce50cb78a80e",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-33064.jsonl",
+      "sha256": "022bea547e1744f307a905254183a6d8db3d766904cb8604850099510d54e78a",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-36064.jsonl",
+      "sha256": "5ffb2f995a81a78b22a1c86990b7c0ab7d420cf557573811b53ece50c4d29345",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-37712.jsonl",
+      "sha256": "8c8e7c63c5dd06c0782853a664a5e981e42318f63e3cbb30465f668b6c965934",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-37912.jsonl",
+      "sha256": "ce50cf6d6f827ca53402bdd15dc90aa711843e117471dae6b81839e63671c151",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-38192.jsonl",
+      "sha256": "57da6bb1ced4f5ff509d8cf3dbdc86b7b44536ceb4d36a891e8a0d1eed90e9da",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-38864.jsonl",
+      "sha256": "9137b5df38766b3544cbba4ca452beb312d20f805a3826510b9abf64fe540f63",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-38932.jsonl",
+      "sha256": "d4d1e33945a3a859e79b680559a54b72e227e39a671d98e552b1af23cab5f69f",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-38992.jsonl",
+      "sha256": "7c7c26714211fd41549c9503751470f21273aeb5a0387b360f33e3579effc843",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-39800.jsonl",
+      "sha256": "fe2ccdf5dd837b740e9a734dda7ef156dcab320d983aa9049d6cb98c33584005",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-40932.jsonl",
+      "sha256": "de404cb72aa1a7f18eb6579a1e49e242f2e743b3f553c363ed376832eb81e435",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-41016.jsonl",
+      "sha256": "118e7c1ebc42479b7fc476b4c00cfea6faff48daf44559a9bcdd977b04b2fe1c",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-42144.jsonl",
+      "sha256": "b4c1bf8d107fd4eb671debd2e9c1c49dd1b28bc9055efe57d419be619f3c557d",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-42648.jsonl",
+      "sha256": "fae626737add2c726adacf532a17baaf3632e7b4a0e9cec4b21acca857e85730",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-43632.jsonl",
+      "sha256": "4695179182b5ae5d0c7880eee6cc05f0e9de69e7ffcaf13979e1517aa1cc1db7",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-43772.jsonl",
+      "sha256": "cc9adf86faaeab89276b888da004a03d835307966da4b2158e883764084a9000",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-43828.jsonl",
+      "sha256": "c4b197faa3e49f0329a621285fde03174f7ed8ee6c97e1c83e007f66bb0565dd",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-44160.jsonl",
+      "sha256": "9479bcfcaac459432079d72126ce67192b91543d3f56d14ce4e1bff72376be84",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-44772.jsonl",
+      "sha256": "05fdcf67b8c2f783c076aca3476fbd0eb7fd32d7df545d05d565ac5946dd8f40",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-44824.jsonl",
+      "sha256": "31805195be2f2315bb027250bb15419fb7e59a7ebb1c679b72f700d7d23eb5e7",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-4816.jsonl",
+      "sha256": "969a1ddc1848ad0215b3a28205c17d9b54b023ee1376444807c73f37f55664aa",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-49268.jsonl",
+      "sha256": "d7cd8aebf104456b9dd14c910368dc79b79d3e5d4046f5e61bc3bc02d0dcaea7",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-49956.jsonl",
+      "sha256": "684eb38f2bd551b72f7920c582dc5b56dbbf13ddbf4327a2398bbfb2ecf836d4",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-50800.jsonl",
+      "sha256": "e10be12bcc631a7e42f3a633034340dcfbd1e8e69e7730813cebdf727e08742e",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-52112.jsonl",
+      "sha256": "2c986452304b53862bba05180f9a298ad00d7d8a94c15776a034002b7cc4c6c0",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-52644.jsonl",
+      "sha256": "84ef2ccc20a2d6d649128063c67087121b8f0ab0d74cba01a1e6f1ef449b490d",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-52848.jsonl",
+      "sha256": "56a79ee7fb129985ac48e0d07bde92aaace29e717f6a5e1767d76046e9b84580",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-52944.jsonl",
+      "sha256": "f77baf90d6bdd287b2c54d51afcc024d5ee6dda461fea8a9b11840dac746e4f6",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-53100.jsonl",
+      "sha256": "88e60f46e3b8186d68836a094d5205aa7c1fe7f8cf5945f2c50f0f96d07354d2",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-6088.jsonl",
+      "sha256": "d51758aab53df67f688b86c5f7dc014f39f3bc0b5b2f1f73ec839ccbd0775da0",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-launch-6400.jsonl",
+      "sha256": "fde430e279c4c8e7b8356cbb5f2af0574fb65ad5778fb4f5a127131f56702b01",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    },
+    {
+      "file": "timing-unity-53236.jsonl",
+      "sha256": "df2ca3b923f88c2555442cd513bc9716d49f061577d133cfea2aea361c8146c9",
+      "role": "Diagnostic timing only; excluded from latency gates"
+    }
+  ]
+}

@@ -227,6 +227,7 @@ namespace UnityBridgeConnector
 
         static async void ProcessItem(WorkItem item)
         {
+            BridgeTiming.Mark("unity_main_thread", item.Request?.RequestId);
             try
             {
                 var r = await CommandRouter.Dispatch(item.Command, item.Parameters, item.Request);
@@ -242,7 +243,12 @@ namespace UnityBridgeConnector
         {
             // Custom tools may return objects whose properties/converters use
             // Unity APIs. Keep their serialization on the dispatch thread.
-            try { item.Tcs.TrySetResult(JsonConvert.SerializeObject(result)); }
+            try
+            {
+                var json = JsonConvert.SerializeObject(result);
+                BridgeTiming.Mark("unity_serialized", item.Request?.RequestId);
+                item.Tcs.TrySetResult(json);
+            }
             catch (Exception ex) { item.Tcs.TrySetException(ex); }
         }
 
@@ -309,6 +315,7 @@ namespace UnityBridgeConnector
 
             object result = null;
             string responseJson = null;
+            string timingId = null;
 
             try
             {
@@ -356,6 +363,8 @@ namespace UnityBridgeConnector
                         }
                         else
                         {
+                            timingId = metadata.RequestId;
+                            BridgeTiming.Mark("unity_queued", timingId);
                             var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
                             s_Queue.Enqueue(new WorkItem
                             {
@@ -381,6 +390,7 @@ namespace UnityBridgeConnector
             response.ContentLength64 = buffer.Length;
             await response.OutputStream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
             response.Close();
+            BridgeTiming.Mark("unity_response_sent", timingId);
         }
     }
 }

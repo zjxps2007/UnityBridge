@@ -100,6 +100,11 @@ registers the new runtime; the previous service exits after outstanding work dra
 The host uses authenticated loopback communication and keeps its process registry
 separate from Unity heartbeat files.
 
+Development after RC2 can start external preparation earlier during Editor
+initialization. It keeps the same installer layout and registered absolute
+paths. Nuitka bundles are comparison artifacts only; use the PyInstaller archive
+with these installers. See [startup and packaging validation](PYTHON_STARTUP.md).
+
 `unity-bridge status` shows host availability separately; its Unity PID, port,
 state, and Heartbeat age still describe the Editor. Use `--json status` for the
 project's compiler `prewarm_state`. `--backend host` requires the new service,

@@ -63,13 +63,27 @@ def main(argv: list[str] | None = None) -> int:
             print(json.dumps(post(endpoint["port"], descriptor["token"], "/stop", {}, 5)))
             return 0
         from pathlib import Path
-        from .service import HostService
         lock = ProcessLock(root / "locks" / f"{descriptor['runtimeId']}.lock")
         if not lock.acquire():
             return 0
         try:
-            service = HostService(root, descriptor, instances_dir=Path(args.instances_dir) if args.instances_dir else None)
-            service.serve()
+            from .compiler import CompilerError, CompilerWorker
+            compiler = CompilerWorker(descriptor["workerPath"])
+            try:
+                # Runtime startup overlaps HTTP/parser imports. No project code
+                # or Unity API executes in this child process.
+                compiler_error = ""
+                try:
+                    compiler.start()
+                except CompilerError as exc:
+                    compiler_error = str(exc)
+                from .service import HostService
+                service = HostService(root, descriptor, compiler=compiler,
+                                      instances_dir=Path(args.instances_dir) if args.instances_dir else None)
+                service.compiler_error = compiler_error
+                service.serve()
+            finally:
+                compiler.close()
         finally:
             lock.close()
         return 0

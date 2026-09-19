@@ -1,0 +1,2 @@
+{"pid":21688,"parent_pid":468,"stage":"process_start","operation":"rotating_exec","ns":311917986881500,"unix_ns":1789750467962112600}
+{"pid":21688,"parent_pid":468,"stage":"process_end","operation":"rotating_exec","ns":311918071922100,"unix_ns":1789750468047153100}

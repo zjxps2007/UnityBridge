@@ -249,3 +249,41 @@ CLI 버전은 별개입니다. `Heartbeat`는 Unity 패키지 정보에서 버�
 `update --check`는 원격 manifest를 읽으므로 이 검증을 대신하지 못합니다.
 v0.2.2-rc.1은 CLI와 manifest 버전이 일치해도 실행 중인 Connector의 상수가
 구버전으로 남아 있었습니다. v0.2.2-rc.2에서 버전 출처를 패키지 정보로 변경했습니다.
+
+## RC2 이후 Python 시작 시간 개선
+
+[Python 시작 시간 보고서](PYTHON_STARTUP.ko.md)에 공개 RC2 기준, 기본값 선택,
+채택하지 않은 실험, 원자료와 검증 한계를 기록합니다. 서비스 첫 시작,
+Unity 시작, 준비된 CLI 프로세스, 연속 세션을 구분합니다.
+`scripts/benchmark-host.py`는 `--cold-samples`, `--session-samples`,
+`--candidate-env`, `--gui foreground|background`를 지원하며 요청별 실제 전경
+여부를 기록합니다. Unity 시작 반복은 `--startup-host --startup-only
+--reuse-projects`와 반복된 variant 목록으로 측정합니다. 최초 import와 기존
+Library를 사용하는 재시작은 별도로 집계합니다.
+`--large-samples 100`으로 1.5MiB 한글·이모지 결과의 CLI와 세션 지연도
+각각 100회 비교할 수 있습니다.
+
+`scripts/benchmark-preparation.py`는 저장한 `compiler-context.json`으로 컴파일러
+준비를, `scripts/benchmark-output.py`는 세션 JSON 직렬화를 따로 측정합니다.
+두 스크립트의 결과만으로 Unity 전체 응답 속도를 주장하지 않습니다.
+`scripts/verify-windows-bundle.py`는 별도 폴더에서 로컬 압축 파일로 실제 설치기를
+실행하며, Nuitka 실험 폴더의 설치 거부도 확인할 수 있습니다.
+
+호스트·프레임·컴파일러 내부 제한 시간에는 `time.perf_counter()`를 사용합니다.
+탐색·큐 대기 전에 만료 시점을 고정하고, 대기 후 원래 시간을 다시 부여하지
+않습니다. Unix 시각의 만료 값도 Connector까지 전달하며 실행 잠금 직후 다시
+검사합니다. 전송 결과가 불확실한 명령은 재실행하지 않습니다.
+
+빌드 변형은 `scripts/build-standalone.py --output-dir ... --work-dir ...`로
+분리합니다. `scripts/build-nuitka-experiment.py`의 결과는 릴리즈 파일이 아닌
+실험 폴더입니다. 성능·설치·5개 플랫폼 기준을 통과하기 전까지 기본 배포 형식을
+유지합니다. `release_tag`가 빈 workflow dispatch는 릴리즈를 게시하지 않고
+검증용 artifact만 만듭니다.
+플랫폼별 `build-info-*` artifact에는 Python·패키징 버전과 실행 파일 압축본,
+컴파일러, Python 소스의 해시를 남깁니다. 릴리즈에 게시하는 설치 파일과는
+별도로 보존합니다.
+`--large-samples 100`으로 약 1.5MiB 한글·이모지 결과를 CLI와 세션에서 각각
+100회 비교합니다. 현재 측정기는 일반 명령뿐 아니라 exec와 세션의 p95도
+판정합니다. `--snippet-offset`은 실행 간 캐시를 조사할 때 생성하는 식을 바꿉니다.
+느린 유효 표본도 재측정 결과와 함께 보존합니다. 과거 `passed` 필드는 확대된
+판정 기준을 포함하지 않을 수 있습니다.

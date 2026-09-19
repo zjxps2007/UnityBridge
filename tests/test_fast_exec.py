@@ -133,8 +133,8 @@ class FastExecTests(unittest.TestCase):
     def test_authentication_required_before_cli_execution(self):
         payload = self.request(token="wrong")
         with socket.create_connection(self.fixture.service.cli_server.server_address, timeout=2) as connection:
-            write_frame(connection, json.dumps(payload).encode(), time.monotonic() + 2)
-            result = json.loads(read_frame(connection, time.monotonic() + 2))
+            write_frame(connection, json.dumps(payload).encode(), time.perf_counter() + 2)
+            result = json.loads(read_frame(connection, time.perf_counter() + 2))
         self.assertEqual(result["exit_code"], 1)
         self.assertIn("authentication", result["stderr"])
         self.assertEqual(self.fixture.executed, [])

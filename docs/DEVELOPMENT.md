@@ -264,3 +264,40 @@ live readiness response, and `Connector:` status line must match the installed
 `package.json`. `update --check` reads the remote manifest and does not replace this
 runtime check. v0.2.2-rc.1 shipped with a stale runtime constant despite matching
 CLI and manifest versions; v0.2.2-rc.2 fixes the runtime version source.
+
+## Python startup work after RC2
+
+Use the [Python startup report](PYTHON_STARTUP.md) for the public-RC2 baseline,
+selected defaults, rejected variants, raw data and remaining validation limits.
+Keep service-cold, Unity startup, warmed subprocesses and persistent sessions
+separate. `scripts/benchmark-host.py` accepts `--cold-samples`, `--session-samples`,
+`--candidate-env` ablations, and `--gui foreground|background` (actual focus is
+recorded per request). For repeated Unity startup, use `--startup-host
+--startup-only --reuse-projects` and repeat the variants; the first import is
+reported separately from subsequent starts over that project's Library.
+
+`scripts/benchmark-preparation.py` isolates compiler preparation using a captured
+`compiler-context.json`. `scripts/benchmark-output.py` isolates session JSON
+serialization; neither script establishes end-to-end Unity performance.
+`scripts/verify-windows-bundle.py` runs the real installer against local archives
+in isolated directories and can check rejection of a flat Nuitka experiment.
+
+Use `time.perf_counter()` for private host/frame/compiler deadlines. Anchor the
+deadline before discovery and queue waits; do not recreate the original budget
+after waiting. The public Unix deadline still reaches the Connector, which
+rechecks it after acquiring the execution lock. Failed delivery is never replayed.
+
+Build variants with `scripts/build-standalone.py --output-dir ... --work-dir ...`.
+`scripts/build-nuitka-experiment.py` produces an experimental folder, not a release
+asset. Keep default release packaging unchanged until the performance, installer
+and five-platform gates pass. A workflow dispatch with an empty `release_tag`
+builds artifacts without publishing a release.
+Each platform also uploads a `build-info-*` artifact with Python/packager versions
+and archive, compiler and Python-source hashes, separately from the published
+installation assets.
+Use `--large-samples 100` in the host benchmark to compare 100 CLI and 100 session
+responses containing 1.5 MiB of Korean text and an emoji.
+The current benchmark gates exec and session tails as well as the five ordinary
+commands. `--snippet-offset` changes the generated expressions when investigating
+cross-run caching. Keep valid slow cohorts alongside passing reruns; historical
+`passed` fields may predate the expanded gate.

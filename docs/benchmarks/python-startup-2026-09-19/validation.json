@@ -1,0 +1,365 @@
+{
+  "python": {
+    "runtime": "official CPython 3.12.10",
+    "ran": 213,
+    "passed": 212,
+    "skipped": 1,
+    "skip_reason": "Windows directory-symlink creation privilege unavailable",
+    "seconds": 63.369,
+    "suite": "python -m unittest discover -s tests"
+  },
+  "compiler": {
+    "passed": 18,
+    "sdk": "10.0.401",
+    "configuration": "Release",
+    "evidence": "18 scenarios passed after base-cache opt-in change in the local tool run",
+    "worker_sha256": "9e67796997e430efe119590fb7e1d62bb540a36dbcdcfe2d8ee34e8262cd2cdf"
+  },
+  "packaged_fast_calls": {
+    "passed": 21,
+    "seconds": 17.218,
+    "runtime": "official CPython 3.12.10 test driver",
+    "target": "accepted Windows executable",
+    "suite": "python -m unittest tests.test_fast_exec tests.test_fast_cli",
+    "environment": "UNITY_BRIDGE_TEST_CLI_EXE points to the accepted executable",
+    "evidence": "Tool output: Ran 21 tests in 17.218s; OK"
+  },
+  "native": {
+    "6": {
+      "passed": true,
+      "checks": 19,
+      "timing_enabled": true
+    },
+    "2021": {
+      "passed": true,
+      "checks": 19,
+      "timing_enabled": true
+    }
+  },
+  "ordinary_p95": {
+    "6": {
+      "instances": {
+        "passed": true,
+        "delta_ms": 0.25780004216358066,
+        "allowed_ms": 10
+      },
+      "wait_ready": {
+        "passed": true,
+        "delta_ms": -41.30870004883036,
+        "allowed_ms": 10
+      },
+      "status": {
+        "passed": true,
+        "delta_ms": -1.449099974706769,
+        "allowed_ms": 10
+      },
+      "console": {
+        "passed": true,
+        "delta_ms": -37.99169999547303,
+        "allowed_ms": 10
+      },
+      "tools": {
+        "passed": true,
+        "delta_ms": -36.362300044856966,
+        "allowed_ms": 10
+      }
+    },
+    "2021": {
+      "instances": {
+        "passed": true,
+        "delta_ms": -2.9611000209115446,
+        "allowed_ms": 10
+      },
+      "wait_ready": {
+        "passed": true,
+        "delta_ms": -42.961300001479685,
+        "allowed_ms": 10
+      },
+      "status": {
+        "passed": true,
+        "delta_ms": -3.338300040923059,
+        "allowed_ms": 10
+      },
+      "console": {
+        "passed": true,
+        "delta_ms": -41.256099997553974,
+        "allowed_ms": 10
+      },
+      "tools": {
+        "passed": true,
+        "delta_ms": -53.99809998925775,
+        "allowed_ms": 10
+      }
+    }
+  },
+  "startup": {
+    "6": {
+      "functional_passed": true,
+      "new_project_samples_per_variant": 1,
+      "reused_project_samples_per_variant": 50
+    },
+    "2021": {
+      "functional_passed": true,
+      "new_project_samples_per_variant": 1,
+      "reused_project_samples_per_variant": 50
+    }
+  },
+  "gui": {
+    "6-foreground": {
+      "file": "diagnostic-gui-6-uninstrumented.json",
+      "passed": true,
+      "focus": {
+        "matched_samples": 1664,
+        "total_samples": 1664,
+        "passed": true
+      },
+      "ordinary_gates": {
+        "instances": {
+          "passed": true,
+          "delta_ms": -0.4085999680683017,
+          "allowed_ms": 10
+        },
+        "wait_ready": {
+          "passed": true,
+          "delta_ms": -40.469200001098216,
+          "allowed_ms": 10
+        },
+        "status": {
+          "passed": true,
+          "delta_ms": 0.024500011932104826,
+          "allowed_ms": 10
+        },
+        "console": {
+          "passed": true,
+          "delta_ms": -42.36510000191629,
+          "allowed_ms": 10
+        },
+        "tools": {
+          "passed": true,
+          "delta_ms": -36.33369994349778,
+          "allowed_ms": 10
+        }
+      },
+      "workload_gates": {
+        "unique_exec": {
+          "passed": true,
+          "delta_ms": -14.82360006775707,
+          "allowed_ms": 10
+        },
+        "repeat_exec": {
+          "passed": true,
+          "delta_ms": -11.333399976138026,
+          "allowed_ms": 10
+        },
+        "session_console": {
+          "passed": true,
+          "delta_ms": -29.34450004249811,
+          "allowed_ms": 10
+        }
+      }
+    },
+    "6-background": {
+      "file": "accepted-gui-6-background.json",
+      "passed": true,
+      "focus": {
+        "matched_samples": 1664,
+        "total_samples": 1664,
+        "passed": true
+      },
+      "ordinary_gates": {
+        "instances": {
+          "passed": true,
+          "delta_ms": -0.8302999776788056,
+          "allowed_ms": 10
+        },
+        "wait_ready": {
+          "passed": true,
+          "delta_ms": 0.2006999566219747,
+          "allowed_ms": 10
+        },
+        "status": {
+          "passed": true,
+          "delta_ms": 0.5796999321319163,
+          "allowed_ms": 10
+        },
+        "console": {
+          "passed": true,
+          "delta_ms": -94.5942000253126,
+          "allowed_ms": 11.205285001778975
+        },
+        "tools": {
+          "passed": true,
+          "delta_ms": -100.25660000974312,
+          "allowed_ms": 10.05919500021264
+        }
+      },
+      "workload_gates": null
+    },
+    "2021-foreground": {
+      "file": "diagnostic-gui-2021-uninstrumented.json",
+      "passed": true,
+      "focus": {
+        "matched_samples": 1664,
+        "total_samples": 1664,
+        "passed": true
+      },
+      "ordinary_gates": {
+        "instances": {
+          "passed": true,
+          "delta_ms": -1.5947999781928957,
+          "allowed_ms": 10
+        },
+        "wait_ready": {
+          "passed": true,
+          "delta_ms": -29.355700011365116,
+          "allowed_ms": 10
+        },
+        "status": {
+          "passed": true,
+          "delta_ms": -0.9128000237978995,
+          "allowed_ms": 10
+        },
+        "console": {
+          "passed": true,
+          "delta_ms": -41.47880006348714,
+          "allowed_ms": 10
+        },
+        "tools": {
+          "passed": true,
+          "delta_ms": -35.69659998174757,
+          "allowed_ms": 10
+        }
+      },
+      "workload_gates": {
+        "unique_exec": {
+          "passed": true,
+          "delta_ms": -21.069500013254583,
+          "allowed_ms": 10
+        },
+        "repeat_exec": {
+          "passed": true,
+          "delta_ms": -25.016700034029782,
+          "allowed_ms": 10
+        },
+        "session_console": {
+          "passed": true,
+          "delta_ms": -29.91209999890998,
+          "allowed_ms": 10
+        }
+      }
+    },
+    "2021-background": {
+      "file": "accepted-gui-2021-background.json",
+      "passed": true,
+      "focus": {
+        "matched_samples": 1664,
+        "total_samples": 1664,
+        "passed": true
+      },
+      "ordinary_gates": {
+        "instances": {
+          "passed": true,
+          "delta_ms": -0.15959999291226268,
+          "allowed_ms": 10
+        },
+        "wait_ready": {
+          "passed": true,
+          "delta_ms": -39.61179993348196,
+          "allowed_ms": 10
+        },
+        "status": {
+          "passed": true,
+          "delta_ms": -0.3657999914139509,
+          "allowed_ms": 10
+        },
+        "console": {
+          "passed": true,
+          "delta_ms": -35.24330002255738,
+          "allowed_ms": 10
+        },
+        "tools": {
+          "passed": true,
+          "delta_ms": -39.278300013393164,
+          "allowed_ms": 10
+        }
+      },
+      "workload_gates": null
+    }
+  },
+  "large_results": {
+    "6": {
+      "functional_passed": true,
+      "samples_per_operation_per_variant": 100,
+      "p95_gates": {
+        "large_exec": true,
+        "session_large_exec": true
+      }
+    },
+    "2021": {
+      "functional_passed": true,
+      "samples_per_operation_per_variant": 100,
+      "p95_gates": {
+        "large_exec": true,
+        "session_large_exec": true
+      }
+    }
+  },
+  "unresolved_foreground_regression": {
+    "cleared": false,
+    "cohorts": [
+      "accepted-gui-6-foreground-verified.json",
+      "accepted-gui-2021-foreground-verified.json"
+    ],
+    "evidence": "New-code exec p50 approximately 337 ms in two valid 100-sample foreground cohorts. Identical-binary uninstrumented reruns pass, but cause remains unknown. Do not discard slow cohorts or claim overall regression clearance."
+  },
+  "ci": {
+    "completed": false,
+    "reason": "GPG pinentry timed out with global commit.gpgsign=true. No unsigned-commit exception authorized.",
+    "remaining": [
+      "Windows x64 CI",
+      "Linux x64",
+      "Linux ARM64",
+      "macOS Intel",
+      "macOS Apple Silicon"
+    ],
+    "local_platform": "Windows x64"
+  },
+  "thresholds": {
+    "ordinary_p95": "candidate <= baseline + max(5% of baseline, 10 ms)",
+    "cold_first_result_p50_target_reduction_percent": 20,
+    "nuitka_adoption_minimum_reduction": "max(10% of PyInstaller p50, 10 ms)",
+    "resource_growth_budget_percent": 10
+  },
+  "installer": {
+    "archive_sha256": "62ab98e306a592a17a2af015c8fc62596d08851f5b04110c0eff41e25a847be9",
+    "checks": [
+      {
+        "name": "fresh",
+        "passed": true,
+        "installer_exit_code": 0
+      },
+      {
+        "name": "reinstall",
+        "passed": true,
+        "installer_exit_code": 0
+      },
+      {
+        "name": "upgrade_public_rc2",
+        "passed": true,
+        "installer_exit_code": 0
+      },
+      {
+        "name": "installed_host_relaunch",
+        "passed": true
+      },
+      {
+        "name": "reject_flat_nuitka",
+        "passed": true,
+        "installer_exit_code": 1
+      }
+    ],
+    "passed": true,
+    "scope": "Real installer and binaries; only remote discovery/download are replaced with local files; user PATH unchanged."
+  },
+  "full_plan_verified": false
+}

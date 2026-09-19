@@ -32,6 +32,7 @@ public sealed class CompileResponse
     public string? AssemblyName { get; init; }
     public string? ReferenceGeneration { get; init; }
     public bool CacheHit { get; init; }
+    public bool BaseCacheHit { get; init; }
     public bool EmitReused { get; init; }
     public CompilerDiagnostic[] Diagnostics { get; init; } = [];
     public string? ErrorCode { get; init; }

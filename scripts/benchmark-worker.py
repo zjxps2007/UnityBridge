@@ -53,11 +53,11 @@ def main():
                 worker.prewarm()
                 ping_ms = (time.perf_counter() - started) * 1000
                 compile_start = time.perf_counter()
-                cold = worker.request(payload, deadline=time.monotonic() + 30)
+                cold = worker.request(payload, deadline=time.perf_counter() + 30)
                 first_ms = (time.perf_counter() - compile_start) * 1000
                 total_ms = (time.perf_counter() - started) * 1000
                 warm_start = time.perf_counter()
-                warm = worker.request(payload, deadline=time.monotonic() + 30)
+                warm = worker.request(payload, deadline=time.perf_counter() + 30)
                 warm_ms = (time.perf_counter() - warm_start) * 1000
                 assert not cold["cache_hit"] and warm["cache_hit"] and not warm["emit_reused"]
                 assert cold["assembly_name"] != warm["assembly_name"]

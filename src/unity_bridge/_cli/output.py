@@ -11,26 +11,28 @@ from ..client import CommandResponse, Instance, UnityBridgeError, UnityClient
 from .versions import version_key
 
 
-def print_result(value: Any, *, json_output: bool) -> None:
+def print_result(value: Any, *, json_output: bool, stdout=None, stderr=None) -> None:
+    stdout = stdout or sys.stdout
+    stderr = stderr or sys.stderr
     if json_output:
-        print(json.dumps(to_jsonable(value), ensure_ascii=False, indent=2))
+        print(json.dumps(to_jsonable(value), ensure_ascii=False, indent=2), file=stdout)
         return
 
     if isinstance(value, list):
         if not value:
-            print("No Unity instances found.")
+            print("No Unity instances found.", file=stdout)
             return
         for instance in value:
-            _print_instance(instance)
+            _print_instance(instance, stdout=stdout, stderr=stderr)
         return
     if isinstance(value, Instance):
-        _print_instance(value)
+        _print_instance(value, stdout=stdout, stderr=stderr)
         return
     from ..adapter import UnityActionResult
     if isinstance(value, (CommandResponse, UnityActionResult)):
-        print(render_action_result(value, json_output=False), end="")
+        print(render_action_result(value, json_output=False), end="", file=stdout)
         return
-    print(value)
+    print(value, file=stdout)
 
 
 def render_action_result(value: Any, *, json_output: bool) -> str:
@@ -43,20 +45,21 @@ def render_action_result(value: Any, *, json_output: bool) -> str:
     return text
 
 
-def _print_instance(instance: Instance) -> None:
+def _print_instance(instance: Instance, *, stdout=None, stderr=None) -> None:
+    stdout = stdout or sys.stdout
     age = instance.heartbeat_age_seconds
     age_label = "unknown" if age is None else f"{age:.1f}s"
-    print(f"Unity (port {instance.port}): {instance.state}")
-    print(f" Project: {instance.project_path}")
-    print(f" Version: {instance.unity_version or 'unknown'}")
-    print(f" Connector: {instance.connector_version or 'unknown'}")
-    print(f" PID: {instance.pid}")
-    print(f" Heartbeat age: {age_label}")
+    print(f"Unity (port {instance.port}): {instance.state}", file=stdout)
+    print(f" Project: {instance.project_path}", file=stdout)
+    print(f" Version: {instance.unity_version or 'unknown'}", file=stdout)
+    print(f" Connector: {instance.connector_version or 'unknown'}", file=stdout)
+    print(f" PID: {instance.pid}", file=stdout)
+    print(f" Heartbeat age: {age_label}", file=stdout)
     if instance.host_status is not None:
         host = instance.host_status
         print(f" Host: {host.get('state', 'unavailable')}" +
-              (f" ({host['version']})" if host.get('version') else ""))
-    print_connector_version_warning(instance, json_output=False)
+              (f" ({host['version']})" if host.get('version') else ""), file=stdout)
+    print_connector_version_warning(instance, json_output=False, stderr=stderr)
 
 
 def warn_for_selected_connector_version(client: UnityClient, *, json_output: bool) -> None:
@@ -66,12 +69,12 @@ def warn_for_selected_connector_version(client: UnityClient, *, json_output: boo
     print_connector_version_warning(instance, json_output=json_output)
 
 
-def print_connector_version_warning(instance: Instance, *, json_output: bool) -> None:
+def print_connector_version_warning(instance: Instance, *, json_output: bool, stderr=None) -> None:
     if json_output:
         return
     warning = _connector_version_warning(instance)
     if warning:
-        print(warning, file=sys.stderr)
+        print(warning, file=stderr or sys.stderr)
 
 
 def _connector_version_warning(instance: Instance) -> str | None:

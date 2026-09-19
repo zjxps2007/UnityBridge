@@ -119,3 +119,9 @@ def execute_command(args: argparse.Namespace, client: UnityClient) -> UnityActio
         params = parse_params(args.params)
         return client.call(args.unity_command, params)
     raise DiscoveryError(f"unsupported built-in command: {args.command}")
+
+
+def result_exit_code(result) -> int:
+    # Instance/list results represent successful discovery. Action results and
+    # raw Connector responses both expose the same success contract.
+    return 0 if getattr(result, "success", True) else 1

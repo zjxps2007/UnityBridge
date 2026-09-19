@@ -1,0 +1,4255 @@
+{
+  "unity_version": "6000.3.13f1",
+  "baseline_ref": "v0.3.0-rc.2",
+  "baseline_host": true,
+  "baseline_working_tree_connector": false,
+  "sessions": [
+    {
+      "number": 1,
+      "variant": "candidate",
+      "source_sha256": {
+        "BridgeHostLauncher.cs": "fed2b739e5d3bfcab8e6a494df860849a3e67a51d94b4b2d869099ce9d409eb2",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+        "CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+        "HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+        "ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+        "Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+        "Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+        "Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+        "Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+        "Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+        "Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+        "Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+        "Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+        "Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+        "Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+        "Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+        "Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+        "Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+        "Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 327.82619999488816
+        },
+        {
+          "name": "first_exec",
+          "ms": 331.73430000897497
+        },
+        {
+          "name": "first_exec",
+          "ms": 329.7012000111863
+        },
+        {
+          "name": "first_exec",
+          "ms": 351.1562999919988
+        },
+        {
+          "name": "first_exec",
+          "ms": 333.00990000134334
+        },
+        {
+          "name": "first_exec",
+          "ms": 318.67060001241043
+        },
+        {
+          "name": "first_exec",
+          "ms": 318.74499999685213
+        },
+        {
+          "name": "first_exec",
+          "ms": 321.4546999661252
+        },
+        {
+          "name": "first_exec",
+          "ms": 310.5121999979019
+        },
+        {
+          "name": "first_exec",
+          "ms": 325.09330002358183
+        },
+        {
+          "name": "first_exec",
+          "ms": 340.6009000027552
+        },
+        {
+          "name": "first_exec",
+          "ms": 326.91590004833415
+        },
+        {
+          "name": "first_exec",
+          "ms": 328.30399996601045
+        },
+        {
+          "name": "first_exec",
+          "ms": 306.9023999851197
+        },
+        {
+          "name": "first_exec",
+          "ms": 334.7867000265978
+        },
+        {
+          "name": "first_exec",
+          "ms": 315.1394000160508
+        },
+        {
+          "name": "first_exec",
+          "ms": 318.64960002712905
+        },
+        {
+          "name": "first_exec",
+          "ms": 313.7563999625854
+        },
+        {
+          "name": "first_exec",
+          "ms": 294.5437000016682
+        },
+        {
+          "name": "first_exec",
+          "ms": 333.00909999525174
+        },
+        {
+          "name": "first_exec",
+          "ms": 320.16840000869706
+        },
+        {
+          "name": "first_exec",
+          "ms": 321.13449997268617
+        },
+        {
+          "name": "first_exec",
+          "ms": 319.49149997672066
+        },
+        {
+          "name": "first_exec",
+          "ms": 341.3894000113942
+        },
+        {
+          "name": "first_exec",
+          "ms": 337.8644000040367
+        },
+        {
+          "name": "first_exec",
+          "ms": 342.49970002565533
+        },
+        {
+          "name": "first_exec",
+          "ms": 358.82099997252226
+        },
+        {
+          "name": "first_exec",
+          "ms": 313.6497999657877
+        },
+        {
+          "name": "first_exec",
+          "ms": 319.0750000067055
+        },
+        {
+          "name": "first_exec",
+          "ms": 316.58129999414086
+        },
+        {
+          "name": "first_exec",
+          "ms": 317.3985999892466
+        },
+        {
+          "name": "first_exec",
+          "ms": 315.1417999761179
+        },
+        {
+          "name": "first_exec",
+          "ms": 299.80259999865666
+        },
+        {
+          "name": "first_exec",
+          "ms": 324.9669999931939
+        },
+        {
+          "name": "first_exec",
+          "ms": 339.42660002503544
+        },
+        {
+          "name": "first_exec",
+          "ms": 312.90010001976043
+        },
+        {
+          "name": "first_exec",
+          "ms": 311.2585000344552
+        },
+        {
+          "name": "first_exec",
+          "ms": 350.2136000315659
+        },
+        {
+          "name": "first_exec",
+          "ms": 338.67989998543635
+        },
+        {
+          "name": "first_exec",
+          "ms": 341.6461000451818
+        },
+        {
+          "name": "first_exec",
+          "ms": 314.1221000114456
+        },
+        {
+          "name": "first_exec",
+          "ms": 330.2166000357829
+        },
+        {
+          "name": "first_exec",
+          "ms": 302.4401000002399
+        },
+        {
+          "name": "first_exec",
+          "ms": 314.76380000822246
+        },
+        {
+          "name": "first_exec",
+          "ms": 315.70559996180236
+        },
+        {
+          "name": "first_exec",
+          "ms": 322.65950000146404
+        },
+        {
+          "name": "first_exec",
+          "ms": 339.83410004293546
+        },
+        {
+          "name": "first_exec",
+          "ms": 347.8184000123292
+        },
+        {
+          "name": "first_exec",
+          "ms": 337.31979998992756
+        },
+        {
+          "name": "first_exec",
+          "ms": 316.794199985452
+        },
+        {
+          "name": "warmed_new_snippet",
+          "ms": 92.36360003706068
+        },
+        {
+          "name": "prewarm_only_first_exec",
+          "ms": 88.612399995327
+        },
+        {
+          "name": "frame_idle_start",
+          "ms": 114.0663999831304
+        },
+        {
+          "name": "frame_idle_stop",
+          "ms": 102.29970002546906
+        },
+        {
+          "name": "status",
+          "ms": 67.51569994958118
+        },
+        {
+          "name": "console",
+          "ms": 83.74960004584864
+        },
+        {
+          "name": "tools",
+          "ms": 95.26629996253178
+        },
+        {
+          "name": "instances",
+          "ms": 67.3205999773927
+        },
+        {
+          "name": "wait_ready",
+          "ms": 82.7601000200957
+        },
+        {
+          "name": "status",
+          "ms": 65.70119998650625
+        },
+        {
+          "name": "console",
+          "ms": 68.2539000408724
+        },
+        {
+          "name": "tools",
+          "ms": 76.75210002344102
+        },
+        {
+          "name": "instances",
+          "ms": 57.444300036877394
+        },
+        {
+          "name": "wait_ready",
+          "ms": 82.16549997450784
+        },
+        {
+          "name": "status",
+          "ms": 63.74030001461506
+        },
+        {
+          "name": "console",
+          "ms": 75.79700002679601
+        },
+        {
+          "name": "tools",
+          "ms": 81.85079996474087
+        },
+        {
+          "name": "instances",
+          "ms": 60.08679996011779
+        },
+        {
+          "name": "wait_ready",
+          "ms": 77.79979996848851
+        },
+        {
+          "name": "status",
+          "ms": 63.783599995076656
+        },
+        {
+          "name": "console",
+          "ms": 75.01130003947765
+        },
+        {
+          "name": "tools",
+          "ms": 94.62739998707548
+        },
+        {
+          "name": "instances",
+          "ms": 58.26560000423342
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.52690002275631
+        },
+        {
+          "name": "status",
+          "ms": 64.86769998446107
+        },
+        {
+          "name": "console",
+          "ms": 75.40879998123273
+        },
+        {
+          "name": "tools",
+          "ms": 93.67430000565946
+        },
+        {
+          "name": "instances",
+          "ms": 57.02399997971952
+        },
+        {
+          "name": "wait_ready",
+          "ms": 67.48540000990033
+        },
+        {
+          "name": "status",
+          "ms": 63.503799960017204
+        },
+        {
+          "name": "console",
+          "ms": 93.96279999054968
+        },
+        {
+          "name": "tools",
+          "ms": 79.02549998834729
+        },
+        {
+          "name": "instances",
+          "ms": 57.11329996120185
+        },
+        {
+          "name": "wait_ready",
+          "ms": 58.664899959694594
+        },
+        {
+          "name": "status",
+          "ms": 63.474200025666505
+        },
+        {
+          "name": "console",
+          "ms": 82.17340003466234
+        },
+        {
+          "name": "tools",
+          "ms": 75.75049996376038
+        },
+        {
+          "name": "instances",
+          "ms": 58.004000049550086
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.47340000141412
+        },
+        {
+          "name": "status",
+          "ms": 65.56840002303943
+        },
+        {
+          "name": "console",
+          "ms": 57.98400001367554
+        },
+        {
+          "name": "tools",
+          "ms": 96.78079996956512
+        },
+        {
+          "name": "instances",
+          "ms": 56.753499957267195
+        },
+        {
+          "name": "wait_ready",
+          "ms": 68.82569997105747
+        },
+        {
+          "name": "status",
+          "ms": 63.92360001336783
+        },
+        {
+          "name": "console",
+          "ms": 74.2846000357531
+        },
+        {
+          "name": "tools",
+          "ms": 75.78539999667555
+        },
+        {
+          "name": "instances",
+          "ms": 56.01780000142753
+        },
+        {
+          "name": "wait_ready",
+          "ms": 59.39360003685579
+        },
+        {
+          "name": "status",
+          "ms": 66.1357999779284
+        },
+        {
+          "name": "console",
+          "ms": 96.50800004601479
+        },
+        {
+          "name": "tools",
+          "ms": 78.34440004080534
+        },
+        {
+          "name": "instances",
+          "ms": 58.99050005245954
+        },
+        {
+          "name": "wait_ready",
+          "ms": 75.91100002173334
+        },
+        {
+          "name": "status",
+          "ms": 63.99499997496605
+        },
+        {
+          "name": "console",
+          "ms": 89.87510000588372
+        },
+        {
+          "name": "tools",
+          "ms": 79.82779998565093
+        },
+        {
+          "name": "instances",
+          "ms": 58.66219999734312
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.96789997862652
+        },
+        {
+          "name": "status",
+          "ms": 65.95039996318519
+        },
+        {
+          "name": "console",
+          "ms": 72.22159998491406
+        },
+        {
+          "name": "tools",
+          "ms": 77.48490001540631
+        },
+        {
+          "name": "instances",
+          "ms": 56.027800019364804
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.3827000092715
+        },
+        {
+          "name": "status",
+          "ms": 68.9161000191234
+        },
+        {
+          "name": "console",
+          "ms": 82.28380000218749
+        },
+        {
+          "name": "tools",
+          "ms": 75.1093999715522
+        },
+        {
+          "name": "instances",
+          "ms": 59.48090000310913
+        },
+        {
+          "name": "wait_ready",
+          "ms": 87.10970001993701
+        },
+        {
+          "name": "status",
+          "ms": 64.58269996801391
+        },
+        {
+          "name": "console",
+          "ms": 76.64599997224286
+        },
+        {
+          "name": "tools",
+          "ms": 77.31670001521707
+        },
+        {
+          "name": "instances",
+          "ms": 58.09990002308041
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.89589999103919
+        },
+        {
+          "name": "status",
+          "ms": 65.32569997943938
+        },
+        {
+          "name": "console",
+          "ms": 93.68360001826659
+        },
+        {
+          "name": "tools",
+          "ms": 75.43049997184426
+        },
+        {
+          "name": "instances",
+          "ms": 56.940399983432144
+        },
+        {
+          "name": "wait_ready",
+          "ms": 77.36180000938475
+        },
+        {
+          "name": "status",
+          "ms": 65.48310001380742
+        },
+        {
+          "name": "console",
+          "ms": 81.99850004166365
+        },
+        {
+          "name": "tools",
+          "ms": 78.49959994200617
+        },
+        {
+          "name": "instances",
+          "ms": 57.941799983382225
+        },
+        {
+          "name": "wait_ready",
+          "ms": 72.45119998697191
+        },
+        {
+          "name": "status",
+          "ms": 65.9010999952443
+        },
+        {
+          "name": "console",
+          "ms": 91.97329997550696
+        },
+        {
+          "name": "tools",
+          "ms": 76.45200000843033
+        },
+        {
+          "name": "instances",
+          "ms": 57.66859999857843
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.28220001142472
+        },
+        {
+          "name": "status",
+          "ms": 66.16950000170618
+        },
+        {
+          "name": "console",
+          "ms": 89.29909998551011
+        },
+        {
+          "name": "tools",
+          "ms": 78.81959999212995
+        },
+        {
+          "name": "instances",
+          "ms": 60.24199997773394
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.74230004381388
+        },
+        {
+          "name": "status",
+          "ms": 65.41290000313893
+        },
+        {
+          "name": "console",
+          "ms": 60.39190001320094
+        },
+        {
+          "name": "tools",
+          "ms": 84.78270005434752
+        },
+        {
+          "name": "instances",
+          "ms": 57.56460002157837
+        },
+        {
+          "name": "wait_ready",
+          "ms": 77.06310000503436
+        },
+        {
+          "name": "status",
+          "ms": 67.64429999748245
+        },
+        {
+          "name": "console",
+          "ms": 86.40900003956631
+        },
+        {
+          "name": "tools",
+          "ms": 75.50400000764057
+        },
+        {
+          "name": "instances",
+          "ms": 59.093200019560754
+        },
+        {
+          "name": "wait_ready",
+          "ms": 75.88469999609515
+        },
+        {
+          "name": "status",
+          "ms": 67.91829998837784
+        },
+        {
+          "name": "console",
+          "ms": 85.88810003129765
+        },
+        {
+          "name": "tools",
+          "ms": 79.08510003471747
+        },
+        {
+          "name": "instances",
+          "ms": 60.66300004022196
+        },
+        {
+          "name": "wait_ready",
+          "ms": 71.87230000272393
+        },
+        {
+          "name": "status",
+          "ms": 66.46450003609061
+        },
+        {
+          "name": "console",
+          "ms": 83.59049999853596
+        },
+        {
+          "name": "tools",
+          "ms": 75.68320003338158
+        },
+        {
+          "name": "instances",
+          "ms": 65.17549999989569
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.47190002212301
+        },
+        {
+          "name": "status",
+          "ms": 67.61450000340119
+        },
+        {
+          "name": "console",
+          "ms": 86.20060002431273
+        },
+        {
+          "name": "tools",
+          "ms": 78.53090000571683
+        },
+        {
+          "name": "instances",
+          "ms": 57.799600006546825
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.04300001589581
+        },
+        {
+          "name": "status",
+          "ms": 68.67539999075234
+        },
+        {
+          "name": "console",
+          "ms": 82.28400000371039
+        },
+        {
+          "name": "tools",
+          "ms": 77.80009997077286
+        },
+        {
+          "name": "instances",
+          "ms": 56.97700002929196
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.73769997199997
+        },
+        {
+          "name": "status",
+          "ms": 65.78220002120361
+        },
+        {
+          "name": "console",
+          "ms": 83.31529999850318
+        },
+        {
+          "name": "tools",
+          "ms": 93.03040005033836
+        },
+        {
+          "name": "instances",
+          "ms": 59.7754999762401
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.27220000419766
+        },
+        {
+          "name": "status",
+          "ms": 64.43069997476414
+        },
+        {
+          "name": "console",
+          "ms": 73.18770000711083
+        },
+        {
+          "name": "tools",
+          "ms": 90.32560000196099
+        },
+        {
+          "name": "instances",
+          "ms": 58.02679999032989
+        },
+        {
+          "name": "wait_ready",
+          "ms": 59.55479998374358
+        },
+        {
+          "name": "status",
+          "ms": 64.69009997090325
+        },
+        {
+          "name": "console",
+          "ms": 69.01999999536201
+        },
+        {
+          "name": "tools",
+          "ms": 92.4451999599114
+        },
+        {
+          "name": "instances",
+          "ms": 58.23909997707233
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.64969996828586
+        },
+        {
+          "name": "status",
+          "ms": 63.278399989940226
+        },
+        {
+          "name": "console",
+          "ms": 78.84089997969568
+        },
+        {
+          "name": "tools",
+          "ms": 79.26719996612519
+        },
+        {
+          "name": "instances",
+          "ms": 58.70260001393035
+        },
+        {
+          "name": "wait_ready",
+          "ms": 84.56819999264553
+        },
+        {
+          "name": "status",
+          "ms": 65.74029999319464
+        },
+        {
+          "name": "console",
+          "ms": 91.04060003301129
+        },
+        {
+          "name": "tools",
+          "ms": 79.99060000292957
+        },
+        {
+          "name": "instances",
+          "ms": 59.703400009311736
+        },
+        {
+          "name": "wait_ready",
+          "ms": 84.83459998387843
+        },
+        {
+          "name": "status",
+          "ms": 64.32379997568205
+        },
+        {
+          "name": "console",
+          "ms": 73.99069995153695
+        },
+        {
+          "name": "tools",
+          "ms": 78.93120002700016
+        },
+        {
+          "name": "instances",
+          "ms": 57.69110005348921
+        },
+        {
+          "name": "wait_ready",
+          "ms": 84.44030000828207
+        },
+        {
+          "name": "status",
+          "ms": 63.68119997205213
+        },
+        {
+          "name": "console",
+          "ms": 75.97479998366907
+        },
+        {
+          "name": "tools",
+          "ms": 77.18979998026043
+        },
+        {
+          "name": "instances",
+          "ms": 56.21350003639236
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.88179997866973
+        },
+        {
+          "name": "status",
+          "ms": 63.924700021743774
+        },
+        {
+          "name": "console",
+          "ms": 76.87350001651794
+        },
+        {
+          "name": "tools",
+          "ms": 95.4137000371702
+        },
+        {
+          "name": "instances",
+          "ms": 58.38229996152222
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.57899999059737
+        },
+        {
+          "name": "status",
+          "ms": 64.34159999480471
+        },
+        {
+          "name": "console",
+          "ms": 86.52509999228641
+        },
+        {
+          "name": "tools",
+          "ms": 77.43770000524819
+        },
+        {
+          "name": "instances",
+          "ms": 56.77919997833669
+        },
+        {
+          "name": "wait_ready",
+          "ms": 68.17560002673417
+        },
+        {
+          "name": "status",
+          "ms": 63.79749998450279
+        },
+        {
+          "name": "console",
+          "ms": 59.698899975046515
+        },
+        {
+          "name": "tools",
+          "ms": 76.38879999285564
+        },
+        {
+          "name": "instances",
+          "ms": 57.87870002677664
+        },
+        {
+          "name": "wait_ready",
+          "ms": 61.577700020279735
+        },
+        {
+          "name": "status",
+          "ms": 67.07180000375956
+        },
+        {
+          "name": "console",
+          "ms": 62.15490004979074
+        },
+        {
+          "name": "tools",
+          "ms": 78.03430000785738
+        },
+        {
+          "name": "instances",
+          "ms": 63.95089998841286
+        },
+        {
+          "name": "wait_ready",
+          "ms": 63.12539998907596
+        },
+        {
+          "name": "status",
+          "ms": 68.71530000353232
+        },
+        {
+          "name": "console",
+          "ms": 98.54330000234768
+        },
+        {
+          "name": "tools",
+          "ms": 59.800399991218
+        },
+        {
+          "name": "instances",
+          "ms": 61.65450002299622
+        },
+        {
+          "name": "wait_ready",
+          "ms": 62.220799969509244
+        },
+        {
+          "name": "status",
+          "ms": 69.27540001925081
+        },
+        {
+          "name": "console",
+          "ms": 80.69109998177737
+        },
+        {
+          "name": "tools",
+          "ms": 77.45650003198534
+        },
+        {
+          "name": "instances",
+          "ms": 73.7201000447385
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.1293000113219
+        },
+        {
+          "name": "status",
+          "ms": 68.34890000754967
+        },
+        {
+          "name": "console",
+          "ms": 82.60419999714941
+        },
+        {
+          "name": "tools",
+          "ms": 86.64469997165725
+        },
+        {
+          "name": "instances",
+          "ms": 62.80199997127056
+        },
+        {
+          "name": "wait_ready",
+          "ms": 92.24879997782409
+        },
+        {
+          "name": "status",
+          "ms": 69.42220003111288
+        },
+        {
+          "name": "console",
+          "ms": 84.22619994962588
+        },
+        {
+          "name": "tools",
+          "ms": 75.04660001723096
+        },
+        {
+          "name": "instances",
+          "ms": 58.96059999940917
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.27669999096543
+        },
+        {
+          "name": "status",
+          "ms": 64.02900000102818
+        },
+        {
+          "name": "console",
+          "ms": 90.87949997046962
+        },
+        {
+          "name": "tools",
+          "ms": 125.19109999993816
+        },
+        {
+          "name": "instances",
+          "ms": 60.174599988386035
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.47160000912845
+        },
+        {
+          "name": "status",
+          "ms": 66.0121000255458
+        },
+        {
+          "name": "console",
+          "ms": 69.50510002207011
+        },
+        {
+          "name": "tools",
+          "ms": 76.66430005338043
+        },
+        {
+          "name": "instances",
+          "ms": 57.118099997751415
+        },
+        {
+          "name": "wait_ready",
+          "ms": 74.77760000620037
+        },
+        {
+          "name": "status",
+          "ms": 65.74729998828843
+        },
+        {
+          "name": "console",
+          "ms": 71.17040001321584
+        },
+        {
+          "name": "tools",
+          "ms": 78.79970001522452
+        },
+        {
+          "name": "instances",
+          "ms": 58.49130003480241
+        },
+        {
+          "name": "wait_ready",
+          "ms": 77.97710003796965
+        },
+        {
+          "name": "status",
+          "ms": 64.14110003970563
+        },
+        {
+          "name": "console",
+          "ms": 73.44399997964501
+        },
+        {
+          "name": "tools",
+          "ms": 78.6647999775596
+        },
+        {
+          "name": "instances",
+          "ms": 58.91459999838844
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.52680002199486
+        },
+        {
+          "name": "status",
+          "ms": 64.75389999104664
+        },
+        {
+          "name": "console",
+          "ms": 73.32570001017302
+        },
+        {
+          "name": "tools",
+          "ms": 76.23899995815009
+        },
+        {
+          "name": "instances",
+          "ms": 58.35880001541227
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.2292999685742
+        },
+        {
+          "name": "status",
+          "ms": 63.40330000966787
+        },
+        {
+          "name": "console",
+          "ms": 92.91130001656711
+        },
+        {
+          "name": "tools",
+          "ms": 87.46299997437745
+        },
+        {
+          "name": "instances",
+          "ms": 59.53349999617785
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.75710000796244
+        },
+        {
+          "name": "status",
+          "ms": 66.35009997989982
+        },
+        {
+          "name": "console",
+          "ms": 83.64910003729165
+        },
+        {
+          "name": "tools",
+          "ms": 75.31700003892183
+        },
+        {
+          "name": "instances",
+          "ms": 60.699099965859205
+        },
+        {
+          "name": "wait_ready",
+          "ms": 74.879800027702
+        },
+        {
+          "name": "status",
+          "ms": 66.99530000332743
+        },
+        {
+          "name": "console",
+          "ms": 89.48520000558347
+        },
+        {
+          "name": "tools",
+          "ms": 77.61069998377934
+        },
+        {
+          "name": "instances",
+          "ms": 60.56630000239238
+        },
+        {
+          "name": "wait_ready",
+          "ms": 61.9048000080511
+        },
+        {
+          "name": "status",
+          "ms": 66.31419999757782
+        },
+        {
+          "name": "console",
+          "ms": 72.18800002010539
+        },
+        {
+          "name": "tools",
+          "ms": 76.80470001650974
+        },
+        {
+          "name": "instances",
+          "ms": 59.59610000718385
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.03419999638572
+        },
+        {
+          "name": "status",
+          "ms": 151.62219997728243
+        },
+        {
+          "name": "console",
+          "ms": 80.83430002443492
+        },
+        {
+          "name": "tools",
+          "ms": 72.5529000046663
+        },
+        {
+          "name": "instances",
+          "ms": 71.45940000191331
+        },
+        {
+          "name": "wait_ready",
+          "ms": 95.91719997115433
+        },
+        {
+          "name": "status",
+          "ms": 66.38530001509935
+        },
+        {
+          "name": "console",
+          "ms": 68.83529998594895
+        },
+        {
+          "name": "tools",
+          "ms": 63.176600029692054
+        },
+        {
+          "name": "instances",
+          "ms": 63.91799997072667
+        },
+        {
+          "name": "wait_ready",
+          "ms": 90.18359996844083
+        },
+        {
+          "name": "status",
+          "ms": 66.07230001827702
+        },
+        {
+          "name": "console",
+          "ms": 74.68590000644326
+        },
+        {
+          "name": "tools",
+          "ms": 78.2308999914676
+        },
+        {
+          "name": "instances",
+          "ms": 59.51769999228418
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.62860004045069
+        },
+        {
+          "name": "status",
+          "ms": 65.88549999287352
+        },
+        {
+          "name": "console",
+          "ms": 82.74149999488145
+        },
+        {
+          "name": "tools",
+          "ms": 73.09570000506938
+        },
+        {
+          "name": "instances",
+          "ms": 58.137600019108504
+        },
+        {
+          "name": "wait_ready",
+          "ms": 83.44449999276549
+        },
+        {
+          "name": "status",
+          "ms": 63.069499970879406
+        },
+        {
+          "name": "console",
+          "ms": 59.670599992387
+        },
+        {
+          "name": "tools",
+          "ms": 70.16700005624443
+        },
+        {
+          "name": "instances",
+          "ms": 58.23850003071129
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.15109999198467
+        },
+        {
+          "name": "status",
+          "ms": 64.20379999326542
+        },
+        {
+          "name": "console",
+          "ms": 70.65720000537112
+        },
+        {
+          "name": "tools",
+          "ms": 78.33470002515242
+        },
+        {
+          "name": "instances",
+          "ms": 59.318399988114834
+        },
+        {
+          "name": "wait_ready",
+          "ms": 93.68300001369789
+        },
+        {
+          "name": "status",
+          "ms": 64.01349999941885
+        },
+        {
+          "name": "console",
+          "ms": 88.04299996700138
+        },
+        {
+          "name": "tools",
+          "ms": 57.10500001441687
+        },
+        {
+          "name": "instances",
+          "ms": 56.6415999783203
+        },
+        {
+          "name": "wait_ready",
+          "ms": 86.96499996585771
+        },
+        {
+          "name": "status",
+          "ms": 63.57120000757277
+        },
+        {
+          "name": "console",
+          "ms": 76.68850000482053
+        },
+        {
+          "name": "tools",
+          "ms": 91.94559999741614
+        },
+        {
+          "name": "instances",
+          "ms": 57.39580001682043
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.59340000525117
+        },
+        {
+          "name": "status",
+          "ms": 63.880000030621886
+        },
+        {
+          "name": "console",
+          "ms": 71.5230000205338
+        },
+        {
+          "name": "tools",
+          "ms": 59.05400001211092
+        },
+        {
+          "name": "instances",
+          "ms": 57.943099993281066
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.89549998799339
+        },
+        {
+          "name": "status",
+          "ms": 63.10909998137504
+        },
+        {
+          "name": "console",
+          "ms": 72.0360999694094
+        },
+        {
+          "name": "tools",
+          "ms": 92.58550003869459
+        },
+        {
+          "name": "instances",
+          "ms": 56.328499980736524
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.83139999164268
+        },
+        {
+          "name": "status",
+          "ms": 65.91369997477159
+        },
+        {
+          "name": "console",
+          "ms": 77.71290000528097
+        },
+        {
+          "name": "tools",
+          "ms": 90.25850001489744
+        },
+        {
+          "name": "instances",
+          "ms": 56.57110002357513
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.22689999779686
+        },
+        {
+          "name": "status",
+          "ms": 66.48320000385866
+        },
+        {
+          "name": "console",
+          "ms": 74.43290000082925
+        },
+        {
+          "name": "tools",
+          "ms": 75.89460001327097
+        },
+        {
+          "name": "instances",
+          "ms": 57.07779998192564
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.62020003469661
+        },
+        {
+          "name": "status",
+          "ms": 63.527499965857714
+        },
+        {
+          "name": "console",
+          "ms": 74.35119996080175
+        },
+        {
+          "name": "tools",
+          "ms": 79.18319996679202
+        },
+        {
+          "name": "instances",
+          "ms": 56.04290001792833
+        },
+        {
+          "name": "wait_ready",
+          "ms": 82.84869999624789
+        },
+        {
+          "name": "status",
+          "ms": 64.67609998071566
+        },
+        {
+          "name": "console",
+          "ms": 88.4129999903962
+        },
+        {
+          "name": "tools",
+          "ms": 77.59939995594323
+        },
+        {
+          "name": "instances",
+          "ms": 57.66580003546551
+        },
+        {
+          "name": "wait_ready",
+          "ms": 83.55109998956323
+        },
+        {
+          "name": "status",
+          "ms": 66.18490000255406
+        },
+        {
+          "name": "console",
+          "ms": 74.31960001122206
+        },
+        {
+          "name": "tools",
+          "ms": 77.97470001969486
+        },
+        {
+          "name": "instances",
+          "ms": 56.80719995871186
+        },
+        {
+          "name": "wait_ready",
+          "ms": 69.88630001433194
+        },
+        {
+          "name": "status",
+          "ms": 62.925799982622266
+        },
+        {
+          "name": "console",
+          "ms": 76.45450002746657
+        },
+        {
+          "name": "tools",
+          "ms": 77.47740001650527
+        },
+        {
+          "name": "instances",
+          "ms": 59.17959997896105
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.9983999566175
+        },
+        {
+          "name": "status",
+          "ms": 62.99460004083812
+        },
+        {
+          "name": "console",
+          "ms": 76.54330000514165
+        },
+        {
+          "name": "tools",
+          "ms": 78.64329998847097
+        },
+        {
+          "name": "instances",
+          "ms": 57.88820004090667
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.88450004672632
+        },
+        {
+          "name": "status",
+          "ms": 64.74589998833835
+        },
+        {
+          "name": "console",
+          "ms": 91.05419996194541
+        },
+        {
+          "name": "tools",
+          "ms": 60.47349999425933
+        },
+        {
+          "name": "instances",
+          "ms": 57.65819997759536
+        },
+        {
+          "name": "wait_ready",
+          "ms": 68.69010004447773
+        },
+        {
+          "name": "status",
+          "ms": 63.780699972994626
+        },
+        {
+          "name": "console",
+          "ms": 94.83940002974123
+        },
+        {
+          "name": "tools",
+          "ms": 77.53629999933764
+        },
+        {
+          "name": "instances",
+          "ms": 57.37940000835806
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.63999998942018
+        },
+        {
+          "name": "status",
+          "ms": 62.75909999385476
+        },
+        {
+          "name": "console",
+          "ms": 79.58309998502955
+        },
+        {
+          "name": "tools",
+          "ms": 81.09950000653043
+        },
+        {
+          "name": "instances",
+          "ms": 58.925900026224554
+        },
+        {
+          "name": "wait_ready",
+          "ms": 75.79120004083961
+        },
+        {
+          "name": "status",
+          "ms": 64.82919998234138
+        },
+        {
+          "name": "console",
+          "ms": 58.73789999168366
+        },
+        {
+          "name": "tools",
+          "ms": 78.02319998154417
+        },
+        {
+          "name": "instances",
+          "ms": 57.57070000981912
+        },
+        {
+          "name": "wait_ready",
+          "ms": 89.45199998561293
+        },
+        {
+          "name": "status",
+          "ms": 65.47039997531101
+        },
+        {
+          "name": "console",
+          "ms": 72.52889999654144
+        },
+        {
+          "name": "tools",
+          "ms": 80.38389997091144
+        },
+        {
+          "name": "instances",
+          "ms": 58.149299991782755
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.0768000036478
+        },
+        {
+          "name": "status",
+          "ms": 69.93050000164658
+        },
+        {
+          "name": "console",
+          "ms": 80.58589999563992
+        },
+        {
+          "name": "tools",
+          "ms": 76.40730001730844
+        },
+        {
+          "name": "instances",
+          "ms": 58.86910000117496
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.69040001928806
+        },
+        {
+          "name": "status",
+          "ms": 64.47270000353456
+        },
+        {
+          "name": "console",
+          "ms": 72.24040001165122
+        },
+        {
+          "name": "tools",
+          "ms": 91.53790003620088
+        },
+        {
+          "name": "instances",
+          "ms": 58.27189999399707
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.22089999495074
+        },
+        {
+          "name": "status",
+          "ms": 65.81479997839779
+        },
+        {
+          "name": "console",
+          "ms": 70.77950000530109
+        },
+        {
+          "name": "tools",
+          "ms": 76.17409998783842
+        },
+        {
+          "name": "instances",
+          "ms": 58.98580001667142
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.43350001005456
+        },
+        {
+          "name": "status",
+          "ms": 66.1190000246279
+        },
+        {
+          "name": "console",
+          "ms": 71.64650002960116
+        },
+        {
+          "name": "tools",
+          "ms": 76.103100029286
+        },
+        {
+          "name": "instances",
+          "ms": 58.906199992634356
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.14110004296526
+        },
+        {
+          "name": "status",
+          "ms": 65.61779999174178
+        },
+        {
+          "name": "console",
+          "ms": 72.92060001054779
+        },
+        {
+          "name": "tools",
+          "ms": 78.7144000059925
+        },
+        {
+          "name": "instances",
+          "ms": 57.56320001091808
+        },
+        {
+          "name": "wait_ready",
+          "ms": 77.57090002996847
+        },
+        {
+          "name": "status",
+          "ms": 65.64790004631504
+        },
+        {
+          "name": "console",
+          "ms": 74.10249998793006
+        },
+        {
+          "name": "tools",
+          "ms": 76.07879996066913
+        },
+        {
+          "name": "instances",
+          "ms": 57.61679995339364
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.02740001352504
+        },
+        {
+          "name": "status",
+          "ms": 70.39419998181984
+        },
+        {
+          "name": "console",
+          "ms": 86.02489996701479
+        },
+        {
+          "name": "tools",
+          "ms": 72.62950000585988
+        },
+        {
+          "name": "instances",
+          "ms": 57.83600005088374
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.66220001596957
+        },
+        {
+          "name": "status",
+          "ms": 64.22829994698986
+        },
+        {
+          "name": "console",
+          "ms": 57.762700016610324
+        },
+        {
+          "name": "tools",
+          "ms": 78.43200000934303
+        },
+        {
+          "name": "instances",
+          "ms": 56.821900012437254
+        },
+        {
+          "name": "wait_ready",
+          "ms": 58.94309998257086
+        },
+        {
+          "name": "status",
+          "ms": 65.55120000848547
+        },
+        {
+          "name": "console",
+          "ms": 77.952700026799
+        },
+        {
+          "name": "tools",
+          "ms": 59.60969999432564
+        },
+        {
+          "name": "instances",
+          "ms": 57.153499976266176
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.11489995988086
+        },
+        {
+          "name": "status",
+          "ms": 67.38640001276508
+        },
+        {
+          "name": "console",
+          "ms": 71.27819996094331
+        },
+        {
+          "name": "tools",
+          "ms": 78.91519996337593
+        },
+        {
+          "name": "instances",
+          "ms": 58.41940001118928
+        },
+        {
+          "name": "wait_ready",
+          "ms": 72.42989999940619
+        },
+        {
+          "name": "status",
+          "ms": 63.462099991738796
+        },
+        {
+          "name": "console",
+          "ms": 68.81050002994016
+        },
+        {
+          "name": "tools",
+          "ms": 78.94559996202588
+        },
+        {
+          "name": "instances",
+          "ms": 56.851200002711266
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.23889998346567
+        },
+        {
+          "name": "status",
+          "ms": 63.44230001559481
+        },
+        {
+          "name": "console",
+          "ms": 74.98250005301088
+        },
+        {
+          "name": "tools",
+          "ms": 59.40239998744801
+        },
+        {
+          "name": "instances",
+          "ms": 56.894199980888516
+        },
+        {
+          "name": "wait_ready",
+          "ms": 82.61149999452755
+        },
+        {
+          "name": "status",
+          "ms": 67.2539999941364
+        },
+        {
+          "name": "console",
+          "ms": 72.12990004336461
+        },
+        {
+          "name": "tools",
+          "ms": 76.5615000273101
+        },
+        {
+          "name": "instances",
+          "ms": 56.24720000196248
+        },
+        {
+          "name": "wait_ready",
+          "ms": 82.76489999843761
+        },
+        {
+          "name": "status",
+          "ms": 63.62029997399077
+        },
+        {
+          "name": "console",
+          "ms": 94.01070000603795
+        },
+        {
+          "name": "tools",
+          "ms": 75.7852999959141
+        },
+        {
+          "name": "instances",
+          "ms": 58.231999981217086
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.11210000747815
+        },
+        {
+          "name": "status",
+          "ms": 64.4361000158824
+        },
+        {
+          "name": "console",
+          "ms": 91.06499998597428
+        },
+        {
+          "name": "tools",
+          "ms": 77.80010002898052
+        },
+        {
+          "name": "instances",
+          "ms": 58.23769996641204
+        },
+        {
+          "name": "wait_ready",
+          "ms": 77.88589998381212
+        },
+        {
+          "name": "status",
+          "ms": 64.84830001136288
+        },
+        {
+          "name": "console",
+          "ms": 57.29540000902489
+        },
+        {
+          "name": "tools",
+          "ms": 79.9733999883756
+        },
+        {
+          "name": "instances",
+          "ms": 55.80030003329739
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.68230003118515
+        },
+        {
+          "name": "status",
+          "ms": 63.5183000122197
+        },
+        {
+          "name": "console",
+          "ms": 75.20510000176728
+        },
+        {
+          "name": "tools",
+          "ms": 93.05209998274222
+        },
+        {
+          "name": "instances",
+          "ms": 67.18170002568513
+        },
+        {
+          "name": "wait_ready",
+          "ms": 73.83490004576743
+        },
+        {
+          "name": "status",
+          "ms": 62.97869997797534
+        },
+        {
+          "name": "console",
+          "ms": 77.24280003458261
+        },
+        {
+          "name": "tools",
+          "ms": 76.34279999183491
+        },
+        {
+          "name": "instances",
+          "ms": 59.06100000720471
+        },
+        {
+          "name": "wait_ready",
+          "ms": 80.9558000182733
+        },
+        {
+          "name": "status",
+          "ms": 74.53669997630641
+        },
+        {
+          "name": "console",
+          "ms": 74.29039996350184
+        },
+        {
+          "name": "tools",
+          "ms": 74.4080999866128
+        },
+        {
+          "name": "instances",
+          "ms": 57.28060001274571
+        },
+        {
+          "name": "wait_ready",
+          "ms": 97.42490004282445
+        },
+        {
+          "name": "status",
+          "ms": 66.3347999798134
+        },
+        {
+          "name": "console",
+          "ms": 72.59629998588935
+        },
+        {
+          "name": "tools",
+          "ms": 80.08520002476871
+        },
+        {
+          "name": "instances",
+          "ms": 64.6349000162445
+        },
+        {
+          "name": "wait_ready",
+          "ms": 86.9978999835439
+        },
+        {
+          "name": "status",
+          "ms": 68.86840000515804
+        },
+        {
+          "name": "console",
+          "ms": 86.08159999130294
+        },
+        {
+          "name": "tools",
+          "ms": 77.03049998963252
+        },
+        {
+          "name": "instances",
+          "ms": 57.35889996867627
+        },
+        {
+          "name": "wait_ready",
+          "ms": 78.19949998520315
+        },
+        {
+          "name": "status",
+          "ms": 63.296500011347234
+        },
+        {
+          "name": "console",
+          "ms": 74.53009998425841
+        },
+        {
+          "name": "tools",
+          "ms": 79.58489999873564
+        },
+        {
+          "name": "instances",
+          "ms": 56.8902000086382
+        },
+        {
+          "name": "wait_ready",
+          "ms": 61.597099993377924
+        },
+        {
+          "name": "status",
+          "ms": 64.21579996822402
+        },
+        {
+          "name": "console",
+          "ms": 71.07229996472597
+        },
+        {
+          "name": "tools",
+          "ms": 80.0798999844119
+        },
+        {
+          "name": "instances",
+          "ms": 56.76730000413954
+        },
+        {
+          "name": "wait_ready",
+          "ms": 83.77379999728873
+        },
+        {
+          "name": "status",
+          "ms": 64.73909999476746
+        },
+        {
+          "name": "console",
+          "ms": 72.58670002920553
+        },
+        {
+          "name": "tools",
+          "ms": 93.8239999813959
+        },
+        {
+          "name": "instances",
+          "ms": 58.03630000445992
+        },
+        {
+          "name": "wait_ready",
+          "ms": 81.10660000238568
+        },
+        {
+          "name": "status",
+          "ms": 64.25270001636818
+        },
+        {
+          "name": "console",
+          "ms": 75.45850001042709
+        },
+        {
+          "name": "tools",
+          "ms": 76.90819998970255
+        },
+        {
+          "name": "instances",
+          "ms": 56.174300028942525
+        },
+        {
+          "name": "wait_ready",
+          "ms": 68.54459998430684
+        },
+        {
+          "name": "status",
+          "ms": 62.465100025292486
+        },
+        {
+          "name": "console",
+          "ms": 75.40639996295795
+        },
+        {
+          "name": "tools",
+          "ms": 77.01060001272708
+        },
+        {
+          "name": "instances",
+          "ms": 59.21549996128306
+        },
+        {
+          "name": "wait_ready",
+          "ms": 82.26659998763353
+        },
+        {
+          "name": "status",
+          "ms": 68.24880000203848
+        },
+        {
+          "name": "console",
+          "ms": 85.69900004658848
+        },
+        {
+          "name": "tools",
+          "ms": 75.58699999935925
+        },
+        {
+          "name": "instances",
+          "ms": 57.01829999452457
+        },
+        {
+          "name": "wait_ready",
+          "ms": 96.35340003296733
+        },
+        {
+          "name": "status",
+          "ms": 64.48719999752939
+        },
+        {
+          "name": "console",
+          "ms": 73.85569997131824
+        },
+        {
+          "name": "tools",
+          "ms": 76.84270001482219
+        },
+        {
+          "name": "instances",
+          "ms": 58.99639998096973
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.86799997463822
+        },
+        {
+          "name": "status",
+          "ms": 66.65570003679022
+        },
+        {
+          "name": "console",
+          "ms": 76.53669995488599
+        },
+        {
+          "name": "tools",
+          "ms": 71.88900001347065
+        },
+        {
+          "name": "instances",
+          "ms": 60.44920004205778
+        },
+        {
+          "name": "wait_ready",
+          "ms": 79.23259999370202
+        },
+        {
+          "name": "status",
+          "ms": 66.74270000075921
+        },
+        {
+          "name": "console",
+          "ms": 69.52749995980412
+        },
+        {
+          "name": "tools",
+          "ms": 74.30590002331883
+        },
+        {
+          "name": "instances",
+          "ms": 58.45070001669228
+        },
+        {
+          "name": "wait_ready",
+          "ms": 76.3182999799028
+        },
+        {
+          "name": "frame_exec_start",
+          "ms": 95.89820000110194
+        },
+        {
+          "name": "unique_exec",
+          "ms": 80.19530004821718
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 101.1651000007987
+        },
+        {
+          "name": "unique_exec",
+          "ms": 88.1768999970518
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 92.03959995647892
+        },
+        {
+          "name": "unique_exec",
+          "ms": 109.55510003259405
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 94.5633000228554
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.97080001467839
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 93.22770003927872
+        },
+        {
+          "name": "unique_exec",
+          "ms": 92.75209996849298
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 87.93280000099912
+        },
+        {
+          "name": "unique_exec",
+          "ms": 103.30890002660453
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 106.96580004878342
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.00049999728799
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 74.18240001425147
+        },
+        {
+          "name": "unique_exec",
+          "ms": 101.953900011722
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 92.95730001758784
+        },
+        {
+          "name": "unique_exec",
+          "ms": 103.46919996663928
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 90.55029996670783
+        },
+        {
+          "name": "unique_exec",
+          "ms": 72.42639997275546
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 93.7081000301987
+        },
+        {
+          "name": "unique_exec",
+          "ms": 92.54579996922985
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 93.1533999973908
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.06250000046566
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 78.28310003969818
+        },
+        {
+          "name": "unique_exec",
+          "ms": 98.55769999558106
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 90.89510003104806
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.43369999947026
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 95.29149997979403
+        },
+        {
+          "name": "unique_exec",
+          "ms": 76.35369995841756
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 86.62749995710328
+        },
+        {
+          "name": "unique_exec",
+          "ms": 90.14799998840317
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 75.04009996773675
+        },
+        {
+          "name": "unique_exec",
+          "ms": 76.91290002549067
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 79.24789999378845
+        },
+        {
+          "name": "unique_exec",
+          "ms": 79.31790000293404
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 87.5944999861531
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.12480001244694
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 72.78529996983707
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.52759996522218
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.37569998344406
+        },
+        {
+          "name": "unique_exec",
+          "ms": 109.84540003119037
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 76.21780002955347
+        },
+        {
+          "name": "unique_exec",
+          "ms": 73.92130000516772
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 91.93339996272698
+        },
+        {
+          "name": "unique_exec",
+          "ms": 73.49009998142719
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.23579996591434
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.80090000899509
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 80.46890003606677
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.85780000593513
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 78.59379996079952
+        },
+        {
+          "name": "unique_exec",
+          "ms": 72.45370000600815
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 75.94519999111071
+        },
+        {
+          "name": "unique_exec",
+          "ms": 97.42710000136867
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 70.65410003997386
+        },
+        {
+          "name": "unique_exec",
+          "ms": 81.57089998712763
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 87.43079996202141
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.39969997340813
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 68.74090002384037
+        },
+        {
+          "name": "unique_exec",
+          "ms": 87.76349999243394
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 84.60140001261607
+        },
+        {
+          "name": "unique_exec",
+          "ms": 95.28299997327849
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 90.03399999346584
+        },
+        {
+          "name": "unique_exec",
+          "ms": 109.45449996506795
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 92.78410003753379
+        },
+        {
+          "name": "unique_exec",
+          "ms": 94.39300000667572
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 76.0213999892585
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.22689997497946
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 94.27920001326129
+        },
+        {
+          "name": "unique_exec",
+          "ms": 94.7174999746494
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.61150003271177
+        },
+        {
+          "name": "unique_exec",
+          "ms": 97.14559995336458
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 77.10770005360246
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.57369995955378
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 88.80909997969866
+        },
+        {
+          "name": "unique_exec",
+          "ms": 75.47799998428673
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 96.5740000247024
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.42849999666214
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 77.41430000169203
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.38900000834838
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 89.62360001169145
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.89499999489635
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 70.32669999171048
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.91500000469387
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 74.78500000433996
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.25379996839911
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 78.84729997022077
+        },
+        {
+          "name": "unique_exec",
+          "ms": 108.33789996104315
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 75.04640001570806
+        },
+        {
+          "name": "unique_exec",
+          "ms": 75.01710002543405
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 97.26239996962249
+        },
+        {
+          "name": "unique_exec",
+          "ms": 75.11400000657886
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 76.20799995493144
+        },
+        {
+          "name": "unique_exec",
+          "ms": 80.69229999091476
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 76.2010999605991
+        },
+        {
+          "name": "unique_exec",
+          "ms": 78.03750003222376
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 75.58369997423142
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.14079998852685
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 86.49209997383878
+        },
+        {
+          "name": "unique_exec",
+          "ms": 80.98979998612776
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 74.34099999954924
+        },
+        {
+          "name": "unique_exec",
+          "ms": 85.02860000589862
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 91.38510003685951
+        },
+        {
+          "name": "unique_exec",
+          "ms": 75.10909996926785
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 71.01189997047186
+        },
+        {
+          "name": "unique_exec",
+          "ms": 86.98369999183342
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 70.95129997469485
+        },
+        {
+          "name": "unique_exec",
+          "ms": 75.86149999406189
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.13299999805167
+        },
+        {
+          "name": "unique_exec",
+          "ms": 87.60550001170486
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 90.06810002028942
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.65049999579787
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 94.83720001298934
+        },
+        {
+          "name": "unique_exec",
+          "ms": 105.80790002131835
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 71.80869998410344
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.22370000556111
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 81.99460001196712
+        },
+        {
+          "name": "unique_exec",
+          "ms": 106.7258000257425
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 72.62330001685768
+        },
+        {
+          "name": "unique_exec",
+          "ms": 79.96370003093034
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.71730002341792
+        },
+        {
+          "name": "unique_exec",
+          "ms": 95.91390000423416
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 74.49279999127612
+        },
+        {
+          "name": "unique_exec",
+          "ms": 76.06900000246242
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 92.26780000608414
+        },
+        {
+          "name": "unique_exec",
+          "ms": 81.92470000358298
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.8615000154823
+        },
+        {
+          "name": "unique_exec",
+          "ms": 75.5563999991864
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 93.23329996550456
+        },
+        {
+          "name": "unique_exec",
+          "ms": 73.77909997012466
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 72.37359997816384
+        },
+        {
+          "name": "unique_exec",
+          "ms": 85.83250001538545
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 94.53299996675923
+        },
+        {
+          "name": "unique_exec",
+          "ms": 92.56219997769222
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 67.33260001055896
+        },
+        {
+          "name": "unique_exec",
+          "ms": 97.84880001097918
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 91.37530002044514
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.47839999804273
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 106.41930002020672
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.9747000229545
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 72.08399998489767
+        },
+        {
+          "name": "unique_exec",
+          "ms": 73.24810000136495
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 70.0279000448063
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.3596000247635
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 93.68170000379905
+        },
+        {
+          "name": "unique_exec",
+          "ms": 72.0815000240691
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 94.1655000206083
+        },
+        {
+          "name": "unique_exec",
+          "ms": 71.58190000336617
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 74.58229997428134
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.14100001612678
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 95.3080999897793
+        },
+        {
+          "name": "unique_exec",
+          "ms": 89.02820001821965
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 69.7591999778524
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.27650000341237
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 78.66070000454783
+        },
+        {
+          "name": "unique_exec",
+          "ms": 74.78600001195446
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 70.76480000978336
+        },
+        {
+          "name": "unique_exec",
+          "ms": 90.58279998134822
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 87.91859995108098
+        },
+        {
+          "name": "unique_exec",
+          "ms": 94.30709999287501
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 72.86229997407645
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.4556000251323
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 69.72749996930361
+        },
+        {
+          "name": "unique_exec",
+          "ms": 70.89309999719262
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.84630001615733
+        },
+        {
+          "name": "unique_exec",
+          "ms": 70.20489999558777
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 72.23779999185354
+        },
+        {
+          "name": "unique_exec",
+          "ms": 102.24470001412556
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 94.09149998100474
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.40830003889278
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 92.21959998831153
+        },
+        {
+          "name": "unique_exec",
+          "ms": 91.25509997829795
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.36380000924692
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.33069994719699
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 83.92810000805184
+        },
+        {
+          "name": "unique_exec",
+          "ms": 69.2937999847345
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 83.0028000054881
+        },
+        {
+          "name": "unique_exec",
+          "ms": 90.60220001265407
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 69.87000000663102
+        },
+        {
+          "name": "unique_exec",
+          "ms": 97.73610002594069
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 71.6089999768883
+        },
+        {
+          "name": "unique_exec",
+          "ms": 93.43320003245026
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 92.79379999497905
+        },
+        {
+          "name": "unique_exec",
+          "ms": 95.07829998619854
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 69.87770000705495
+        },
+        {
+          "name": "unique_exec",
+          "ms": 71.5280000003986
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 71.87550002709031
+        },
+        {
+          "name": "unique_exec",
+          "ms": 92.3713999800384
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 71.25749997794628
+        },
+        {
+          "name": "unique_exec",
+          "ms": 85.66609997069463
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.2097000000067
+        },
+        {
+          "name": "unique_exec",
+          "ms": 73.35220003733411
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 73.85149999754503
+        },
+        {
+          "name": "unique_exec",
+          "ms": 88.36039999732748
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 91.82420000433922
+        },
+        {
+          "name": "unique_exec",
+          "ms": 70.73010003659874
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 71.22099999105558
+        },
+        {
+          "name": "unique_exec",
+          "ms": 73.20919999619946
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 93.53830001782626
+        },
+        {
+          "name": "unique_exec",
+          "ms": 77.42649997817352
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 85.4240000480786
+        },
+        {
+          "name": "frame_exec_stop",
+          "ms": 98.29850000096485
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 137.442099978216
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 139.40690003801137
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 168.26449998188764
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 155.0079000298865
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 166.70959995826706
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 149.3726999615319
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 125.74230000609532
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 150.20589996129274
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 92.04840002348647
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 85.94690001336858
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 83.58820003923029
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 77.10759999463335
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 73.32429999951273
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 74.72199999028817
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 74.72259999485686
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 85.76029998948798
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 71.5046999976039
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 81.98329998413101
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 71.23060000594705
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 92.37040003063157
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 97.46640000957996
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 92.71019999869168
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 72.0007999916561
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 72.95220001833513
+        },
+        {
+          "name": "session_first",
+          "ms": 104.38289999729022
+        },
+        {
+          "name": "session_console",
+          "ms": 29.922900022938848
+        },
+        {
+          "name": "session_console",
+          "ms": 30.989799997769296
+        },
+        {
+          "name": "session_console",
+          "ms": 16.452400013804436
+        },
+        {
+          "name": "session_console",
+          "ms": 15.940400015097111
+        },
+        {
+          "name": "session_console",
+          "ms": 16.630800033453852
+        },
+        {
+          "name": "session_console",
+          "ms": 14.140100043732673
+        },
+        {
+          "name": "session_console",
+          "ms": 15.74050000635907
+        },
+        {
+          "name": "session_console",
+          "ms": 30.67790000932291
+        },
+        {
+          "name": "session_console",
+          "ms": 15.58200002182275
+        },
+        {
+          "name": "session_console",
+          "ms": 15.532000048551708
+        },
+        {
+          "name": "session_console",
+          "ms": 16.799600038211793
+        },
+        {
+          "name": "session_console",
+          "ms": 43.22449996834621
+        },
+        {
+          "name": "session_console",
+          "ms": 16.043899988289922
+        },
+        {
+          "name": "session_console",
+          "ms": 29.909399978350848
+        },
+        {
+          "name": "session_console",
+          "ms": 15.574100019875914
+        },
+        {
+          "name": "session_console",
+          "ms": 44.75619998993352
+        },
+        {
+          "name": "session_console",
+          "ms": 30.870100017637014
+        },
+        {
+          "name": "session_console",
+          "ms": 31.01149998838082
+        },
+        {
+          "name": "session_console",
+          "ms": 16.365099989343435
+        },
+        {
+          "name": "session_console",
+          "ms": 15.46799996867776
+        },
+        {
+          "name": "session_console",
+          "ms": 15.932899957988411
+        },
+        {
+          "name": "session_console",
+          "ms": 29.285200056619942
+        },
+        {
+          "name": "session_console",
+          "ms": 32.18069998547435
+        },
+        {
+          "name": "session_console",
+          "ms": 28.389499988406897
+        },
+        {
+          "name": "session_console",
+          "ms": 30.628299980890006
+        },
+        {
+          "name": "session_console",
+          "ms": 13.856700039468706
+        },
+        {
+          "name": "session_console",
+          "ms": 2.9670000076293945
+        },
+        {
+          "name": "session_console",
+          "ms": 26.705000025685877
+        },
+        {
+          "name": "session_console",
+          "ms": 14.15379997342825
+        },
+        {
+          "name": "session_console",
+          "ms": 16.6682000271976
+        },
+        {
+          "name": "session_console",
+          "ms": 32.230000011622906
+        },
+        {
+          "name": "session_console",
+          "ms": 28.414800006430596
+        },
+        {
+          "name": "session_console",
+          "ms": 28.203300025779754
+        },
+        {
+          "name": "session_console",
+          "ms": 15.209900040645152
+        },
+        {
+          "name": "session_console",
+          "ms": 31.633000005967915
+        },
+        {
+          "name": "session_console",
+          "ms": 31.28250001464039
+        },
+        {
+          "name": "session_console",
+          "ms": 27.98930002609268
+        },
+        {
+          "name": "session_console",
+          "ms": 16.19689998915419
+        },
+        {
+          "name": "session_console",
+          "ms": 16.0531000001356
+        },
+        {
+          "name": "session_console",
+          "ms": 14.32399998884648
+        },
+        {
+          "name": "session_console",
+          "ms": 30.469899997115135
+        },
+        {
+          "name": "session_console",
+          "ms": 30.79820005223155
+        },
+        {
+          "name": "session_console",
+          "ms": 16.47370000137016
+        },
+        {
+          "name": "session_console",
+          "ms": 30.282000021543354
+        },
+        {
+          "name": "session_console",
+          "ms": 14.899200003128499
+        },
+        {
+          "name": "session_console",
+          "ms": 3.14689998049289
+        },
+        {
+          "name": "session_console",
+          "ms": 43.95600000862032
+        },
+        {
+          "name": "session_console",
+          "ms": 15.655399998649955
+        },
+        {
+          "name": "session_console",
+          "ms": 29.965000052470714
+        },
+        {
+          "name": "session_console",
+          "ms": 15.923700004350394
+        },
+        {
+          "name": "session_console",
+          "ms": 16.88740000827238
+        },
+        {
+          "name": "session_console",
+          "ms": 15.666699968278408
+        },
+        {
+          "name": "session_console",
+          "ms": 15.01149998512119
+        },
+        {
+          "name": "session_console",
+          "ms": 29.713099997024983
+        },
+        {
+          "name": "session_console",
+          "ms": 31.099699961487204
+        },
+        {
+          "name": "session_console",
+          "ms": 31.29590000025928
+        },
+        {
+          "name": "session_console",
+          "ms": 14.511300018057227
+        },
+        {
+          "name": "session_console",
+          "ms": 14.551399974152446
+        },
+        {
+          "name": "session_console",
+          "ms": 30.937100003939122
+        },
+        {
+          "name": "session_console",
+          "ms": 31.662599998526275
+        },
+        {
+          "name": "session_console",
+          "ms": 15.587200003210455
+        },
+        {
+          "name": "session_console",
+          "ms": 30.62060003867373
+        },
+        {
+          "name": "session_console",
+          "ms": 31.250700005330145
+        },
+        {
+          "name": "session_console",
+          "ms": 28.903500002343208
+        },
+        {
+          "name": "session_console",
+          "ms": 16.565300000365824
+        },
+        {
+          "name": "session_console",
+          "ms": 14.916300016921014
+        },
+        {
+          "name": "session_console",
+          "ms": 30.96689999802038
+        },
+        {
+          "name": "session_console",
+          "ms": 3.545899991877377
+        },
+        {
+          "name": "session_console",
+          "ms": 41.223700041882694
+        },
+        {
+          "name": "session_console",
+          "ms": 31.69169998727739
+        },
+        {
+          "name": "session_console",
+          "ms": 31.17159998510033
+        },
+        {
+          "name": "session_console",
+          "ms": 14.813699992373586
+        },
+        {
+          "name": "session_console",
+          "ms": 15.32409997889772
+        },
+        {
+          "name": "session_console",
+          "ms": 30.50309995887801
+        },
+        {
+          "name": "session_console",
+          "ms": 16.64599997457117
+        },
+        {
+          "name": "session_console",
+          "ms": 30.284599983133376
+        },
+        {
+          "name": "session_console",
+          "ms": 24.883300007786602
+        },
+        {
+          "name": "session_console",
+          "ms": 31.703800021205097
+        },
+        {
+          "name": "session_console",
+          "ms": 30.388800019863993
+        },
+        {
+          "name": "session_console",
+          "ms": 28.616200026590377
+        },
+        {
+          "name": "session_console",
+          "ms": 16.17489999625832
+        },
+        {
+          "name": "session_console",
+          "ms": 13.354099995922297
+        },
+        {
+          "name": "session_console",
+          "ms": 30.204600014258176
+        },
+        {
+          "name": "session_console",
+          "ms": 17.189100035466254
+        },
+        {
+          "name": "session_console",
+          "ms": 43.110899976454675
+        },
+        {
+          "name": "session_console",
+          "ms": 16.247000021394342
+        },
+        {
+          "name": "session_console",
+          "ms": 2.9175999807193875
+        },
+        {
+          "name": "session_console",
+          "ms": 2.820399997290224
+        },
+        {
+          "name": "session_console",
+          "ms": 24.115299980621785
+        },
+        {
+          "name": "session_console",
+          "ms": 30.84089996991679
+        },
+        {
+          "name": "session_console",
+          "ms": 16.542900004424155
+        },
+        {
+          "name": "session_console",
+          "ms": 29.760500008706003
+        },
+        {
+          "name": "session_console",
+          "ms": 28.814600023906678
+        },
+        {
+          "name": "session_console",
+          "ms": 15.758600027766079
+        },
+        {
+          "name": "session_console",
+          "ms": 27.85999997286126
+        },
+        {
+          "name": "session_console",
+          "ms": 17.017400008626282
+        },
+        {
+          "name": "session_console",
+          "ms": 29.18490004958585
+        },
+        {
+          "name": "session_console",
+          "ms": 16.943899972829968
+        },
+        {
+          "name": "session_console",
+          "ms": 30.712599982507527
+        },
+        {
+          "name": "session_console",
+          "ms": 16.873000015038997
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\python-startup\\final\\unity-bridge\\unity-bridge.exe",
+      "executable_sha256": "32c8b09d991142a7127d8ff7011d897ddd2d9a5a8b5d390cf3edf53d9e6d40ac",
+      "installed_bytes": 135226434,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/ablation-no-reuse/1-candidate/UnityProject",
+        "port": 8090,
+        "pid": 35160,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789744482277,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "0f8d33f090954044a0b214e79f6ae529",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 6001.593200024217,
+      "cold_service_samples_ms": [
+        582.4690999579616,
+        524.8476999695413,
+        521.0398999624886,
+        523.9863999886438,
+        626.0426000226289,
+        507.03199999406934,
+        509.21970000490546,
+        511.5156999672763,
+        503.69729998055845,
+        494.63619996095076,
+        511.9896999676712,
+        518.4080000035465,
+        517.9974000202492,
+        497.0814000116661,
+        504.0313000208698,
+        505.98139996873215,
+        486.90229997737333,
+        484.2671000515111,
+        482.7068000449799,
+        501.8328999867663,
+        509.85500001115724,
+        513.1819000234827,
+        487.4040000140667,
+        512.5269999844022,
+        506.6133000073023,
+        514.38850001432,
+        528.5647999844514,
+        482.5802999548614,
+        488.5704000480473,
+        505.92290004715323,
+        485.222099989187,
+        484.69850001856685,
+        488.150899996981,
+        514.9560999707319,
+        510.21749997744337,
+        502.51800002297387,
+        503.9517999975942,
+        519.6502999751829,
+        507.28439999511465,
+        509.36269998783246,
+        505.01590000931174,
+        499.1268000449054,
+        491.3438999792561,
+        482.87780000828207,
+        505.23200002498925,
+        491.32140004076064,
+        531.296500004828,
+        516.2470999639481,
+        507.6474999659695,
+        506.0656000277959
+      ],
+      "cold_service_to_first_result_ms": 582.4690999579616,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "86c8b4588383ab58594b136dda89ae87",
+        "pid": 3112,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "base_cache_hit": true,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_aaeb1673f456495b86e22d1f61bd753a"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/ablation-no-reuse/1-candidate/UnityProject",
+            "pid": 35160,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "idle_editor_gaps": [
+        1.117500000000291,
+        1.140800000001036,
+        1.0138999999981024,
+        6.007599999997183,
+        1.0521999999982654,
+        3.2039000000004307,
+        5.834199999997509,
+        1.0651999999972759,
+        1.2776000000012573,
+        3.2116000000023632,
+        6.024499999999534,
+        1.0864999999976135,
+        1.0335000000050059,
+        2.9944000000032247,
+        5.183499999999185
+      ],
+      "exec_editor_gaps": [
+        1.1561999999976251,
+        1.01140000000305,
+        1.0807999999960884,
+        1.1062999999994645,
+        5.4839000000065425,
+        1.1728999999904772,
+        1.0795999999972992,
+        1.0877000000036787,
+        1.1134000000020023,
+        1.1418000000121538,
+        1.1480000000010477,
+        1.1784000000043306,
+        1.069499999997788,
+        1.1394000000000233,
+        3.2483999999967637,
+        1.131999999997788,
+        1.2123999999894295,
+        1.21129999999539,
+        5.274099999995087,
+        1.0760999999911292,
+        1.147400000001653,
+        1.1095000000059372,
+        1.1661999999923864,
+        1.1059999999997672,
+        1.0503999999928055,
+        1.2090000000025611,
+        1.048800000004121,
+        1.1849999999976717,
+        1.0847999999969034,
+        1.0266000000119675,
+        1.0377999999909662,
+        1.1301999999996042,
+        1.0917000000044936,
+        1.1040000000066357,
+        5.172000000005937,
+        1.1497999999992317,
+        3.224900000001071,
+        1.1797999999980675,
+        1.059399999998277,
+        1.3953000000037719,
+        1.1700999999884516,
+        1.1027000000030966,
+        1.1910999999963678,
+        1.1214000000036322,
+        1.2734999999956926,
+        1.1423000000067987,
+        1.1165999999939231,
+        6.75449999999546,
+        1.1582000000053085,
+        1.2062000000005355,
+        1.090700000000652,
+        1.2752000000036787,
+        1.0521000000007916,
+        1.1543999999994412,
+        3.2330999999976484,
+        1.140400000003865,
+        1.0238000000099419,
+        1.213899999987916,
+        1.137300000002142,
+        5.418900000004214,
+        1.26140000000305,
+        1.333199999993667,
+        1.3582000000023982,
+        1.4513000000006286,
+        1.3855000000039581,
+        1.150099999998929,
+        1.1718000000109896,
+        1.5583999999944353,
+        1.2274000000033993,
+        1.443700000003446,
+        5.368400000006659,
+        1.2281999999977415,
+        1.1040000000066357,
+        1.1208999999944353,
+        1.8040000000037253,
+        3.2735000000102445,
+        1.0363000000070315,
+        1.4505000000062864,
+        1.064700000002631,
+        1.5385999999998603,
+        1.529000000009546,
+        5.627300000007381,
+        1.3977000000013504,
+        1.20240000000922,
+        1.1505999999935739,
+        1.193199999994249,
+        1.2073999999993248,
+        1.2847000000037951,
+        1.101699999999255,
+        1.3071000000054482,
+        1.5348999999987427,
+        6.427999999999884,
+        1.1567999999970198,
+        1.0878999999986263,
+        1.2422999999980675,
+        1.1331000000063796,
+        1.1392999999952735,
+        1.19890000000305,
+        3.2954999999928987,
+        1.4240999999892665,
+        1.1471000000019558,
+        1.3557000000000698,
+        5.911699999996927,
+        1.6270999999978812,
+        1.474000000001979,
+        1.3021000000007916,
+        1.126799999998184,
+        1.1481000000057975,
+        1.063800000003539,
+        1.582299999994575,
+        1.5898999999917578,
+        1.609199999991688,
+        1.0816999999951804,
+        5.2009000000107335,
+        1.3179999999993015,
+        1.5936999999976251,
+        1.1883000000088941,
+        1.2802999999985332,
+        1.1996999999973923,
+        1.0874999999941792,
+        3.296100000006845,
+        1.1127000000124099,
+        1.1654000000125961,
+        1.2792999999946915,
+        5.844399999987218,
+        1.092000000004191,
+        1.15230000000156,
+        1.1352000000042608,
+        1.026400000002468,
+        1.5773999999946682,
+        1.1089000000065425,
+        1.228899999987334,
+        1.2559000000037486,
+        1.1277999999874737,
+        5.610300000000279,
+        1.467000000004191,
+        1.1876999999949476,
+        1.2534000000014203,
+        1.1658000000024913,
+        1.393899999995483,
+        1.4360999999917112,
+        3.269000000000233,
+        1.272400000001653,
+        1.1046999999962281,
+        5.385399999999208,
+        1.2730999999912456,
+        1.1695000000036089,
+        1.0727999999944586,
+        1.1894000000029337,
+        1.1058000000048196,
+        1.2171999999991385,
+        1.1739000000088708,
+        1.248299999992014,
+        1.2631000000110362,
+        1.0950000000011642,
+        4.891799999997602,
+        1.170800000007148,
+        1.161500000001979,
+        1.3211000000010245,
+        1.2608999999938533,
+        1.0837000000028638,
+        1.2087000000028638,
+        1.5738000000128523,
+        3.2039000000077067,
+        1.1313000000081956,
+        1.1667000000015832,
+        1.776399999987916,
+        5.333899999997811,
+        1.5476999999955297,
+        1.5106999999989057,
+        1.512799999996787,
+        2.088499999998021,
+        1.1799000000028173,
+        1.5408999999926891,
+        1.1757000000070548,
+        1.3724999999976717,
+        5.397100000001956,
+        1.6696000000083586,
+        1.2444000000105007,
+        1.3730000000068685,
+        1.6374000000068918,
+        1.6983999999938533,
+        1.4409000000014203,
+        1.598600000012084,
+        1.315100000007078,
+        1.1365999999979977,
+        5.398199999995995,
+        3.2695000000094296,
+        1.037400000001071,
+        1.0881999999983236,
+        1.6319000000075903,
+        1.8383999999932712,
+        1.6950999999971827,
+        1.6477000000013504,
+        1.431799999991199,
+        1.6067999999941094,
+        1.109599999996135,
+        5.972199999989243,
+        1.2817999999970198,
+        1.5086000000010245,
+        1.2615999999979977,
+        1.6010999999998603,
+        1.5590999999985797,
+        1.6726999999955297,
+        1.313399999999092,
+        1.2299999999959255,
+        1.1886999999987893,
+        5.740799999999581,
+        1.7586000000010245,
+        1.5203000000037719,
+        3.2497000000003027,
+        1.3046999999933178,
+        1.2476000000024214,
+        1.59769999999844,
+        1.2584999999962747,
+        1.5235000000102445,
+        1.2765999999974156,
+        1.4279999999998836,
+        5.356099999989965,
+        1.579700000002049,
+        1.7263999999995576,
+        1.3251999999920372,
+        1.1457999999984168,
+        1.3518999999942025,
+        1.1394000000000233,
+        1.1784000000043306,
+        1.4513000000006286,
+        1.5426000000006752,
+        5.76589999999851,
+        1.763200000001234,
+        1.1754000000073574,
+        1.1729000000050291,
+        3.239799999995739,
+        1.1070999999938067,
+        1.2419000000081724,
+        1.5982999999978347,
+        1.1428000000014435,
+        1.2026999999943655,
+        1.4461000000010245,
+        6.995299999995041,
+        1.48059999999532,
+        1.4642999999923632,
+        1.3554000000003725,
+        1.5262999999977183,
+        1.148300000000745,
+        1.178299999999581,
+        1.1847999999881722,
+        1.2051999999966938,
+        1.275999999998021,
+        1.6318999999930384,
+        1.1189000000013039,
+        5.611099999994622,
+        1.2828999999910593,
+        1.3038000000087777,
+        1.2126999999891268,
+        1.6028999999980442,
+        3.1992000000027474,
+        1.0195999999996275,
+        1.204200000007404,
+        1.1805999999924097,
+        1.2361000000091735,
+        1.164199999999255,
+        1.2265000000043074,
+        6.362099999998463,
+        1.275099999998929,
+        1.4551999999966938,
+        1.2906999999977415,
+        1.4367999999958556,
+        1.26140000000305,
+        1.1684000000095693,
+        1.4035000000003492,
+        1.2314000000042142,
+        1.1506999999983236,
+        1.2939000000042142,
+        5.57410000001255,
+        1.2287999999971362,
+        1.1686999999947147,
+        1.2010000000009313,
+        1.610899999999674,
+        3.316400000010617,
+        1.2329000000027008,
+        1.6969000000099186,
+        1.5399000000033993,
+        1.687900000004447,
+        5.940499999996973,
+        1.3148000000073807,
+        1.4597999999969034,
+        1.2260999999998603,
+        1.221400000009453,
+        1.1535000000003492,
+        1.2366999999940163,
+        1.0952000000106636,
+        1.224900000001071,
+        1.472299999993993,
+        1.1517999999923632,
+        5.172500000000582,
+        1.9622000000090338,
+        1.2262999999948079,
+        1.125899999999092,
+        1.2364000000088708,
+        1.3313000000052853,
+        3.2510999999940395,
+        1.161500000001979,
+        1.3891999999905238,
+        1.2059000000008382,
+        1.3442999999970198,
+        1.7717000000120606,
+        4.6445999999996275,
+        1.2170999999943888,
+        1.1866999999911059,
+        1.192799999989802,
+        1.1383999999961816,
+        1.168600000004517,
+        1.2229999999981374,
+        1.4801000000006752,
+        1.319099999993341,
+        1.235000000000582,
+        1.224099999992177,
+        6.330600000001141,
+        1.1682000000000698,
+        1.2826999999961117,
+        1.1640999999945052,
+        1.1775000000052387,
+        1.2955000000074506,
+        3.31699999999546,
+        1.0385999999998603,
+        1.2371000000130152,
+        1.3263999999908265,
+        1.1794999999983702,
+        1.147400000001653,
+        5.873200000001816,
+        1.3681000000069616,
+        1.3542000000015832,
+        1.1753000000026077,
+        1.7304000000003725,
+        1.4787000000069384,
+        1.139100000000326,
+        1.163300000000163,
+        1.2780999999959022,
+        1.379000000000815,
+        1.1864999999961583,
+        7.011700000002747,
+        1.143499999991036,
+        1.0133000000059837,
+        1.130300000004354,
+        1.1203999999997905,
+        3.2312999999994645,
+        1.2735000000102445,
+        1.090200000006007,
+        1.2332000000023982,
+        1.2513999999937369,
+        1.193199999994249,
+        5.024600000004284,
+        1.2857000000076368,
+        1.1797999999980675,
+        1.2428999999974621,
+        1.3369000000093365,
+        1.1840999999985797,
+        1.1383000000059837,
+        1.2136999999929685,
+        1.3601999999955297,
+        1.171699999991688,
+        1.4817999999941094,
+        5.490300000004936,
+        1.4147999999986496,
+        1.0616999999911059,
+        1.2578000000066822,
+        1.0524999999906868,
+        3.2441000000108033,
+        1.0301000000035856,
+        1.2972999999910826,
+        1.194100000007893,
+        1.0843000000022585,
+        1.184399999998277,
+        1.1567999999970198,
+        5.67500000000291,
+        1.251799999998184,
+        1.2476999999926193,
+        1.4470000000001164,
+        1.211699999999837,
+        1.395700000008219
+      ],
+      "rotating_cache_hits": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unity_working_set_bytes": 460447744,
+      "host_after": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "86c8b4588383ab58594b136dda89ae87",
+        "pid": 43476,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": true,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_bbcca5abec1743b7802ab4574984478a"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/ablation-no-reuse/1-candidate/UnityProject",
+            "pid": 35160,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "host_working_set_bytes": 35360768,
+      "worker_working_set_bytes": 223764480
+    }
+  ],
+  "scope": "Windows, empty projects, batchmode/nographics, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms",
+  "configuration": {
+    "unity_editor": "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.13f1\\Editor\\Unity.exe",
+    "unity_version": "6000.3.13f1",
+    "baseline_bin": "<repo>\\.codex-deps\\python-startup\\final\\unity-bridge\\unity-bridge.exe",
+    "candidate_bin": "<repo>\\.codex-deps\\python-startup\\final\\unity-bridge\\unity-bridge.exe",
+    "baseline_ref": "v0.3.0-rc.2",
+    "baseline_host": true,
+    "baseline_working_tree_connector": false,
+    "variants": [
+      "candidate"
+    ],
+    "samples": 100,
+    "exec_samples": 100,
+    "cold_samples": 50,
+    "session_samples": 100,
+    "candidate_env": [
+      "UNITY_BRIDGE_DISABLE_CONNECTION_REUSE=1"
+    ],
+    "startup_host": false,
+    "startup_only": false,
+    "reuse_projects": false,
+    "gui": null,
+    "extended": true,
+    "output": "<repo>\\.codex-deps\\python-startup\\ablation-no-reuse"
+  },
+  "summary": {
+    "baseline": {
+      "instances": {},
+      "wait_ready": {},
+      "status": {},
+      "console": {},
+      "tools": {},
+      "unique_exec": {},
+      "repeat_exec": {},
+      "first_exec": {},
+      "warmed_new_snippet": {},
+      "prewarm_only_first_exec": {},
+      "cold_service_to_first_result": {},
+      "idle_editor_gaps": {},
+      "exec_editor_gaps": {}
+    },
+    "candidate": {
+      "instances": {
+        "n": 100,
+        "p50_ms": 58.137600019108504,
+        "p95_ms": 64.6349000162445,
+        "max_ms": 73.7201000447385
+      },
+      "wait_ready": {
+        "n": 100,
+        "p50_ms": 79.2292999685742,
+        "p95_ms": 90.18359996844083,
+        "max_ms": 97.42490004282445
+      },
+      "status": {
+        "n": 100,
+        "p50_ms": 65.32569997943938,
+        "p95_ms": 69.27540001925081,
+        "max_ms": 151.62219997728243
+      },
+      "console": {
+        "n": 100,
+        "p50_ms": 75.79700002679601,
+        "p95_ms": 93.68360001826659,
+        "max_ms": 98.54330000234768
+      },
+      "tools": {
+        "n": 100,
+        "p50_ms": 77.61069998377934,
+        "p95_ms": 93.8239999813959,
+        "max_ms": 125.19109999993816
+      },
+      "unique_exec": {
+        "n": 100,
+        "p50_ms": 85.83250001538545,
+        "p95_ms": 105.80790002131835,
+        "max_ms": 109.84540003119037
+      },
+      "repeat_exec": {
+        "n": 100,
+        "p50_ms": 78.59379996079952,
+        "p95_ms": 95.3080999897793,
+        "max_ms": 106.96580004878342
+      },
+      "first_exec": {
+        "n": 50,
+        "p50_ms": 321.4546999661252,
+        "p95_ms": 350.2136000315659,
+        "max_ms": 358.82099997252226
+      },
+      "warmed_new_snippet": {
+        "n": 1,
+        "p50_ms": 92.36360003706068,
+        "p95_ms": 92.36360003706068,
+        "max_ms": 92.36360003706068
+      },
+      "prewarm_only_first_exec": {
+        "n": 1,
+        "p50_ms": 88.612399995327,
+        "p95_ms": 88.612399995327,
+        "max_ms": 88.612399995327
+      },
+      "refresh_wait": {
+        "n": 8,
+        "p50_ms": 149.3726999615319,
+        "p95_ms": 168.26449998188764,
+        "max_ms": 168.26449998188764
+      },
+      "rotating_exec": {
+        "n": 16,
+        "p50_ms": 77.10759999463335,
+        "p95_ms": 97.46640000957996,
+        "max_ms": 97.46640000957996
+      },
+      "session_first": {
+        "n": 1,
+        "p50_ms": 104.38289999729022,
+        "p95_ms": 104.38289999729022,
+        "max_ms": 104.38289999729022
+      },
+      "session_console": {
+        "n": 100,
+        "p50_ms": 24.115299980621785,
+        "p95_ms": 32.230000011622906,
+        "max_ms": 44.75619998993352
+      },
+      "cold_service_to_first_result": {
+        "n": 50,
+        "p50_ms": 506.0656000277959,
+        "p95_ms": 531.296500004828,
+        "max_ms": 626.0426000226289
+      },
+      "idle_editor_gaps": {
+        "n": 15,
+        "p50_ms": 1.2776000000012573,
+        "p95_ms": 6.024499999999534,
+        "max_ms": 6.024499999999534
+      },
+      "exec_editor_gaps": {
+        "n": 381,
+        "p50_ms": 1.2476000000024214,
+        "p95_ms": 5.4839000000065425,
+        "max_ms": 7.011700000002747
+      }
+    }
+  },
+  "ordinary_command_gates": {},
+  "functional_passed": true,
+  "performance_gates_evaluated": false,
+  "passed": null
+}

@@ -16,8 +16,9 @@ from typing import TYPE_CHECKING
 import uuid
 
 from .._cli.arguments import build_parser
-from .._cli.output import _connector_version_warning, render_action_result
-from ..adapter import UnityBridgeAdapter
+from .._cli.commands import execute_command, result_exit_code
+from .._cli.output import _connector_version_warning, print_result
+from .._fast_exec import _options, SUPPORTED_COMMANDS
 from ..client import CommandResponse, DiscoveryError, UnityBridgeError, UnityClient, UnityConnectionError, send_command
 from .registry import normalized_project
 
@@ -39,18 +40,21 @@ class _LocalClient(UnityClient):
 
     def call(self, command, params=None, *, timeout_ms=None, instance=None):
         target = instance or self.discover_instance()
-        remaining = self.deadline - int(time.time() * 1000)
+        now = int(time.time() * 1000)
+        call_deadline = min(self.deadline, now + (timeout_ms or self.timeout_ms))
+        remaining = call_deadline - now
         if remaining <= 0:
             from .service import not_started
             return CommandResponse.from_dict(not_started("expired", "Request expired before Unity execution"))
         service = self.service
-        with service.projects_lock:
-            registered = (normalized_project(target.project_path), target.pid) in service.projects
-        if (self.backend != "legacy" and target.bridge_protocol == 1 and registered
+        if (self.backend != "legacy" and target.bridge_protocol == 1
                 and normalized_project(self.instances_dir) == normalized_project(service.instances_dir)):
+            # submit refreshes authoritative discovery when the CLI observes a
+            # new instance before the watchdog. Initial negotiation must not
+            # force a direct compiler fallback or reject the first request.
             return CommandResponse.from_dict(service.submit({
                 "command": command, "params": params or {}, "request_id": uuid.uuid4().hex,
-                "deadline_unix_ms": self.deadline,
+                "deadline_unix_ms": call_deadline,
                 "target": {"projectPath": target.project_path, "pid": target.pid, "port": target.port},
             }))
         if self.backend == "host":
@@ -85,18 +89,21 @@ def execute_cli(service: HostService, payload: dict) -> dict:
                 or not isinstance(argv, list) or not 0 < len(argv) <= 4096
                 or any(not isinstance(arg, str) for arg in argv)
                 or not isinstance(cwd, str) or not Path(cwd).is_absolute()
-                or not isinstance(code, str)
                 or not isinstance(deadline, int) or isinstance(deadline, bool)):
             raise DiscoveryError("Invalid fast CLI request")
-        args = build_parser("exec", parser_class=Parser).parse_args(argv)
+        options = _options(argv)
+        selected = options["command"] if options else "exec"
+        args = build_parser(selected, parser_class=Parser).parse_args(argv)
         json_output = args.json
-        if args.command != "exec" or args.csc or args.dotnet:
-            raise DiscoveryError("Fast CLI request only supports exec without compiler overrides")
+        if (args.command not in SUPPORTED_COMMANDS or getattr(args, "csc", None) or getattr(args, "dotnet", None)
+                or (args.command == "exec" and not isinstance(code, str))):
+            raise DiscoveryError("Unsupported fast CLI request")
         if not 0 < args.timeout_ms <= 86_400_000:
             raise DiscoveryError("--timeout-ms must be between 1 and 86400000")
         # The caller sends its original absolute deadline. Receiving the request
         # and parsing arguments must not restart the timeout.
-        deadline = min(deadline, int(time.time() * 1000) + args.timeout_ms)
+        budget = args.timeout_sec * 1000 if args.command == "wait-ready" else args.timeout_ms
+        deadline = min(deadline, int(time.time() * 1000) + budget)
         directory = args.instances_dir or payload.get("instances_dir")
         if directory is not None:
             if not isinstance(directory, str):
@@ -105,13 +112,15 @@ def execute_cli(service: HostService, payload: dict) -> dict:
         backend = args.backend or payload.get("backend") or "auto"
         client = _LocalClient(service, deadline, project=args.project, port=args.port,
                               timeout_ms=args.timeout_ms, instances_dir=directory, cwd=cwd, backend=backend)
-        if not json_output:
+        if not json_output and args.command not in {"instances", "status", "wait-ready"}:
             warning = _connector_version_warning(client.discover_instance())
             if warning:
                 stderr.write(warning + "\n")
-        result = UnityBridgeAdapter(client=client).exec_csharp(code, usings=args.usings)
-        stdout.write(render_action_result(result, json_output=json_output))
-        return reply(0 if result.success else 1)
+        if args.command == "exec":
+            args.code = code
+        result = execute_command(args, client)
+        print_result(result, json_output=json_output, stdout=stdout, stderr=stderr)
+        return reply(result_exit_code(result))
     except _ParseExit as exc:
         return reply(exc.status)
     except UnityBridgeError as exc:

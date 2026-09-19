@@ -98,15 +98,26 @@ namespace UnityBridgeConnector
         static BridgeHostLauncher()
         {
             if (AssetDatabase.IsAssetImportWorkerProcess()) return;
+            // Only filesystem/process work is started here. Unity references and
+            // commands still wait for the host's live ready/context negotiation.
+            if (Environment.GetEnvironmentVariable("UNITY_BRIDGE_DISABLE_EARLY_HOST") != "1")
+                ScheduleCheck();
             EditorApplication.delayCall += Check;
             EditorApplication.update += Check;
         }
 
         static void Check()
         {
-            if (EditorApplication.timeSinceStartup < s_NextCheck || EditorApplication.isCompiling || EditorApplication.isUpdating)
+            if (Environment.GetEnvironmentVariable("UNITY_BRIDGE_DISABLE_EARLY_HOST") == "1" &&
+                (EditorApplication.isCompiling || EditorApplication.isUpdating)) return;
+            if (EditorApplication.timeSinceStartup < s_NextCheck)
                 return;
             s_NextCheck = EditorApplication.timeSinceStartup + 5;
+            ScheduleCheck();
+        }
+
+        static void ScheduleCheck()
+        {
             if (Interlocked.Exchange(ref s_CheckRunning, 1) != 0) return;
             // No filesystem probes or process startup waits run on the Editor thread.
             _ = Task.Run(() =>

@@ -1,0 +1,81 @@
+{
+  "unity_version": "6000.3.13f1",
+  "baseline_ref": "v0.3.0-rc.2",
+  "baseline_host": true,
+  "baseline_working_tree_connector": false,
+  "sessions": [
+    {
+      "number": 1,
+      "variant": "baseline",
+      "source_sha256": {
+        "Attributes/UnityBridgeToolAttribute.cs": "8b4fcf47917924c72fb19512ce10f4c01efab6cf25f8fa32d4e72bb6574d7ebb",
+        "BridgeHostLauncher.cs": "cc083f70fae8ef4bddafd957c2c65667c512eb6b1700629f55748dc2ecd37e9d",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "CommandRouter.cs": "d14f3f3b26b95a9cda520d95a84039b17b50a1f078ca176e13d6e8b7a1c989ac",
+        "Core/AtomicFile.cs": "fa8600931d84edff930cfa55fa4dbabf962fb993ab1b954a515b581063bbe696",
+        "Core/ParamCoercion.cs": "73b13494f7f1c0dae39738c24abd8b8ecb2f7896d212725ecea0c69c52f3c6d0",
+        "Core/Response.cs": "86e3f785175b6a55442bab304e8a803b180b21dd74ce71ac8a62e548bcffce32",
+        "Core/StringCaseUtility.cs": "ac3826f8fc7ef689c9346af53bbf527b67cc2dbc1158dd68275da897626e8581",
+        "Core/ToolParams.cs": "7957b15878eaf4054bd9bee23e63b921ddf008b7025d1606fadd7cde3b4b1d22",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "6d1e6b6d57550dc8326c99103b6c97f55a14e6584ba9bd381677e12e7b4ddaa2",
+        "HttpServer.cs": "206d8c4511eeba6fb0a8446e5cf74aef01bf26178ab8ac41ad231795ba55f119",
+        "ToolDiscovery.cs": "63131c303f5cf4ac214ad4f0797a0a9be7973a3de1dfe31ce72d012aab4f40ec",
+        "Tools/EditorScreenshot.cs": "8da5112b871490fe4625d62cc9edb7da322bf07ab3b047e4601e3cc604a0f7a2",
+        "Tools/ExecuteCsharp.cs": "5a2646697c5e45f753b84ef94492cf9c1703de24c5e5ae4d01c9fe967e85a289",
+        "Tools/ExecuteMenuItem.cs": "73588a00aed26cadd7d85ec220a85ae227838902d496b44f3f47dd4038207f58",
+        "Tools/ManageEditor.cs": "e7f5f65a189eb2af4639abece0bb21139a9b67dae56994d1abde6a0981c0ca84",
+        "Tools/ManageProfiler.cs": "f1b01a6c80d6c553e5b92127665589e9498f603c592d5591f6a50ce7f5c7d848",
+        "Tools/ReadConsole.cs": "83a3d18560753acbce9e3701e3be9099a3f23da9a1a12a701ed429e192f76d38",
+        "Tools/RefreshUnity.cs": "657b45dfbc40a136b088b13efb1e36a958780f225c5b8cdf53ce251cd88aa333",
+        "Tools/ReserializeAssets.cs": "f0f2460b4ec0f81e687702c6dfa1e1a2183b5c9924197db8a76926155018066a"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [],
+      "passed": false,
+      "executable": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+      "executable_sha256": "585c23be16579c16c9217aa295b58c1e9f28201cad0d1cb5f06c4169121ec385",
+      "installed_bytes": 135202789,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-gui-6-foreground/1-baseline/UnityProject",
+        "port": 8090,
+        "pid": 35220,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789748367409,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "e37450878dea4181bd624f2e35dce6c7",
+        "referenceGeneration": 3
+      },
+      "unity_ready_ms": 7796.051400015131
+    }
+  ],
+  "scope": "Windows, empty projects, foreground, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms",
+  "configuration": {
+    "unity_editor": "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.13f1\\Editor\\Unity.exe",
+    "unity_version": "6000.3.13f1",
+    "baseline_bin": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+    "candidate_bin": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+    "baseline_ref": "v0.3.0-rc.2",
+    "baseline_host": true,
+    "baseline_working_tree_connector": false,
+    "variants": [
+      "baseline",
+      "candidate"
+    ],
+    "samples": 100,
+    "exec_samples": 100,
+    "cold_samples": 1,
+    "session_samples": 100,
+    "candidate_env": [],
+    "startup_host": false,
+    "startup_only": false,
+    "reuse_projects": false,
+    "gui": "foreground",
+    "extended": true,
+    "output": "<repo>\\.codex-deps\\python-startup\\accepted-gui-6-foreground"
+  }
+}

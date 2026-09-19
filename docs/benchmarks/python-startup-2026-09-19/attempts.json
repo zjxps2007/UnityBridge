@@ -1,0 +1,435 @@
+{
+  "scope": "All retained orchestration attempts; success status alone is not a performance or focus pass.",
+  "notes": {
+    "selected-startup6": "Product race: known Connector had no initial context; first request was rejected. Fixed before accepted build.",
+    "initial-bench6": "Harness expected registry deletion before process exit; candidate incomplete. Later waits use process liveness.",
+    "final-native2021": "Harness assumed the compiler remained busy after a fixed sleep; replaced by observed request timing.",
+    "bundle-install": "Harness expected synchronous _host start; replaced by bounded live status polling.",
+    "accepted-gui-foreground-verified": "Valid slow exec cohorts, not excluded as outliers. Older gates only cover five ordinary commands; reruns pass but cause remains unresolved.",
+    "gui": "Read the individual focus_validation and sample counts. Failed/mixed focus attempts are not treated as foreground acceptance."
+  },
+  "attempts": [
+    {
+      "name": "accepted-python-tests",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 63.58232617378235
+    },
+    {
+      "name": "accepted-install",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": null,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 20.564738750457764
+    },
+    {
+      "name": "accepted-native6",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": null,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 18.876246213912964
+    },
+    {
+      "name": "accepted-native2021",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": null,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 19.016526699066162
+    },
+    {
+      "name": "accepted6",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 214.33861780166626
+    },
+    {
+      "name": "accepted2021",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 212.50515699386597
+    },
+    {
+      "name": "accepted-gui-6-foreground",
+      "status": "failed",
+      "exit_code": 1,
+      "validation_passed": null,
+      "functional_passed": null,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 13.02555775642395
+    },
+    {
+      "name": "accepted-gui-6-background",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 217.16765308380127
+    },
+    {
+      "name": "accepted-gui-2021-foreground",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": false,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 159.74920773506165
+    },
+    {
+      "name": "accepted-gui-2021-background",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 157.37596797943115
+    },
+    {
+      "name": "accepted-startup6",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": null,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 515.0111553668976
+    },
+    {
+      "name": "accepted-startup2021",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": null,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 567.2433414459229
+    },
+    {
+      "name": "accepted-startup-no-early",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": null,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 262.9110095500946
+    },
+    {
+      "name": "accepted-startup-no-warmup",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": null,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 203.0723249912262
+    },
+    {
+      "name": "accepted-timing",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": null,
+      "functional_passed": true,
+      "ledger": "accepted-checks-status.json",
+      "seconds": 15.408053398132324
+    },
+    {
+      "name": "diagnostic-gui-6-uninstrumented",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "diagnostic-launch-status.json",
+      "seconds": 156.94255757331848
+    },
+    {
+      "name": "diagnostic-gui-2021-uninstrumented",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "diagnostic-launch-status.json",
+      "seconds": 155.14360094070435
+    },
+    {
+      "name": "ablation-no-fast",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 108.57432079315186
+    },
+    {
+      "name": "ablation-no-reuse",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 106.6851418018341
+    },
+    {
+      "name": "ablation-snapshots",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 97.80654072761536
+    },
+    {
+      "name": "gui-6-foreground",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 205.2878246307373
+    },
+    {
+      "name": "gui-6-background",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 201.80266308784485
+    },
+    {
+      "name": "gui-2021-foreground",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 143.4860062599182
+    },
+    {
+      "name": "gui-2021-background",
+      "status": "failed",
+      "exit_code": 1,
+      "ledger": "extra-matrix-status.json",
+      "seconds": 125.94015622138977
+    },
+    {
+      "name": "controlled-gui-6-foreground",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "final-checks-status.json",
+      "seconds": 187.92108607292175
+    },
+    {
+      "name": "controlled-gui-6-background",
+      "status": "failed",
+      "exit_code": 1,
+      "ledger": "final-checks-status.json",
+      "seconds": 126.97244000434875
+    },
+    {
+      "name": "controlled-gui-2021-background",
+      "status": "failed",
+      "exit_code": 1,
+      "ledger": "final-checks-status.json",
+      "seconds": 127.11125135421753
+    },
+    {
+      "name": "final-native6",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "final-checks-status.json",
+      "seconds": 19.17609977722168
+    },
+    {
+      "name": "final-native2021",
+      "status": "failed",
+      "exit_code": 1,
+      "ledger": "final-checks-status.json",
+      "seconds": 16.244961261749268
+    },
+    {
+      "name": "final6",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "final-matrix-status.json",
+      "seconds": 210.35896706581116
+    },
+    {
+      "name": "final2021",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "final-matrix-status.json",
+      "seconds": 213.1438069343567
+    },
+    {
+      "name": "accepted-large6",
+      "status": "completed",
+      "exit_code": 0,
+      "functional_passed": true,
+      "ledger": "large-checks-status.json",
+      "seconds": 52.60938620567322
+    },
+    {
+      "name": "accepted-large2021",
+      "status": "completed",
+      "exit_code": 0,
+      "functional_passed": true,
+      "ledger": "large-checks-status.json",
+      "seconds": 52.02606010437012
+    },
+    {
+      "name": "bench6-candidate",
+      "status": "passed",
+      "exit_code": 0,
+      "ledger": "matrix-status.json",
+      "seconds": 96.35772895812988
+    },
+    {
+      "name": "bench2021",
+      "status": "passed",
+      "exit_code": 0,
+      "ledger": "matrix-status.json",
+      "seconds": 209.2515778541565
+    },
+    {
+      "name": "runtime",
+      "status": "passed",
+      "exit_code": 0,
+      "ledger": "matrix-status.json",
+      "seconds": 194.74264001846313
+    },
+    {
+      "name": "packaging",
+      "status": "passed",
+      "exit_code": 0,
+      "ledger": "matrix-status.json",
+      "seconds": 177.0475161075592
+    },
+    {
+      "name": "accepted-gui-6-foreground-verified",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "quiet-gui-status.json",
+      "seconds": 189.64547872543335
+    },
+    {
+      "name": "accepted-gui-2021-foreground-verified",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "quiet-gui-status.json",
+      "seconds": 187.96831393241882
+    },
+    {
+      "name": "robust-native6",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "remaining-status.json",
+      "seconds": 19.182327032089233
+    },
+    {
+      "name": "robust-native2021",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "remaining-status.json",
+      "seconds": 19.0703067779541
+    },
+    {
+      "name": "preparation",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "remaining-status.json",
+      "seconds": 57.03444266319275
+    },
+    {
+      "name": "bundle-install",
+      "status": "failed",
+      "exit_code": 1,
+      "ledger": "remaining-status.json",
+      "seconds": 17.2011456489563
+    },
+    {
+      "name": "selected-install",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 23.818936347961426
+    },
+    {
+      "name": "session-output",
+      "status": "completed",
+      "exit_code": 0,
+      "ledger": "selected-checks-status.json",
+      "seconds": 0.4579603672027588
+    },
+    {
+      "name": "selected-native6",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 25.937166929244995
+    },
+    {
+      "name": "selected-native2021",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 24.04010534286499
+    },
+    {
+      "name": "selected6",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 243.08470797538757
+    },
+    {
+      "name": "selected2021",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 211.8492214679718
+    },
+    {
+      "name": "selected-gui-6-foreground",
+      "status": "failed",
+      "exit_code": 1,
+      "validation_passed": null,
+      "ledger": "selected-checks-status.json",
+      "seconds": 11.102698802947998
+    },
+    {
+      "name": "selected-gui-6-background",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 216.32214307785034
+    },
+    {
+      "name": "selected-gui-2021-foreground",
+      "status": "failed",
+      "exit_code": 1,
+      "validation_passed": null,
+      "ledger": "selected-checks-status.json",
+      "seconds": 10.240227460861206
+    },
+    {
+      "name": "selected-gui-2021-background",
+      "status": "completed",
+      "exit_code": 0,
+      "validation_passed": true,
+      "ledger": "selected-checks-status.json",
+      "seconds": 154.03272914886475
+    },
+    {
+      "name": "selected-startup6",
+      "status": "failed",
+      "exit_code": 1,
+      "validation_passed": null,
+      "ledger": "selected-checks-status.json",
+      "seconds": 16.11940360069275
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+{"pid":42144,"parent_pid":468,"stage":"process_start","operation":"wait_ready","ns":311914654764200,"unix_ns":1789750464629994600}
+{"pid":42144,"parent_pid":468,"stage":"process_end","operation":"wait_ready","ns":311914725217100,"unix_ns":1789750464700448200}

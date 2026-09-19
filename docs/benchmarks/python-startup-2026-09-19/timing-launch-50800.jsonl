@@ -1,0 +1,2 @@
+{"pid":50800,"parent_pid":468,"stage":"process_start","operation":"frame_idle_stop","ns":311913867247100,"unix_ns":1789750463842478700}
+{"pid":50800,"parent_pid":468,"stage":"process_end","operation":"frame_idle_stop","ns":311913983010500,"unix_ns":1789750463958241900}

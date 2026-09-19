@@ -48,6 +48,35 @@ Live confirmation probes use at most one second per read, within the original
 wait deadline, so a connection to a replaced listener cannot consume the whole
 wait. Only state reads are retried.
 
+## Development After RC2
+
+Development after RC2 also reuses session/host HTTP connections and serializes
+result objects once. Ordinary `console`, `tools`, `wait-ready` and `exec` calls
+can use the resident parser. Snapshot commands stay local by default after
+their forwarding path missed the latency gate. See [measurements](PYTHON_STARTUP.md).
+Use one session across consecutive requests, reading each response before the next:
+
+```python
+import json
+import subprocess
+
+with subprocess.Popen(
+    ["unity-bridge", "--project", "D:/UnityProjects/MyGame", "--no-update-check", "session"],
+    stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8",
+) as session:
+    for request in ({"id": 1, "args": ["console", "--count", "5"]},
+                    {"id": 2, "args": ["exec", "--code", "return 42;"]}):
+        session.stdin.write(json.dumps(request) + "\n")
+        session.stdin.flush()
+        response = json.loads(session.stdout.readline())
+        assert response["id"] == request["id"]
+        print(response)
+    session.stdin.close()
+```
+
+Long-lived Python callers can use `with UnityClient(...) as client:` or call
+`client.close()` to release the connection pool. Discovery still runs per call.
+
 ## Basic Form
 
 ```powershell

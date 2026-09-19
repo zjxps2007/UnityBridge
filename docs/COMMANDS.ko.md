@@ -45,6 +45,35 @@ editor/reserialize에서는 `--poll-interval-sec`를 지정할 수 있습니다.
 직접 확인 요청은 전체 대기 제한 안에서 한 번에 최대 1초만 기다립니다. 리로드 전
 listener의 연결이 전체 시간을 소모하지 않도록 하며, 재시도하는 것은 상태 조회뿐입니다.
 
+## RC2 이후 개발 변경
+
+RC2 이후 개발 변경은 세션·호스트 HTTP 연결을 재사용하고 결과 객체를 한 번만
+직렬화합니다. 일반 `console`, `tools`, `wait-ready`, `exec`도 상주 호스트의 경량
+경로를 사용할 수 있습니다. 스냅샷 명령은 전달 경로의 지연 기준을 통과하지 못해
+기본적으로 로컬 처리합니다. [측정 결과](PYTHON_STARTUP.ko.md)를 참고하세요.
+연속 요청에서는 세션 하나를 유지하고 각 응답을 받은 뒤 다음 요청을 보냅니다.
+
+```python
+import json
+import subprocess
+
+with subprocess.Popen(
+    ["unity-bridge", "--project", "D:/UnityProjects/MyGame", "--no-update-check", "session"],
+    stdin=subprocess.PIPE, stdout=subprocess.PIPE, text=True, encoding="utf-8",
+) as session:
+    for request in ({"id": 1, "args": ["console", "--count", "5"]},
+                    {"id": 2, "args": ["exec", "--code", "return 42;"]}):
+        session.stdin.write(json.dumps(request) + "\n")
+        session.stdin.flush()
+        response = json.loads(session.stdout.readline())
+        assert response["id"] == request["id"]
+        print(response)
+    session.stdin.close()
+```
+
+장기 실행 Python 프로그램은 `with UnityClient(...) as client:` 또는
+`client.close()`로 연결을 해제할 수 있습니다. Unity 탐색은 요청마다 수행합니다.
+
 ## 기본 형태
 
 ```powershell

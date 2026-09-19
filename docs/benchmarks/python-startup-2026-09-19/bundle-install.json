@@ -1,0 +1,22 @@
+{
+  "archive_sha256": "7bcd08080ae9ffec248e60174cdc4c6ec6c340cc336cb02bf8b4d22fc6b5f0a8",
+  "checks": [
+    {
+      "name": "fresh",
+      "passed": true,
+      "installer_exit_code": 0
+    },
+    {
+      "name": "reinstall",
+      "passed": true,
+      "installer_exit_code": 0
+    },
+    {
+      "name": "upgrade_public_rc2",
+      "passed": true,
+      "installer_exit_code": 0
+    }
+  ],
+  "passed": false,
+  "scope": "Real installer and binaries; only remote discovery/download are replaced with local files; user PATH unchanged."
+}

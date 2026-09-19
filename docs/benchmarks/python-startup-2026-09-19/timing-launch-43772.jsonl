@@ -1,0 +1,2 @@
+{"pid":43772,"parent_pid":468,"stage":"process_start","operation":"frame_exec_start","ns":311915076087900,"unix_ns":1789750465051318300}
+{"pid":43772,"parent_pid":468,"stage":"process_end","operation":"frame_exec_start","ns":311915171203300,"unix_ns":1789750465146434900}

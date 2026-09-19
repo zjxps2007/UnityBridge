@@ -1,0 +1,4 @@
+{"stage":"python_entry","pid":42648,"ns":311914036796400,"unix_ns":1789750464011767500,"request_id":null}
+{"stage":"fast_cli_imported","pid":42648,"ns":311914037259600,"unix_ns":1789750464012282100,"request_id":null}
+{"stage":"full_cli_imported","pid":42648,"ns":311914043957900,"unix_ns":1789750464018800400,"request_id":null}
+{"stage":"python_result","pid":42648,"ns":311914052248300,"unix_ns":1789750464026766600,"request_id":null}

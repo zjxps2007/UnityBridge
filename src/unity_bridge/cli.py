@@ -14,7 +14,7 @@ from ._cli.arguments import (
     parse_direct_tool_args,
     parser_for,
 )
-from ._cli.commands import execute_command
+from ._cli.commands import execute_command, result_exit_code
 from ._cli.output import (
     print_connector_version_warning,
     print_error,
@@ -64,13 +64,7 @@ def main(argv: list[str] | None = None) -> int:
             result = execute_command(args, client)
 
         print_result(result, json_output=args.json)
-        if isinstance(result, CommandResponse):
-            return 0 if result.success else 1
-        if args.command not in {"instances", "status", "wait-ready"}:
-            from .adapter import UnityActionResult
-            if isinstance(result, UnityActionResult):
-                return 0 if result.success else 1
-        return 0
+        return result_exit_code(result)
     except UnityBridgeError as exc:
         print_error(exc, json_output=json_output)
         return 1

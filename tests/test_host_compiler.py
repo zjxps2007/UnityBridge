@@ -34,17 +34,37 @@ class CompilerWorkerTests(unittest.TestCase):
         pid = self.worker.process.pid
         self.assertEqual(result["compiler_version"], "fixture")
         with self.assertRaises(CompilerError) as failed:
-            self.worker.request({"operation": "error"}, deadline=time.monotonic() + 2)
+            self.worker.request({"operation": "error"}, deadline=time.perf_counter() + 2)
         self.assertEqual(failed.exception.code, "compile_error")
         self.assertEqual(failed.exception.diagnostics, [{"id": "CS0001"}])
         self.worker.prewarm()
         self.assertEqual(self.worker.process.pid, pid)
 
+    def test_preparation_does_not_queue_ahead_of_waiting_execution(self):
+        self.worker.lock.acquire()
+        result = []
+        thread = threading.Thread(target=lambda: result.append(self.worker.prewarm()))
+        thread.start()
+        try:
+            limit = time.perf_counter() + 2
+            while self.worker.foreground_waiters == 0 and time.perf_counter() < limit:
+                time.sleep(.001)
+            self.assertEqual(self.worker.foreground_waiters, 1)
+            with self.assertRaises(CompilerError) as failure:
+                self.worker.warmup()
+            self.assertEqual(failure.exception.code, 'prewarm_deferred')
+            self.assertIsNone(self.worker.process)
+        finally:
+            self.worker.lock.release()
+            thread.join(3)
+        self.assertFalse(thread.is_alive())
+        self.assertTrue(result[0]['success'])
+
     def test_timeout_kills_worker_then_next_request_starts_a_new_worker(self):
         self.worker.prewarm()
         first_process = self.worker.process
         with self.assertRaises(CompilerError) as failed:
-            self.worker.request({"operation": "slow"}, deadline=time.monotonic() + .1)
+            self.worker.request({"operation": "slow"}, deadline=time.perf_counter() + .1)
         self.assertEqual(failed.exception.code, "compiler_timeout")
         self.assertIsNotNone(first_process.poll())
         self.assertIsNone(self.worker.process)
@@ -52,19 +72,19 @@ class CompilerWorkerTests(unittest.TestCase):
 
     def test_exited_worker_does_not_hang_and_can_restart(self):
         with self.assertRaises(CompilerError) as failed:
-            self.worker.request({"operation": "exit"}, deadline=time.monotonic() + 2)
+            self.worker.request({"operation": "exit"}, deadline=time.perf_counter() + 2)
         self.assertEqual(failed.exception.code, "compiler_exited")
         self.assertTrue(self.worker.prewarm()["success"])
 
     def test_deadline_covers_blocked_write_when_worker_does_not_read_stdin(self):
         original_argv = self.worker.argv
         self.worker.argv = [sys.executable, "-u", "-c", "import time; time.sleep(10)"]
-        started = time.monotonic()
+        started = time.perf_counter()
         with self.assertRaises(CompilerError) as failed:
             self.worker.request({"operation": "compile", "code": "x" * (1024 * 1024)},
-                                deadline=time.monotonic() + .15)
+                                deadline=time.perf_counter() + .15)
         self.assertEqual(failed.exception.code, "compiler_timeout")
-        self.assertLess(time.monotonic() - started, 3)
+        self.assertLess(time.perf_counter() - started, 3)
         self.assertIsNone(self.worker.process)
         self.worker.argv = original_argv
         self.assertTrue(self.worker.prewarm()["success"])

@@ -18,7 +18,8 @@ from .compiler import CompilerError, CompilerWorker
 from .context import PreparedContext
 from .registry import (PROTOCOL, atomic_json, endpoint_path, load_launcher, normalized_project,
                        process_alive, read_json)
-from .transport import MAX_MESSAGE_BYTES, TransportError, post
+from .transport import MAX_MESSAGE_BYTES, ConnectionPool, TransportError, post
+from .._timing import mark
 
 BUSY_STATES = {"compiling", "refreshing", "reloading", "entering_playmode", "exiting_playmode"}
 
@@ -89,6 +90,7 @@ class HostService:
         self.instances_dir = instances_dir or (Path(descriptor["instancesDir"]) if descriptor.get("instancesDir")
                                               else default_instances_dir())
         self.compiler = compiler or CompilerWorker(descriptor["workerPath"])
+        self.connections = ConnectionPool()
         self.idle_seconds, self.scan_interval = idle_seconds, scan_interval
         self.projects: dict[tuple[str, int], Project] = {}
         self.projects_lock = threading.Lock()
@@ -99,8 +101,10 @@ class HostService:
         self.server: ThreadingHTTPServer | None = None
         self.cli_server = None
         self.last_registry = None
-        self.last_active = time.monotonic()
+        self.last_active = time.perf_counter()
         self.compiler_error = ""
+        self.bootstrap_warming = False
+        self.bootstrap_warmed = False
 
     @property
     def port(self) -> int:
@@ -124,7 +128,8 @@ class HostService:
                                         "prewarmState": project.prewarm_state,
                                         "prewarmError": project.prewarm_error})
             targets.sort(key=lambda p: (p["projectPath"], p["pid"]))
-            value = {"protocol": PROTOCOL, "cliProtocol": 1,
+            from .._fast_exec import SUPPORTED_COMMANDS
+            value = {"protocol": PROTOCOL, "cliProtocol": 1, "cliCommands": list(SUPPORTED_COMMANDS),
                      "cliPort": self.cli_server.server_address[1] if self.cli_server else 0,
                      "runtimeId": self.descriptor["runtimeId"],
                      "version": self.descriptor["version"], "pid": os.getpid(), "port": self.port,
@@ -144,11 +149,12 @@ class HostService:
             snapshot = dict(project.snapshot)
             key = Project.key(snapshot)
         request_id = uuid.uuid4().hex
+        mark('reference_negotiation_begin', request_id)
         try:
-            response = post(int(snapshot["port"]), self.descriptor["token"], "/command", {
+            response = self._post(snapshot, {
                 "command": "bridge_context", "params": {}, "request_id": request_id,
                 "deadline_unix_ms": int(time.time() * 1000) + 2000,
-            }, 2.)
+            }, 2., "negotiate")
             context = response.get("data")
             if (not response.get("success") or not isinstance(context, dict)
                     or context.get("protocol") != PROTOCOL or context.get("pid") != snapshot["pid"]
@@ -159,6 +165,7 @@ class HostService:
                     or not isinstance(context.get("languageVersion"), str)):
                 return
             prepared = PreparedContext.from_connector(context)
+            mark('reference_negotiation_end', request_id)
             warm_context = False
             with project.condition:
                 if Project.key(project.snapshot) == key:
@@ -179,7 +186,7 @@ class HostService:
             with project.condition:
                 project.negotiating = False
                 changed = Project.key(project.snapshot) != key
-                project.next_negotiate = 0. if changed else time.monotonic() + 1.
+                project.next_negotiate = 0. if changed else time.perf_counter() + 1.
             if changed:
                 self.discovery_wakeup.set()
             self._write_registry()
@@ -187,16 +194,19 @@ class HostService:
     def _prewarm_context(self, project: Project, context: PreparedContext, key: tuple) -> None:
         # Compile an innocuous wrapper only. Its assembly is never loaded into Unity.
         job = Job({"command": "exec", "params": {"code": "return null;"}},
-                  time.monotonic() + 30., "prewarm")
+                  time.perf_counter() + 30., "prewarm")
         state, error = "ready", ""
         try:
-            self._compile(context, job)
+            if self.has_work():
+                state = "pending"
+            else:
+                self._compile(context, job, background=True)
         except CompilerError as exc:
-            state, error = "failed", str(exc)
+            state, error = (("pending", "") if exc.code == "prewarm_deferred" else ("failed", str(exc)))
         except Exception:
             state, error = "failed", "Compiler context preparation failed"
         with project.condition:
-            if project.warmed_key == key:
+            if project.warmed_key == key and project.prewarm_state != "ready":
                 project.prewarm_state, project.prewarm_error = state, error
         self._write_registry()
 
@@ -240,13 +250,22 @@ class HostService:
                 project.snapshot, project.alive = snapshot, True
                 project.condition.notify_all()
                 if (project.context_key != Project.key(snapshot) and not project.negotiating
-                        and time.monotonic() >= project.next_negotiate
+                        and time.perf_counter() >= project.next_negotiate
                         and snapshot.get("state") not in BUSY_STATES):
                     project.negotiating = True
                     start_negotiation = True
             if start_negotiation:
                 threading.Thread(target=self._negotiate, args=(project,), daemon=True,
                                  name="unity-host-negotiate").start()
+            elif not self.has_work():
+                with project.condition:
+                    if (project.prewarm_state == "pending" and project.context is not None
+                            and project.context_key == Project.key(snapshot)
+                            and snapshot.get("state") not in BUSY_STATES):
+                        project.prewarm_state = "warming"
+                        threading.Thread(target=self._prewarm_context,
+                                         args=(project, project.context, project.context_key), daemon=True,
+                                         name="unity-host-reference-prewarm").start()
         with self.projects_lock:
             projects = list(self.projects.items())
         for key, project in projects:
@@ -274,9 +293,16 @@ class HostService:
                     self.request_stop()
                     return
                 self.scan_once()
+                if (not self.bootstrap_warmed and not self.bootstrap_warming and not self.has_work()
+                        and not any(p.negotiating or p.context for p in self._project_list())
+                        and callable(getattr(self.compiler, "warmup", None))
+                        and os.environ.get("UNITY_BRIDGE_DISABLE_COMPILER_WARMUP") != "1"):
+                    self.bootstrap_warming = True
+                    threading.Thread(target=self._warm_bootstrap, daemon=True,
+                                     name="unity-host-bootstrap-warmup").start()
                 if any(p.alive for p in self._project_list()) or self.has_work():
-                    self.last_active = time.monotonic()
-                elif time.monotonic() - self.last_active >= self.idle_seconds:
+                    self.last_active = time.perf_counter()
+                elif time.perf_counter() - self.last_active >= self.idle_seconds:
                     self.request_stop()
                     return
             except OSError:
@@ -284,10 +310,21 @@ class HostService:
                 pass
             self.discovery_wakeup.wait(self.scan_interval)
 
+    def _warm_bootstrap(self) -> None:
+        try:
+            self.compiler.warmup()
+            self.bootstrap_warmed = True
+        except CompilerError as exc:
+            if exc.code != "prewarm_deferred":
+                self.compiler_error = str(exc)
+                self.bootstrap_warmed = True
+        finally:
+            self.bootstrap_warming = False
+
     def _wait_context(self, project: Project, job: Job) -> PreparedContext | None:
         with project.condition:
             while not job.done.is_set() and not self.stopping.is_set():
-                remaining = job.deadline - time.monotonic()
+                remaining = job.deadline - time.perf_counter()
                 if remaining <= 0:
                     return None
                 if not project.alive:
@@ -299,7 +336,7 @@ class HostService:
                 project.condition.wait(min(.1, remaining))
         return None
 
-    def _compile(self, context: PreparedContext, job: Job) -> dict[str, Any]:
+    def _compile(self, context: PreparedContext, job: Job, *, background: bool = False) -> dict[str, Any]:
         params = job.payload.get("params") or {}
         if not isinstance(params, dict):
             raise CompilerError("compile_error", "exec parameters must be an object")
@@ -319,7 +356,7 @@ class HostService:
             "language_version": context.language_version, "references": context.references,
             "project_id": context.project_id,
             "reference_generation": generation, "fresh_identity": True,
-        }, deadline=job.deadline)
+        }, deadline=job.deadline, background=background)
         if (result.get("reference_generation") != generation
                 or not isinstance(result.get("assembly_base64"), str)):
             raise CompilerError("compiler_protocol", "Compiler returned a mismatched assembly result")
@@ -332,7 +369,13 @@ class HostService:
             project.condition.notify_all()
         self.discovery_wakeup.set()
 
+    def _post(self, snapshot, payload, timeout, lane="execute"):
+        return post(snapshot["port"], self.descriptor["token"], "/command", payload, timeout,
+                    pool=self.connections, key=(normalized_project(snapshot["projectPath"]), lane),
+                    identity=Project.key(snapshot))
+
     def _execute(self, project: Project, job: Job) -> None:
+        mark('host_execution_begin', job.payload.get('request_id'))
         command = str(job.payload["command"])
         for attempt in range(2):
             context = self._wait_context(project, job)
@@ -345,6 +388,9 @@ class HostService:
                                            and (forwarded_params.get("csc") or forwarded_params.get("dotnet"))):
                 try:
                     compiled = self._compile(context, job)
+                    with project.condition:
+                        if project.context is context:
+                            project.prewarm_state, project.prewarm_error = "ready", ""
                 except CompilerError as exc:
                     if exc.code == "stale_reference" and attempt == 0:
                         self._invalidate_context(project)
@@ -366,7 +412,7 @@ class HostService:
                     continue
                 job.complete(not_started("stale_domain", "Unity changed while preparing the request"))
                 return
-            remaining = job.deadline - time.monotonic()
+            remaining = job.deadline - time.perf_counter()
             with job.lock:
                 if job.done.is_set():
                     return
@@ -386,7 +432,9 @@ class HostService:
                 "domain_id": context.domain_id, "reference_generation": context.reference_generation,
             }
             try:
-                response = post(snapshot["port"], self.descriptor["token"], "/command", forwarded, remaining)
+                mark('unity_roundtrip_begin', job.payload['request_id'])
+                response = self._post(snapshot, forwarded, remaining)
+                mark('unity_roundtrip_end', job.payload['request_id'])
             except TransportError:
                 job.complete(unknown(command))
                 return
@@ -443,6 +491,9 @@ class HostService:
                 or not isinstance(unix_deadline, (int, float)) or isinstance(unix_deadline, bool)):
             return not_started("invalid_request", "Invalid host command envelope")
         remaining = (unix_deadline - time.time() * 1000) / 1000
+        # Anchor once, before discovery or lock waits. Recreating a monotonic
+        # deadline after those waits would silently extend the caller's budget.
+        deadline = time.perf_counter() + remaining
         if not 0 < remaining <= 86400:
             return not_started("expired", "Request deadline has expired or is invalid")
         if command in {"bridge_context", "bridge_exec_assembly"}:
@@ -464,8 +515,10 @@ class HostService:
                                              sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         control = command == "get_editor_state"
         with project.condition:
-            if project.context is None:
-                return not_started("unsupported_connector", "The Unity Connector is not available")
+            # Discovery verifies protocol/identity before creating this project.
+            # Initial reference negotiation may still be in flight when the first
+            # CLI arrives. Queue it under its original deadline; _wait_context
+            # gates execution, while live control queries do not need references.
             job = project.jobs.get(request_id)
             if job is not None:
                 if job.signature != signature:
@@ -480,7 +533,8 @@ class HostService:
                             project.jobs.pop(previous_id)
                 if sum(not item.done.is_set() for item in project.jobs.values()) >= 256:
                     return not_started("queue_full", "The project's request queue is full")
-                job = Job(dict(payload), time.monotonic() + remaining, signature)
+                job = Job(dict(payload), deadline, signature)
+                mark('host_queued', request_id)
                 project.jobs[request_id] = job
                 if control:
                     threading.Thread(target=self._run_control, args=(project, job), daemon=True,
@@ -492,7 +546,7 @@ class HostService:
                         threading.Thread(target=self._project_loop, args=(project,), daemon=True,
                                          name="unity-host-project").start()
                     project.condition.notify_all()
-        if not job.done.wait(max(0., min(job.deadline - time.monotonic(), remaining))):
+        if not job.done.wait(max(0., min(job.deadline - time.perf_counter(), remaining))):
             return job.expire()
         return job.response
 
@@ -500,7 +554,7 @@ class HostService:
         # Live readiness observes compiling/reloading states as well as ready.
         with project.condition:
             snapshot = dict(project.snapshot)
-        remaining = job.deadline - time.monotonic()
+        remaining = job.deadline - time.perf_counter()
         if remaining <= 0:
             job.expire()
             return
@@ -509,10 +563,10 @@ class HostService:
                 return
             job.state = "dispatched"
         try:
-            result = post(snapshot["port"], self.descriptor["token"], "/command", {
+            result = self._post(snapshot, {
                 "command": "get_editor_state", "params": job.payload.get("params", {}),
                 "request_id": job.payload["request_id"], "deadline_unix_ms": job.payload["deadline_unix_ms"],
-            }, remaining)
+            }, remaining, "control")
             job.complete(result)
         except TransportError:
             job.complete(unknown("get_editor_state"))
@@ -532,21 +586,31 @@ class HostService:
         service = self
 
         class Handler(BaseHTTPRequestHandler):
-            protocol_version = "HTTP/1.0"
+            protocol_version = "HTTP/1.1"
             # Headers and a small JSON body are written separately. Nagle can hold
             # the second write until a delayed ACK (~40 ms), adding a round trip
             # even on loopback. Disable it on accepted host sockets, not globally.
             disable_nagle_algorithm = True
+            timeout = 5.
+
+            def handle(self):
+                try:
+                    super().handle()
+                except (ConnectionError, TimeoutError):
+                    # A client may retire an idle persistent connection at any time.
+                    self.close_connection = True
 
             def log_message(self, format, *args):
                 pass
 
             def do_POST(self):
                 if self.headers.get("Origin") is not None:
+                    self.close_connection = True
                     self.reply(403, {"error": "Browser requests are not allowed"})
                     return
                 if not hmac.compare_digest(self.headers.get("X-UnityBridge-Token", "").encode("utf-8"),
                                            service.descriptor["token"].encode("utf-8")):
+                    self.close_connection = True
                     self.reply(403, {"error": "Authentication required"})
                     return
                 try:
@@ -558,6 +622,7 @@ class HostService:
                     if not isinstance(payload, dict):
                         raise ValueError()
                 except (ValueError, OSError):
+                    self.close_connection = True
                     self.reply(400, {"error": "Invalid JSON request"})
                     return
                 if self.path == "/health":
@@ -591,6 +656,8 @@ class HostService:
                     self.send_response(status)
                     self.send_header("Content-Type", "application/json")
                     self.send_header("Content-Length", str(len(raw)))
+                    if self.close_connection:
+                        self.send_header("Connection", "close")
                     self.end_headers()
                     self.wfile.write(raw)
                 except OSError:
@@ -608,14 +675,11 @@ class HostService:
         self.server.daemon_threads = True
         self._write_registry()
 
-        def prewarm():
-            try:
-                self.compiler.prewarm()
-            except CompilerError as exc:
-                self.compiler_error = str(exc)
-
-        threading.Thread(target=prewarm, name="unity-host-prewarm", daemon=True).start()
+        mark('host_listening')
         threading.Thread(target=self._scan_loop, name="unity-host-discovery", daemon=True).start()
+        def prepare_cli():
+            from . import cli_request  # noqa: F401; load alongside compiler preparation
+        threading.Thread(target=prepare_cli, name="unity-host-cli-prewarm", daemon=True).start()
         try:
             self.server.serve_forever(poll_interval=.1)
         finally:
@@ -625,6 +689,7 @@ class HostService:
             self.cli_server.server_close()
             cli_thread.join(2)
             self.compiler.close()
+            self.connections.close()
             path = endpoint_path(self.root, self.descriptor["runtimeId"])
             saved = read_json(path)
             if saved and saved.get("pid") == os.getpid() and saved.get("port") == self.port:

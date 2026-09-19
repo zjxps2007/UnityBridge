@@ -46,12 +46,14 @@ namespace UnityBridgeConnector
                 // A timeout/domain change may occur while queued behind another tool.
                 rejected = BridgeProtocol.Validate(request, request != null && request.Authenticated);
                 if (rejected != null) return rejected;
+                BridgeTiming.Mark("unity_execution_begin", request?.RequestId);
                 if (command == "bridge_exec_assembly")
                     return BridgeProtocol.ExecuteAssembly(parameters, request);
                 return await DispatchInternal(command, parameters);
             }
             finally
             {
+                BridgeTiming.Mark("unity_execution_end", request?.RequestId);
                 s_Lock.Release();
             }
         }

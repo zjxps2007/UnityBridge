@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any
 
 from .transport import MAX_MESSAGE_BYTES
+from .._timing import mark
 
 
 class CompilerError(Exception):
@@ -24,6 +25,8 @@ class CompilerWorker:
     def __init__(self, executable: str, *, argv: list[str] | None = None):
         self.argv = argv or [str(Path(executable).resolve())]
         self.lock = threading.Lock()
+        self.priority_lock = threading.Lock()
+        self.foreground_waiters = 0
         self.process: subprocess.Popen | None = None
         self.responses: queue.Queue = queue.Queue()
         self.stderr_tail = ""
@@ -36,12 +39,14 @@ class CompilerWorker:
         self.responses = queue.Queue()
         self.stderr_tail = ""
         try:
+            mark('compiler_spawn_begin')
             self.process = subprocess.Popen(self.argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE, text=True, encoding="utf-8",
                                             bufsize=1, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         except OSError as exc:
             raise CompilerError("compiler_unavailable", "Could not start the bundled C# compiler") from exc
         process, responses = self.process, self.responses
+        mark('compiler_spawn_end')
 
         def read_stdout():
             try:
@@ -89,17 +94,38 @@ class CompilerWorker:
                 except OSError:
                     pass
 
-    def request(self, payload: dict[str, Any], *, deadline: float) -> dict[str, Any]:
-        remaining = deadline - time.monotonic()
-        if remaining <= 0 or not self.lock.acquire(timeout=max(0, remaining)):
+    def start(self) -> None:
+        """Start the runtime without waiting for project metadata or a compile."""
+        with self.lock:
+            self._start()
+
+    def request(self, payload: dict[str, Any], *, deadline: float, background: bool = False) -> dict[str, Any]:
+        """Use an absolute time.perf_counter() deadline, including queue time."""
+        remaining = deadline - time.perf_counter()
+        if background:
+            # Background preparation never joins the queue ahead of real work.
+            with self.priority_lock:
+                acquired = remaining > 0 and not self.foreground_waiters and self.lock.acquire(blocking=False)
+            if not acquired:
+                raise CompilerError("prewarm_deferred", "Compiler is serving an execution request")
+        else:
+            with self.priority_lock:
+                self.foreground_waiters += 1
+            try:
+                acquired = remaining > 0 and self.lock.acquire(timeout=max(0, remaining))
+            finally:
+                with self.priority_lock:
+                    self.foreground_waiters -= 1
+        if not acquired:
             raise CompilerError("expired", "Request expired before the compiler was available")
         try:
-            remaining = deadline - time.monotonic()
+            remaining = deadline - time.perf_counter()
             if remaining <= 0:
                 raise CompilerError("expired", "Request expired before compilation")
-            compile_deadline = min(deadline, time.monotonic() + 30.)
+            compile_deadline = min(deadline, time.perf_counter() + 30.)
             self._start()
             request_id = uuid.uuid4().hex
+            mark('compiler_request_begin', request_id)
             message = dict(payload, protocol=1, request_id=request_id)
             raw = json.dumps(message, ensure_ascii=False)
             if len(raw.encode("utf-8")) > MAX_MESSAGE_BYTES:
@@ -116,13 +142,13 @@ class CompilerWorker:
                 except OSError:
                     pass
 
-            watchdog = threading.Timer(max(.001, compile_deadline - time.monotonic()), kill_hung_worker)
+            watchdog = threading.Timer(max(.001, compile_deadline - time.perf_counter()), kill_hung_worker)
             watchdog.daemon = True
             watchdog.start()
             try:
                 process.stdin.write(raw + "\n")
                 process.stdin.flush()
-                response = self.responses.get(timeout=max(.001, compile_deadline - time.monotonic()))
+                response = self.responses.get(timeout=max(.001, compile_deadline - time.perf_counter()))
             except (OSError, BrokenPipeError, queue.Empty) as exc:
                 self._stop()
                 raise CompilerError("compiler_timeout", "Compiler failed to respond within its time limit") from exc
@@ -145,13 +171,17 @@ class CompilerWorker:
                 raise CompilerError(str(response.get("error_code", "compile_error")),
                                     str(response.get("error", "Compilation failed")), response.get("diagnostics"))
             self.last_info = {key: response[key] for key in
-                              ("compiler_version", "cache_hit", "emit_reused", "assembly_name") if key in response}
+                              ("compiler_version", "cache_hit", "base_cache_hit", "emit_reused", "assembly_name") if key in response}
+            mark('compiler_request_end', request_id)
             return response
         finally:
             self.lock.release()
 
     def prewarm(self) -> dict[str, Any]:
-        return self.request({"operation": "ping"}, deadline=time.monotonic() + 30)
+        return self.request({"operation": "ping"}, deadline=time.perf_counter() + 30)
+
+    def warmup(self) -> dict[str, Any]:
+        return self.request({"operation": "warmup"}, deadline=time.perf_counter() + 30, background=True)
 
     def close(self) -> None:
         with self.lock:

@@ -1,0 +1,4 @@
+# Preserve the measured evidence bytes across Windows and POSIX checkouts.
+docs/benchmarks/python-startup-2026-09-19/*.json -text
+docs/benchmarks/python-startup-2026-09-19/*.jsonl -text
+docs/benchmarks/python-startup-2026-09-19/*.patch -text -whitespace

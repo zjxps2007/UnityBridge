@@ -112,7 +112,7 @@ jobs:
           # Exercise the extracted executable's private exec transport as well
           # as source Python, using an isolated host and fixture Connector.
           subprocess.run(
-              [sys.executable, "-m", "unittest", "tests.test_fast_exec"], check=True,
+              [sys.executable, "-m", "unittest", "tests.test_fast_exec", "tests.test_fast_cli"], check=True,
               env=dict(os.environ, UNITY_BRIDGE_TEST_CLI_EXE=executable), timeout=120)
           result = json.loads(run("--json", "update", "--check", "--ref", os.environ["BUILD_REF"]))
           assert result["mode"] == "standalone", result
@@ -126,6 +126,12 @@ jobs:
         with:
           name: ${{ matrix.asset_name }}
           path: dist/${{ matrix.asset_name }}
+
+      - name: Upload build provenance
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info-${{ matrix.asset_name }}
+          path: dist/build-info.json
 
   publish:
     name: Publish complete release

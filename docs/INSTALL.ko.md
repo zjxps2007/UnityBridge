@@ -98,6 +98,11 @@ Unity Hub가 CLI의 PATH 설정을 물려받을 필요가 없습니다. `compile
 마친 뒤 종료합니다. 호스트는 인증된 로컬 통신을 사용하고, 자체 프로세스 정보를
 Unity heartbeat와 별도 파일로 관리합니다.
 
+RC2 이후 개발 변경은 Editor 초기화 중 외부 준비를 더 일찍 시작할 수 있습니다.
+설치 파일 배치와 등록된 절대 경로 방식은 유지합니다. Nuitka 묶음은 비교 실험용이며,
+이 설치기에는 PyInstaller 압축 파일을 사용합니다.
+[시작 및 배포 방식 검증](PYTHON_STARTUP.ko.md)을 참고하세요.
+
 `unity-bridge status`는 호스트 사용 가능 여부를 따로 표시합니다. Unity PID·포트·상태와
 Heartbeat age는 계속 Editor를 뜻합니다. `--json status`에서는 프로젝트의 컴파일러
 `prewarm_state`를 확인할 수 있습니다. `--backend host`는 새 서비스를 요구하고,

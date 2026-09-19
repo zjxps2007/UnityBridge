@@ -2,12 +2,15 @@
 from __future__ import annotations
 
 import argparse
-from contextlib import redirect_stderr, redirect_stdout
 from io import StringIO
 import json
 import sys
 
-from .arguments import GLOBAL_VALUE_OPTIONS, _find_command_index
+from .arguments import (GLOBAL_VALUE_OPTIONS, KNOWN_COMMANDS, _find_command_index,
+                        build_parser, is_direct_tool_invocation, parse_direct_tool_args)
+from .commands import execute_command, result_exit_code
+from .output import to_jsonable
+from ..client import UnityBridgeError
 
 MAX_REQUEST_CHARS = 1024 * 1024
 
@@ -21,8 +24,65 @@ def _decode_output(value: str):
         return value.rstrip()
 
 
+class SessionExecutor:
+    """One sequential session owns its parsers and diagnostics, never sys.stdout."""
+
+    def __init__(self):
+        self.stdout, self.stderr = StringIO(), StringIO()
+        self.parsers = {}
+        self.pool = None
+        owner = self
+
+        class Parser(argparse.ArgumentParser):
+            def _print_message(self, message, file=None):
+                if message:
+                    (owner.stdout if file is sys.stdout else owner.stderr).write(message)
+
+        self.parser_class = Parser
+
+    def invoke(self, argv):
+        from ..cli import _create_client
+        self.stdout, self.stderr = StringIO(), StringIO()
+        try:
+            direct = is_direct_tool_invocation(argv)
+            if direct:
+                parsed = parse_direct_tool_args(argv)
+            else:
+                index = _find_command_index(argv)
+                selected = argv[index] if index is not None and argv[index] in KNOWN_COMMANDS else None
+                if selected not in self.parsers:
+                    self.parsers[selected] = build_parser(selected, parser_class=self.parser_class)
+                parsed = self.parsers[selected].parse_args(argv)
+            client = _create_client(parsed)
+            if parsed.command not in {"instances", "status"}:
+                if self.pool is None:
+                    from ..host.transport import ConnectionPool
+                    self.pool = ConnectionPool()
+                client._connection_pool = self.pool
+            if direct:
+                result = client.call(parsed.command, parsed.params, instance=client.discover_instance())
+            else:
+                result = execute_command(parsed, client)
+            return result_exit_code(result), to_jsonable(result), None
+        except SystemExit as exc:
+            return int(exc.code or 0), _decode_output(self.stdout.getvalue()), _decode_output(self.stderr.getvalue())
+        except UnityBridgeError as exc:
+            return 1, None, {"ok": False, "error": str(exc)}
+
+    def close(self):
+        if self.pool is not None:
+            self.pool.close()
+
+
 def run_session(args: argparse.Namespace) -> int:
-    from ..cli import main
+    executor = SessionExecutor()
+    try:
+        return _run_session(args, executor)
+    finally:
+        executor.close()
+
+
+def _run_session(args: argparse.Namespace, executor: SessionExecutor) -> int:
 
     inherited = ["--json"]
     for option, name in GLOBAL_VALUE_OPTIONS.items():
@@ -55,14 +115,8 @@ def run_session(args: argparse.Namespace) -> int:
                 raise ValueError("Session requests cannot invoke session, update, or _host")
             if "--stdin" in argv:
                 raise ValueError("Use --code or --code-file in a session; stdin carries JSONL requests")
-            stdout, stderr = StringIO(), StringIO()
-            with redirect_stdout(stdout), redirect_stderr(stderr):
-                try:
-                    code = main(inherited + argv)
-                except SystemExit as exc:
-                    code = int(exc.code or 0)
-            response = {"id": request_id, "exit_code": code,
-                        "result": _decode_output(stdout.getvalue()), "error": _decode_output(stderr.getvalue())}
+            code, result, error = executor.invoke(inherited + argv)
+            response = {"id": request_id, "exit_code": code, "result": result, "error": error}
         except (ValueError, TypeError) as exc:
             response = {"id": request_id, "exit_code": 2, "result": None, "error": str(exc)}
         output.write(json.dumps(response, ensure_ascii=False, separators=(",", ":")) + "\n")

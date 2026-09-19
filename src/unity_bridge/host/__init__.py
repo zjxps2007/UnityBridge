@@ -53,7 +53,7 @@ def host_status(instance=None, instances_dir=None) -> dict[str, Any]:
 
 
 def try_host_command(instance, command: str, params: Any, timeout_ms: int,
-                     instances_dir=None):
+                     instances_dir=None, *, connection_pool=None):
     """Return None only when no host request has been submitted.
 
     Once a POST is attempted, an ambiguous result is represented as unknown
@@ -71,7 +71,11 @@ def try_host_command(instance, command: str, params: Any, timeout_ms: int,
                "target": {"projectPath": instance.project_path, "pid": instance.pid, "port": instance.port},
                "request_id": uuid.uuid4().hex, "deadline_unix_ms": deadline}
     try:
-        response = post(endpoint["port"], descriptor["token"], "/command", payload, max(.001, timeout_ms / 1000))
+        response = post(endpoint["port"], descriptor["token"], "/command", payload, max(.001, timeout_ms / 1000),
+                        pool=connection_pool,
+                        key=(normalized_project(instance.project_path), "control" if command == "get_editor_state" else "execute"),
+                        identity=(endpoint["pid"], descriptor["runtimeId"], instance.pid,
+                                  instance.port, instance.domain_id, instance.reference_generation))
         if not isinstance(response.get("success"), bool) or not isinstance(response.get("message"), str):
             raise TransportError("Host returned an invalid command result")
         return CommandResponse.from_dict(response)

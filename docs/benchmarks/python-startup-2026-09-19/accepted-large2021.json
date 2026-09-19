@@ -1,0 +1,2033 @@
+{
+  "unity_version": "2021.3.19f1",
+  "baseline_ref": "v0.3.0-rc.2",
+  "baseline_host": true,
+  "baseline_working_tree_connector": false,
+  "sessions": [
+    {
+      "number": 1,
+      "variant": "baseline",
+      "source_sha256": {
+        "Attributes/UnityBridgeToolAttribute.cs": "8b4fcf47917924c72fb19512ce10f4c01efab6cf25f8fa32d4e72bb6574d7ebb",
+        "BridgeHostLauncher.cs": "cc083f70fae8ef4bddafd957c2c65667c512eb6b1700629f55748dc2ecd37e9d",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "CommandRouter.cs": "d14f3f3b26b95a9cda520d95a84039b17b50a1f078ca176e13d6e8b7a1c989ac",
+        "Core/AtomicFile.cs": "fa8600931d84edff930cfa55fa4dbabf962fb993ab1b954a515b581063bbe696",
+        "Core/ParamCoercion.cs": "73b13494f7f1c0dae39738c24abd8b8ecb2f7896d212725ecea0c69c52f3c6d0",
+        "Core/Response.cs": "86e3f785175b6a55442bab304e8a803b180b21dd74ce71ac8a62e548bcffce32",
+        "Core/StringCaseUtility.cs": "ac3826f8fc7ef689c9346af53bbf527b67cc2dbc1158dd68275da897626e8581",
+        "Core/ToolParams.cs": "7957b15878eaf4054bd9bee23e63b921ddf008b7025d1606fadd7cde3b4b1d22",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "6d1e6b6d57550dc8326c99103b6c97f55a14e6584ba9bd381677e12e7b4ddaa2",
+        "HttpServer.cs": "206d8c4511eeba6fb0a8446e5cf74aef01bf26178ab8ac41ad231795ba55f119",
+        "ToolDiscovery.cs": "63131c303f5cf4ac214ad4f0797a0a9be7973a3de1dfe31ce72d012aab4f40ec",
+        "Tools/EditorScreenshot.cs": "8da5112b871490fe4625d62cc9edb7da322bf07ab3b047e4601e3cc604a0f7a2",
+        "Tools/ExecuteCsharp.cs": "5a2646697c5e45f753b84ef94492cf9c1703de24c5e5ae4d01c9fe967e85a289",
+        "Tools/ExecuteMenuItem.cs": "73588a00aed26cadd7d85ec220a85ae227838902d496b44f3f47dd4038207f58",
+        "Tools/ManageEditor.cs": "e7f5f65a189eb2af4639abece0bb21139a9b67dae56994d1abde6a0981c0ca84",
+        "Tools/ManageProfiler.cs": "f1b01a6c80d6c553e5b92127665589e9498f603c592d5591f6a50ce7f5c7d848",
+        "Tools/ReadConsole.cs": "83a3d18560753acbce9e3701e3be9099a3f23da9a1a12a701ed429e192f76d38",
+        "Tools/RefreshUnity.cs": "657b45dfbc40a136b088b13efb1e36a958780f225c5b8cdf53ce251cd88aa333",
+        "Tools/ReserializeAssets.cs": "f0f2460b4ec0f81e687702c6dfa1e1a2183b5c9924197db8a76926155018066a"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 265.6379000400193
+        },
+        {
+          "name": "warmed_new_snippet",
+          "ms": 83.40400003362447
+        },
+        {
+          "name": "prewarm_only_first_exec",
+          "ms": 91.44190000370145
+        },
+        {
+          "name": "frame_idle_start",
+          "ms": 115.08319998392835
+        },
+        {
+          "name": "frame_idle_stop",
+          "ms": 102.17860003467649
+        },
+        {
+          "name": "frame_exec_start",
+          "ms": 104.12269999505952
+        },
+        {
+          "name": "frame_exec_stop",
+          "ms": 107.6486999518238
+        },
+        {
+          "name": "large_exec",
+          "ms": 123.60550003359094
+        },
+        {
+          "name": "large_exec",
+          "ms": 108.73989999527112
+        },
+        {
+          "name": "large_exec",
+          "ms": 126.31630001123995
+        },
+        {
+          "name": "large_exec",
+          "ms": 101.99430002830923
+        },
+        {
+          "name": "large_exec",
+          "ms": 111.10560002271086
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.26470003603026
+        },
+        {
+          "name": "large_exec",
+          "ms": 109.2083000112325
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.74859999865294
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.74480005400255
+        },
+        {
+          "name": "large_exec",
+          "ms": 125.27240003691986
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.49819999141619
+        },
+        {
+          "name": "large_exec",
+          "ms": 108.990500040818
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.89109997451305
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.79039999656379
+        },
+        {
+          "name": "large_exec",
+          "ms": 92.87699998822063
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.21159999165684
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.11269998457283
+        },
+        {
+          "name": "large_exec",
+          "ms": 94.11940001882613
+        },
+        {
+          "name": "large_exec",
+          "ms": 118.76729998039082
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.9393000183627
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.09709996404126
+        },
+        {
+          "name": "large_exec",
+          "ms": 100.61009996570647
+        },
+        {
+          "name": "large_exec",
+          "ms": 111.84829997364432
+        },
+        {
+          "name": "large_exec",
+          "ms": 123.80890001077205
+        },
+        {
+          "name": "large_exec",
+          "ms": 99.87289999844506
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.17570000188425
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.6702999919653
+        },
+        {
+          "name": "large_exec",
+          "ms": 126.7187999910675
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.710899988655
+        },
+        {
+          "name": "large_exec",
+          "ms": 108.55479998281226
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.70290002273396
+        },
+        {
+          "name": "large_exec",
+          "ms": 131.17730000521988
+        },
+        {
+          "name": "large_exec",
+          "ms": 111.52550001861528
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.31969999242574
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.24530001543462
+        },
+        {
+          "name": "large_exec",
+          "ms": 110.60069996165112
+        },
+        {
+          "name": "large_exec",
+          "ms": 96.75650001736358
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.94060004223138
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.48779997043312
+        },
+        {
+          "name": "large_exec",
+          "ms": 101.92410001764074
+        },
+        {
+          "name": "large_exec",
+          "ms": 109.26870000548661
+        },
+        {
+          "name": "large_exec",
+          "ms": 107.61929996078834
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.03430003859103
+        },
+        {
+          "name": "large_exec",
+          "ms": 112.34419996617362
+        },
+        {
+          "name": "large_exec",
+          "ms": 125.9252000018023
+        },
+        {
+          "name": "large_exec",
+          "ms": 99.17679999489337
+        },
+        {
+          "name": "large_exec",
+          "ms": 109.15319999912754
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.89260001201183
+        },
+        {
+          "name": "large_exec",
+          "ms": 108.47660002764314
+        },
+        {
+          "name": "large_exec",
+          "ms": 102.96679998282343
+        },
+        {
+          "name": "large_exec",
+          "ms": 118.0018000304699
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.35349999554455
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.70439999736845
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.7959000095725
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.19950000848621
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.67800002917647
+        },
+        {
+          "name": "large_exec",
+          "ms": 112.42530000163242
+        },
+        {
+          "name": "large_exec",
+          "ms": 122.74229998001829
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.44049997767434
+        },
+        {
+          "name": "large_exec",
+          "ms": 108.1772000179626
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.83790000900626
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.40700002433732
+        },
+        {
+          "name": "large_exec",
+          "ms": 110.0323999999091
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.26619998924434
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.09759995993227
+        },
+        {
+          "name": "large_exec",
+          "ms": 104.63720001280308
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.63709997199476
+        },
+        {
+          "name": "large_exec",
+          "ms": 109.07459998270497
+        },
+        {
+          "name": "large_exec",
+          "ms": 124.3489000480622
+        },
+        {
+          "name": "large_exec",
+          "ms": 122.44240002473816
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.86160002276301
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.96080001071095
+        },
+        {
+          "name": "large_exec",
+          "ms": 93.76039996277541
+        },
+        {
+          "name": "large_exec",
+          "ms": 94.63399997912347
+        },
+        {
+          "name": "large_exec",
+          "ms": 104.39460002817214
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.01159997470677
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.13600002741441
+        },
+        {
+          "name": "large_exec",
+          "ms": 112.64780000783503
+        },
+        {
+          "name": "large_exec",
+          "ms": 107.72219998762012
+        },
+        {
+          "name": "large_exec",
+          "ms": 111.53880000347272
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.01379999145865
+        },
+        {
+          "name": "large_exec",
+          "ms": 94.06360000139102
+        },
+        {
+          "name": "large_exec",
+          "ms": 107.55509999580681
+        },
+        {
+          "name": "large_exec",
+          "ms": 97.94170001987368
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.72719997819513
+        },
+        {
+          "name": "large_exec",
+          "ms": 114.86349999904633
+        },
+        {
+          "name": "large_exec",
+          "ms": 124.26809995668009
+        },
+        {
+          "name": "large_exec",
+          "ms": 120.65699999220669
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.05430002091452
+        },
+        {
+          "name": "large_exec",
+          "ms": 104.2304000002332
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.77340003894642
+        },
+        {
+          "name": "large_exec",
+          "ms": 104.50990003300831
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.60629998892546
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.90890000900254
+        },
+        {
+          "name": "large_exec",
+          "ms": 128.17440001526847
+        },
+        {
+          "name": "large_exec",
+          "ms": 123.15929995384067
+        },
+        {
+          "name": "large_exec",
+          "ms": 100.96069995779544
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.48869996657595
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.24510000646114
+        },
+        {
+          "name": "large_exec",
+          "ms": 110.9322999836877
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 77.71059998776764
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 80.52920002955943
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.082699980586767
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 74.04360000509769
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 78.1511000241153
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 59.35789999784902
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 53.66089998278767
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 89.77050002431497
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 38.337300007697195
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 51.22379999374971
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 59.51130000175908
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 41.02509998483583
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 65.99749997258186
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 42.76599996956065
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 47.49920003814623
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 74.93040000554174
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 62.971699982881546
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 68.61200003186241
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 42.19790000934154
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 75.27530001243576
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 44.66329998103902
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 78.62260000547394
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 75.39779995568097
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.13260000385344
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.463700022082776
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.09720000065863
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 64.18300000950694
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 41.41689999960363
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.38280004635453
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 62.8658999921754
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 59.62740001268685
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 61.289899982512
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 47.428099962417036
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 61.73219997435808
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 71.66389998747036
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 66.07659999281168
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 49.859800026752055
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 69.16069996077567
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 47.71670000627637
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 68.93800001125783
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 53.87810000684112
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 70.62319997930899
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.204500027466565
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 81.23330003581941
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 40.28590000234544
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 65.84990001283586
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 63.36060003377497
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 40.77670001424849
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 78.04120000218973
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.79800000647083
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 72.71030003903434
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 78.46879999851808
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 47.129000013228506
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 46.66590003762394
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 44.72410003654659
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 47.057799994945526
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 47.07329999655485
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 64.84950002050027
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 41.50829999707639
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 73.89780000085011
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 61.89290003385395
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 34.399099997244775
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 33.70920004090294
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 54.31289999978617
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 52.74180002743378
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 30.09730001213029
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 29.653199948370457
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 41.03889997350052
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 46.29430000204593
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 49.21560001093894
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 44.85000000568107
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 40.5940999626182
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 48.50030003581196
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 75.50589996390045
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 40.98610003711656
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 63.75610001850873
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.973500004038215
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.35199996177107
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 43.60969999106601
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 44.758700008969754
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 73.55930004268885
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.312900037970394
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 46.06600000988692
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.80219998024404
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 43.74679998727515
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 77.31279998552054
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 44.826900004409254
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 44.928900024387985
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 41.95040004560724
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 52.90499998955056
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 71.994400001131
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 75.45840000966564
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.904100006911904
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 45.176299987360835
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 64.28370001958683
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 51.96249997243285
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 49.843299959320575
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 63.65880003431812
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 56.82140000863001
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 29.84969998942688
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+      "executable_sha256": "585c23be16579c16c9217aa295b58c1e9f28201cad0d1cb5f06c4169121ec385",
+      "installed_bytes": 135202789,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-large2021/1-baseline/UnityProject",
+        "port": 8090,
+        "pid": 11296,
+        "unityVersion": "2021.3.19f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789750967664,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "61fdd8d50097442783dba981f0b2983c",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 6351.04840004351,
+      "cold_service_samples_ms": [
+        503.5773999989033
+      ],
+      "cold_service_to_first_result_ms": 503.5773999989033,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "719f03f618886df4c02d57afb1fa8b92",
+        "pid": 9860,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_d57279b592714840a20d458410182808"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-large2021/1-baseline/UnityProject",
+            "pid": 11296,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "idle_editor_gaps": [
+        1.9730999999997039,
+        5.956299999999828,
+        2.0857999999998356,
+        5.408600000000206,
+        2.0176000000001295,
+        6.507799999999861,
+        2.167500000000018,
+        5.833000000000084,
+        2.0203999999998814,
+        2.1586999999999534
+      ],
+      "exec_editor_gaps": [],
+      "unity_working_set_bytes": 315875328,
+      "host_after": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "719f03f618886df4c02d57afb1fa8b92",
+        "pid": 41108,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": true,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_2ca07fe0d44c4d62bff65535b292c552"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-large2021/1-baseline/UnityProject",
+            "pid": 11296,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "host_working_set_bytes": 476459008,
+      "worker_working_set_bytes": 207835136
+    },
+    {
+      "number": 2,
+      "variant": "candidate",
+      "source_sha256": {
+        "BridgeHostLauncher.cs": "fed2b739e5d3bfcab8e6a494df860849a3e67a51d94b4b2d869099ce9d409eb2",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+        "CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+        "HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+        "ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+        "Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+        "Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+        "Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+        "Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+        "Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+        "Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+        "Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+        "Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+        "Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+        "Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+        "Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+        "Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+        "Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+        "Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 289.51339999912307
+        },
+        {
+          "name": "warmed_new_snippet",
+          "ms": 73.03239998873323
+        },
+        {
+          "name": "prewarm_only_first_exec",
+          "ms": 98.3985000057146
+        },
+        {
+          "name": "frame_idle_start",
+          "ms": 89.49779998511076
+        },
+        {
+          "name": "frame_idle_stop",
+          "ms": 98.4357999986969
+        },
+        {
+          "name": "frame_exec_start",
+          "ms": 83.4807000355795
+        },
+        {
+          "name": "frame_exec_stop",
+          "ms": 82.53970002988353
+        },
+        {
+          "name": "large_exec",
+          "ms": 101.55999998096377
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.22099996823817
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.6620999770239
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.52079999633133
+        },
+        {
+          "name": "large_exec",
+          "ms": 109.23569998703897
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.53649999946356
+        },
+        {
+          "name": "large_exec",
+          "ms": 99.87149998778477
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.4171000001952
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.8359000091441
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.14149996032938
+        },
+        {
+          "name": "large_exec",
+          "ms": 118.94240003312007
+        },
+        {
+          "name": "large_exec",
+          "ms": 98.54970005108044
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.20999997947365
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.10070000961423
+        },
+        {
+          "name": "large_exec",
+          "ms": 107.01129998778924
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.00479998113587
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.77649997500703
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.03199999220669
+        },
+        {
+          "name": "large_exec",
+          "ms": 120.88139995466918
+        },
+        {
+          "name": "large_exec",
+          "ms": 95.31530004460365
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.75070002209395
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.87920001102611
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.8553000036627
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.78660002583638
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.38259997032583
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.7225000448525
+        },
+        {
+          "name": "large_exec",
+          "ms": 96.47879999829456
+        },
+        {
+          "name": "large_exec",
+          "ms": 94.60189996752888
+        },
+        {
+          "name": "large_exec",
+          "ms": 111.78370000561699
+        },
+        {
+          "name": "large_exec",
+          "ms": 101.69089998817071
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.49889997206628
+        },
+        {
+          "name": "large_exec",
+          "ms": 95.89910000795498
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.60700003849342
+        },
+        {
+          "name": "large_exec",
+          "ms": 111.08939995756373
+        },
+        {
+          "name": "large_exec",
+          "ms": 107.21669998019934
+        },
+        {
+          "name": "large_exec",
+          "ms": 98.87360001448542
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.3223000089638
+        },
+        {
+          "name": "large_exec",
+          "ms": 100.91310000279918
+        },
+        {
+          "name": "large_exec",
+          "ms": 106.94959998363629
+        },
+        {
+          "name": "large_exec",
+          "ms": 113.11310000019148
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.57619999535382
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.09359997091815
+        },
+        {
+          "name": "large_exec",
+          "ms": 85.96400002716109
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.7541000219062
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.34529999410734
+        },
+        {
+          "name": "large_exec",
+          "ms": 97.92540001217276
+        },
+        {
+          "name": "large_exec",
+          "ms": 95.54220002610236
+        },
+        {
+          "name": "large_exec",
+          "ms": 89.57319997716695
+        },
+        {
+          "name": "large_exec",
+          "ms": 82.96020003035665
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.0102000082843
+        },
+        {
+          "name": "large_exec",
+          "ms": 95.6307000014931
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.96089998539537
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.56149997841567
+        },
+        {
+          "name": "large_exec",
+          "ms": 89.1770999878645
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.91069999197498
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.92789999581873
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.5726999794133
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.91380001557991
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.75050003593788
+        },
+        {
+          "name": "large_exec",
+          "ms": 99.68330000992864
+        },
+        {
+          "name": "large_exec",
+          "ms": 89.06799997203052
+        },
+        {
+          "name": "large_exec",
+          "ms": 82.93289999710396
+        },
+        {
+          "name": "large_exec",
+          "ms": 85.74080001562834
+        },
+        {
+          "name": "large_exec",
+          "ms": 93.7304999679327
+        },
+        {
+          "name": "large_exec",
+          "ms": 100.03119998145849
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.28920002188534
+        },
+        {
+          "name": "large_exec",
+          "ms": 108.25569997541606
+        },
+        {
+          "name": "large_exec",
+          "ms": 211.4780999836512
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.21429998613894
+        },
+        {
+          "name": "large_exec",
+          "ms": 97.5474999868311
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.90299999620765
+        },
+        {
+          "name": "large_exec",
+          "ms": 85.40979999816045
+        },
+        {
+          "name": "large_exec",
+          "ms": 103.5787999862805
+        },
+        {
+          "name": "large_exec",
+          "ms": 89.01900000637397
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.73010001378134
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.445100012701
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.04279996547848
+        },
+        {
+          "name": "large_exec",
+          "ms": 90.19870002521202
+        },
+        {
+          "name": "large_exec",
+          "ms": 116.04779999470338
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.08209999511018
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.03739999327809
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.2353000449948
+        },
+        {
+          "name": "large_exec",
+          "ms": 89.86670000012964
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.25919997878373
+        },
+        {
+          "name": "large_exec",
+          "ms": 109.98750000726432
+        },
+        {
+          "name": "large_exec",
+          "ms": 92.6636999938637
+        },
+        {
+          "name": "large_exec",
+          "ms": 107.11959999753162
+        },
+        {
+          "name": "large_exec",
+          "ms": 82.41580001777038
+        },
+        {
+          "name": "large_exec",
+          "ms": 105.39909999351948
+        },
+        {
+          "name": "large_exec",
+          "ms": 88.14909995999187
+        },
+        {
+          "name": "large_exec",
+          "ms": 97.16180001851171
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.49019999150187
+        },
+        {
+          "name": "large_exec",
+          "ms": 87.28550001978874
+        },
+        {
+          "name": "large_exec",
+          "ms": 86.22050000121817
+        },
+        {
+          "name": "large_exec",
+          "ms": 98.41559996129945
+        },
+        {
+          "name": "large_exec",
+          "ms": 85.4156999848783
+        },
+        {
+          "name": "large_exec",
+          "ms": 83.237899991218
+        },
+        {
+          "name": "large_exec",
+          "ms": 84.27659998415038
+        },
+        {
+          "name": "large_exec",
+          "ms": 102.88630001014099
+        },
+        {
+          "name": "large_exec",
+          "ms": 91.37000003829598
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.24110003327951
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.431400027126074
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.73119999235496
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 30.839300015941262
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.239400035701692
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 32.249099982436746
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 43.357099988497794
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.35639999061823
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.08100003656
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.5594000229612
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.59089997643605
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 32.58030000142753
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.581300019752234
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.76440001698211
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 31.739199999719858
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.26180000556633
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.143599989358336
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.889199973084033
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.8497999641113
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.38759999535978
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.431399990338832
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.72949997941032
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.650499959941953
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.175200007855892
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.12049999879673
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.530499988235533
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.16339997621253
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.723200000356883
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.057599974796176
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.872299971524626
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 30.53450002335012
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.161300007719547
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.043299993034452
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.661899999249727
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.153700018767267
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.652999978978187
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.616099989041686
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.140600035432726
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.67480003926903
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.142499980982393
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.459500018972903
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.458200009074062
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.419700006954372
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.358600007370114
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.901800010818988
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.377500013448298
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.112899999134243
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.526299993041903
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.30320005118847
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.11760003492236
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 29.24659999553114
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 32.46949997264892
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.681499999947846
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.491599972359836
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.895099959801883
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.84969996334985
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.98749996488914
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.871500012930483
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.415899978019297
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.81079996889457
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.427899952977896
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 36.599299986846745
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.690499984193593
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.849100027699023
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.577499986160547
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.37699997285381
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.232900039758533
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 34.75049999542534
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.15449997736141
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.904000027570873
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.54749997984618
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.09519998077303
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.119600002653897
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.978699966799468
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.453400030732155
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.374799992889166
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.407500030472875
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.68080001603812
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.878500018734485
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.59780002431944
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.207200018689036
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.625300000887364
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 41.31349996896461
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.96810000250116
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.185199967585504
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.269800008274615
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.985199958086014
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.475200011394918
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.98010000353679
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.07070000562817
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 26.982099981978536
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.556799955666065
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.20499999122694
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 25.48039995599538
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 28.382799995597452
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.14719995856285
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.636800019536167
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 36.480800015851855
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 38.33700000541285
+        },
+        {
+          "name": "session_large_exec",
+          "ms": 27.602999994996935
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+      "executable_sha256": "39ad76387cd6ecf2f109de5d5e23964b31ad2d210ef67baa3aabdf020fc3408b",
+      "installed_bytes": 135226276,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-large2021/2-candidate/UnityProject",
+        "port": 8090,
+        "pid": 46724,
+        "unityVersion": "2021.3.19f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789750994721,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "c8f576e01cff49bdac9ec4e846741746",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 6198.137499974109,
+      "cold_service_samples_ms": [
+        542.7108000149019
+      ],
+      "cold_service_to_first_result_ms": 542.7108000149019,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "04da9345b08c3cfff121dc28fd60e96f",
+        "pid": 36752,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_bd9086b4803547d5a1514046b9a5e39c"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-large2021/2-candidate/UnityProject",
+            "pid": 46724,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "idle_editor_gaps": [
+        1.999000000000251,
+        6.307400000000143,
+        2.0612999999998465,
+        4.897100000000137,
+        2.0338999999999032,
+        6.414299999999912,
+        2.152900000000045,
+        5.571599999999762,
+        2.095100000000002,
+        2.242699999999786
+      ],
+      "exec_editor_gaps": [],
+      "unity_working_set_bytes": 327647232,
+      "host_after": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "04da9345b08c3cfff121dc28fd60e96f",
+        "pid": 10044,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": true,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_8afd6a150d07449fb0d28407a1a88632"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-large2021/2-candidate/UnityProject",
+            "pid": 46724,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "host_working_set_bytes": 476426240,
+      "worker_working_set_bytes": 218132480
+    }
+  ],
+  "scope": "Windows, empty projects, batchmode/nographics, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms",
+  "configuration": {
+    "unity_editor": "C:\\Program Files\\Unity\\Hub\\Editor\\2021.3.19f1\\Editor\\Unity.exe",
+    "unity_version": "2021.3.19f1",
+    "baseline_bin": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+    "candidate_bin": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+    "baseline_ref": "v0.3.0-rc.2",
+    "baseline_host": true,
+    "baseline_working_tree_connector": false,
+    "variants": [
+      "baseline",
+      "candidate"
+    ],
+    "samples": 0,
+    "exec_samples": 0,
+    "cold_samples": 1,
+    "session_samples": 20,
+    "large_samples": 100,
+    "candidate_env": [],
+    "startup_host": false,
+    "startup_only": false,
+    "reuse_projects": false,
+    "gui": null,
+    "extended": false,
+    "output": "<repo>\\.codex-deps\\python-startup\\accepted-large2021"
+  },
+  "summary": {
+    "baseline": {
+      "instances": {},
+      "wait_ready": {},
+      "status": {},
+      "console": {},
+      "tools": {},
+      "unique_exec": {},
+      "repeat_exec": {},
+      "first_exec": {
+        "n": 1,
+        "p50_ms": 265.6379000400193,
+        "p95_ms": 265.6379000400193,
+        "max_ms": 265.6379000400193
+      },
+      "warmed_new_snippet": {
+        "n": 1,
+        "p50_ms": 83.40400003362447,
+        "p95_ms": 83.40400003362447,
+        "max_ms": 83.40400003362447
+      },
+      "prewarm_only_first_exec": {
+        "n": 1,
+        "p50_ms": 91.44190000370145,
+        "p95_ms": 91.44190000370145,
+        "max_ms": 91.44190000370145
+      },
+      "large_exec": {
+        "n": 100,
+        "p50_ms": 105.13600002741441,
+        "p95_ms": 125.27240003691986,
+        "max_ms": 131.17730000521988
+      },
+      "session_large_exec": {
+        "n": 100,
+        "p50_ms": 49.843299959320575,
+        "p95_ms": 78.1511000241153,
+        "max_ms": 89.77050002431497
+      },
+      "cold_service_to_first_result": {
+        "n": 1,
+        "p50_ms": 503.5773999989033,
+        "p95_ms": 503.5773999989033,
+        "max_ms": 503.5773999989033
+      },
+      "idle_editor_gaps": {
+        "n": 10,
+        "p50_ms": 2.1586999999999534,
+        "p95_ms": 6.507799999999861,
+        "max_ms": 6.507799999999861
+      },
+      "exec_editor_gaps": {}
+    },
+    "candidate": {
+      "instances": {},
+      "wait_ready": {},
+      "status": {},
+      "console": {},
+      "tools": {},
+      "unique_exec": {},
+      "repeat_exec": {},
+      "first_exec": {
+        "n": 1,
+        "p50_ms": 289.51339999912307,
+        "p95_ms": 289.51339999912307,
+        "max_ms": 289.51339999912307
+      },
+      "warmed_new_snippet": {
+        "n": 1,
+        "p50_ms": 73.03239998873323,
+        "p95_ms": 73.03239998873323,
+        "max_ms": 73.03239998873323
+      },
+      "prewarm_only_first_exec": {
+        "n": 1,
+        "p50_ms": 98.3985000057146,
+        "p95_ms": 98.3985000057146,
+        "max_ms": 98.3985000057146
+      },
+      "large_exec": {
+        "n": 100,
+        "p50_ms": 89.57319997716695,
+        "p95_ms": 111.78370000561699,
+        "max_ms": 211.4780999836512
+      },
+      "session_large_exec": {
+        "n": 100,
+        "p50_ms": 26.68080001603812,
+        "p95_ms": 34.75049999542534,
+        "max_ms": 43.357099988497794
+      },
+      "cold_service_to_first_result": {
+        "n": 1,
+        "p50_ms": 542.7108000149019,
+        "p95_ms": 542.7108000149019,
+        "max_ms": 542.7108000149019
+      },
+      "idle_editor_gaps": {
+        "n": 10,
+        "p50_ms": 2.152900000000045,
+        "p95_ms": 6.414299999999912,
+        "max_ms": 6.414299999999912
+      },
+      "exec_editor_gaps": {}
+    }
+  },
+  "ordinary_command_gates": {},
+  "functional_passed": true,
+  "performance_gates_evaluated": false,
+  "passed": null
+}

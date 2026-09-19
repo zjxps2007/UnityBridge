@@ -67,6 +67,12 @@ startup work when a compatible host is running. Existing command syntax and
 per-request execution are preserved. See the [exec comparison](docs/EXEC_OPTIMIZATION.md)
 for the separate follow-up measurement collected before the RC2 version bump.
 
+Work after RC2 starts external preparation earlier, extends lightweight command
+forwarding, and reuses session connections and compiler preparation. These are
+development changes, not part of the published RC2 archive. See the
+[Python startup comparison](docs/PYTHON_STARTUP.md) for measurements, rejected
+defaults, runtime/packaging experiments, and verification limits.
+
 ## Quick Start
 
 ### 1. Install The Unity Package

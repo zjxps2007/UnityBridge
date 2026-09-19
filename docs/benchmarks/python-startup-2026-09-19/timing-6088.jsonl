@@ -1,0 +1,4 @@
+{"stage":"python_entry","pid":6088,"ns":311916600572500,"unix_ns":1789750466575304200,"request_id":null}
+{"stage":"fast_cli_imported","pid":6088,"ns":311916601261100,"unix_ns":1789750466576304300,"request_id":null}
+{"stage":"full_cli_imported","pid":6088,"ns":311916607862600,"unix_ns":1789750466582333100,"request_id":null}
+{"stage":"python_result","pid":6088,"ns":311916676548800,"unix_ns":1789750466651021300,"request_id":null}

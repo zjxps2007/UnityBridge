@@ -1,0 +1,3 @@
+{"stage":"python_entry","pid":48268,"ns":311911208134000,"unix_ns":1789750461182682500,"request_id":null}
+{"stage":"host_cli_imported","pid":48268,"ns":311911219281300,"unix_ns":1789750461193828700,"request_id":null}
+{"stage":"python_result","pid":48268,"ns":311911225681200,"unix_ns":1789750461200761600,"request_id":null}

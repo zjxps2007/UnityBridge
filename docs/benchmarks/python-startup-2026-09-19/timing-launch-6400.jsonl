@@ -1,0 +1,2 @@
+{"pid":6400,"parent_pid":468,"stage":"process_start","operation":"console","ns":311914439724200,"unix_ns":1789750464414954400}
+{"pid":6400,"parent_pid":468,"stage":"process_end","operation":"console","ns":311914513502400,"unix_ns":1789750464488733500}

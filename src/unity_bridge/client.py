@@ -145,6 +145,7 @@ class UnityClient:
         self.cwd = Path(cwd) if cwd is not None else None
         self.process_checker = process_checker
         self.backend = backend or os.environ.get("UNITY_BRIDGE_BACKEND", "auto")
+        self._connection_pool = None
         if self.backend not in {"auto", "host", "legacy"}:
             raise DiscoveryError("backend must be auto, host, or legacy")
 
@@ -197,12 +198,26 @@ class UnityClient:
             if target.bridge_protocol == 1:
                 from .host import try_host_command
 
-                response = try_host_command(target, command, params, timeout, self.instances_dir)
+                if self._connection_pool is None:
+                    from .host.transport import ConnectionPool
+                    self._connection_pool = ConnectionPool()
+                response = try_host_command(target, command, params, timeout, self.instances_dir,
+                                            connection_pool=self._connection_pool)
                 if response is not None:
                     return response
             if self.backend == "host":
                 raise UnityConnectionError("no compatible UnityBridge host is ready for this Unity instance")
         return send_command(target, command, params, timeout_ms=timeout)
+
+    def close(self) -> None:
+        if self._connection_pool is not None:
+            self._connection_pool.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        self.close()
 
     def wait_for_alive(self, *, timeout_ms: int | None = None) -> Instance:
         return wait_for_alive(

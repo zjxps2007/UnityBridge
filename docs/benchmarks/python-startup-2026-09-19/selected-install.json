@@ -1,0 +1,31 @@
+{
+  "archive_sha256": "ae6843ff6781751a0e9a68bec24c53114c7fe668a25e96b08441b026d9725bee",
+  "checks": [
+    {
+      "name": "fresh",
+      "passed": true,
+      "installer_exit_code": 0
+    },
+    {
+      "name": "reinstall",
+      "passed": true,
+      "installer_exit_code": 0
+    },
+    {
+      "name": "upgrade_public_rc2",
+      "passed": true,
+      "installer_exit_code": 0
+    },
+    {
+      "name": "installed_host_relaunch",
+      "passed": true
+    },
+    {
+      "name": "reject_flat_nuitka",
+      "passed": true,
+      "installer_exit_code": 1
+    }
+  ],
+  "passed": true,
+  "scope": "Real installer and binaries; only remote discovery/download are replaced with local files; user PATH unchanged."
+}

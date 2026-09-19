@@ -72,6 +72,37 @@ try
         Check(engine.Process(Request("return \"한글🧪\";")).Success, "Unicode source is compiled.");
     });
 
+    Test("Framework warmup never leaks implicit references or an executable result", () =>
+    {
+        var warmEngine = new CompilerEngine();
+        var warm = warmEngine.Process(new CompileRequest { Protocol = 1, Operation = "warmup", RequestId = "warm" });
+        Check(warm.Success && warm.AssemblyBase64 is null && warm.AssemblyName is null, "Warmup produces no loadable result.");
+        Check(warmEngine.Process(new CompileRequest { Protocol = 1, Operation = "warmup" }).Success, "Warmup is idempotent.");
+        Check(!warmEngine.Process(Request("return 42;", providedReferences: [Identity(fixturePath)])).Success, "Runtime references never become implicit Unity references.");
+        Check(warmEngine.Process(Request("return new UnityEngine.Object();")).Success, "Actual project references still compile after warmup.");
+    });
+
+    Test("Different snippets reuse only a compatible base compilation", () =>
+    {
+        var baseEngine = new CompilerEngine(reuseBaseCompilation: true);
+        var first = baseEngine.Process(Request("return 7101;"));
+        var second = baseEngine.Process(Request("return 7102;"));
+        Check(first.Success && second.Success && !first.BaseCacheHit && second.BaseCacheHit && !second.CacheHit, "New source reuses its reference context.");
+        Check(first.AssemblyName != second.AssemblyName && first.AssemblyBase64 != second.AssemblyBase64, "Base sharing never reuses a result or assembly identity.");
+        Check(!baseEngine.Process(Request("return 7103;", language: "8.0")).BaseCacheHit, "Language configuration is isolated.");
+        var missing = baseEngine.Process(Request("return 7104;", providedReferences: [Identity(fixturePath)]));
+        Check(!missing.Success && missing.ErrorCode == "compile_error", "A base cannot supply missing references.");
+    });
+
+    Test("Base compilation remains opt in after its latency experiment", () =>
+    {
+        var defaultEngine = new CompilerEngine();
+        var first = defaultEngine.Process(Request("return 8101;"));
+        var second = defaultEngine.Process(Request("return 8102;"));
+        Check(first.Success && second.Success && !first.BaseCacheHit && !second.BaseCacheHit,
+            "The default path does not retain an unproven base compilation.");
+    });
+
     Test("Cached emission is byte identical only when explicitly requested", () =>
     {
         var first = engine.Process(Request("return 7123;", freshIdentity: false));

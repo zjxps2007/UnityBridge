@@ -8,6 +8,7 @@ from pathlib import Path
 from urllib.parse import quote
 
 from ..client import DiscoveryError
+from .._runtime import executable_path
 
 
 DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-amd64.zip"
@@ -16,7 +17,8 @@ DEFAULT_INSTALL_SHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/
 
 
 def is_standalone_build() -> bool:
-    return bool(getattr(sys, "frozen", False))
+    from .._runtime import is_standalone
+    return is_standalone()
 
 
 def install_mode() -> str:
@@ -49,7 +51,7 @@ def _standalone_windows_update_command(version: str, *, wait_pid: int | None = N
         + "$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'; "
         + f"Invoke-WebRequest -Uri '{installer_url}' -OutFile $script; "
         + f"& $script -Version '{_escape_powershell_single_quoted(version)}' "
-        + f"-InstallDir '{_escape_powershell_single_quoted(str(Path(sys.executable).parent))}' -NoPathUpdate"
+        + f"-InstallDir '{_escape_powershell_single_quoted(str(Path(executable_path()).parent))}' -NoPathUpdate"
     )
     return [
         "powershell",
@@ -79,7 +81,7 @@ def _standalone_posix_update_command(version: str, *, wait_pid: int | None = Non
         + f"wget -qO \"$script\" {_sh_quote(installer_url)}; "
         + "else echo 'curl or wget is required to update UnityBridge.' >&2; exit 1; fi; "
         + f"sh \"$script\" --version {_sh_quote(version)} "
-        + f"--install-dir {_sh_quote(str(Path(sys.executable).parent))} --no-path-update; "
+        + f"--install-dir {_sh_quote(str(Path(executable_path()).parent))} --no-path-update; "
         + "rm -f \"$script\""
     )
     return ["sh", "-c", script]

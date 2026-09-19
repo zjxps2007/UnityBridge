@@ -1,0 +1,662 @@
+{
+  "unity_version": "6000.3.13f1",
+  "expected_connector_version": "0.3.0-rc.2",
+  "source_sha256": {
+    "BridgeHostLauncher.cs": "d88a3f396079d01b2895d2a86584ba8502b68eb8f5c8079947f9c74c8054c86a",
+    "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+    "BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+    "CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+    "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+    "Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+    "HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+    "ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+    "Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+    "Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+    "Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+    "Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+    "Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+    "Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+    "Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+    "Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+    "Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+    "Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+    "Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+    "Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+    "Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+    "Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306"
+  },
+  "checks": [
+    {
+      "name": "connector_protocol_audit",
+      "passed": true,
+      "result": {
+        "domainId": "6b7ad65c6fde47b28297546cd0beffad",
+        "referenceGeneration": 0
+      },
+      "elapsed_ms": 51.04369996115565
+    },
+    {
+      "name": "authentication",
+      "passed": true,
+      "result": {
+        "connector_http": 403,
+        "host_http": 403
+      },
+      "elapsed_ms": 34.72170000895858
+    },
+    {
+      "name": "async_tool_and_result_getters_on_main_thread",
+      "passed": true,
+      "result": {
+        "projectDataPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject/Assets",
+        "threadId": 1
+      },
+      "elapsed_ms": 165.31700000632554
+    },
+    {
+      "name": "cli_uses_external_compiler",
+      "passed": true,
+      "result": {
+        "response": {
+          "tool": "exec",
+          "command": "exec",
+          "params": {
+            "code": "return 20 + 22;"
+          },
+          "success": true,
+          "message": "OK",
+          "data": 42
+        },
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "base_cache_hit": true,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_1784ea88c54b4782ad66009dca7ed7ff"
+        }
+      },
+      "elapsed_ms": 91.2432000041008
+    },
+    {
+      "name": "fast_cli_inputs_static_state_and_error_recovery",
+      "passed": true,
+      "result": {
+        "file_stdin_unicode": true,
+        "custom_using": true,
+        "fresh_static_results": [
+          1,
+          1
+        ],
+        "compile_error_recovery": true,
+        "cli_protocol": 1
+      },
+      "elapsed_ms": 634.0509000001475
+    },
+    {
+      "name": "large_unicode_cli_and_session_results",
+      "passed": true,
+      "result": {
+        "characters": 524289,
+        "utf8_bytes": 1572868,
+        "cli_and_session": true
+      },
+      "elapsed_ms": 203.70640000328422
+    },
+    {
+      "name": "operation_receipts_without_fixed_settling_delay",
+      "passed": true,
+      "result": [
+        {
+          "command": [
+            "refresh",
+            "--wait"
+          ],
+          "operation_id": "84c438be9a3146d48b2b85fbc7c75dc0"
+        },
+        {
+          "command": [
+            "reserialize",
+            "--wait"
+          ],
+          "operation_id": "88c2d5c9e5a24e538289078739e865b0"
+        },
+        {
+          "command": [
+            "refresh",
+            "--compile",
+            "request",
+            "--wait"
+          ],
+          "operation_id": "3dd00deb57a94189a807c637376318f9"
+        }
+      ],
+      "elapsed_ms": 1811.7308000219055
+    },
+    {
+      "name": "persistent_cli_session",
+      "passed": true,
+      "result": [
+        {
+          "id": 0,
+          "exit_code": 0,
+          "result": {
+            "state": "ready",
+            "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+            "port": 8091,
+            "pid": 47768,
+            "unityVersion": "6000.3.13f1",
+            "connectorVersion": "0.3.0-rc.2",
+            "timestamp": 1789745881752,
+            "compileErrors": false,
+            "bridgeProtocol": 1,
+            "domainId": "aab0e068add045cca99807bdb48c70cf",
+            "referenceGeneration": 0,
+            "host": {
+              "state": "running",
+              "version": "0.3.0-rc.2",
+              "pid": 25768,
+              "port": 57223,
+              "project_registered": true,
+              "protocol": 1,
+              "prewarm_state": "pending"
+            }
+          },
+          "error": null
+        },
+        {
+          "id": 1,
+          "exit_code": 0,
+          "result": {
+            "tool": "exec",
+            "command": "exec",
+            "params": {
+              "code": "return 19;"
+            },
+            "success": true,
+            "message": "OK",
+            "data": 19
+          },
+          "error": null
+        },
+        {
+          "id": 2,
+          "exit_code": 0,
+          "result": {
+            "success": true,
+            "message": "Current editor state",
+            "data": {
+              "requestId": null,
+              "instance": {
+                "state": "ready",
+                "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+                "port": 8091,
+                "pid": 47768,
+                "unityVersion": "6000.3.13f1",
+                "connectorVersion": "0.3.0-rc.2",
+                "timestamp": 1789745882163,
+                "compileErrors": false,
+                "bridgeProtocol": 1,
+                "domainId": "aab0e068add045cca99807bdb48c70cf",
+                "referenceGeneration": 0
+              },
+              "operation": null
+            }
+          },
+          "error": null
+        }
+      ],
+      "elapsed_ms": 143.13809998566285
+    },
+    {
+      "name": "repeated_exec_and_static_isolation",
+      "passed": true,
+      "result": {
+        "results": [
+          77,
+          77
+        ],
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": true,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_692adac4336d4640aecca1c331591029"
+        },
+        "fresh_static_results": [
+          1,
+          1
+        ]
+      },
+      "elapsed_ms": 133.2854999927804
+    },
+    {
+      "name": "same_pe_reload_observation",
+      "passed": true,
+      "result": {
+        "first": 1,
+        "second": 1,
+        "referenceGeneration": 0
+      },
+      "elapsed_ms": 32.07800001837313
+    },
+    {
+      "name": "stale_and_expired_preexecution",
+      "passed": true,
+      "result": [
+        "stale_domain",
+        "stale_references",
+        "expired"
+      ],
+      "elapsed_ms": 70.21460001124069
+    },
+    {
+      "name": "control_bypass_and_no_late_side_effect",
+      "passed": true,
+      "result": {
+        "before": 0,
+        "after": 1,
+        "control_state": "ready",
+        "expired": {
+          "success": false,
+          "message": "Request deadline expired while waiting to execute.",
+          "data": {
+            "completion": "not_started",
+            "reason": "expired",
+            "domainId": "aab0e068add045cca99807bdb48c70cf",
+            "referenceGeneration": 0
+          }
+        }
+      },
+      "elapsed_ms": 1871.0177000029944
+    },
+    {
+      "name": "fast_cli_timeout_never_executes_late",
+      "passed": true,
+      "result": {
+        "response": {
+          "tool": "exec",
+          "command": "exec",
+          "params": {
+            "code": "System.IO.File.WriteAllText(@\"<repo>\\.codex-deps\\python-startup\\final-native6\\expired-cli-mutation\", \"late\"); return true;"
+          },
+          "success": true,
+          "message": "exec sent to host; completion could not be confirmed",
+          "data": {
+            "accepted": true,
+            "completion": "unknown",
+            "command": "exec"
+          }
+        },
+        "late_mutation": false
+      },
+      "elapsed_ms": 1939.3626999808475
+    },
+    {
+      "name": "queued_old_listener_request_never_executes_after_restart",
+      "passed": true,
+      "result": {
+        "audit": {
+          "before": 2,
+          "after": 2,
+          "queuedBeforeStop": true,
+          "listenerRestarted": true,
+          "gateEntries": 1,
+          "rejected": {
+            "success": false,
+            "message": "Unity connector is stopping.",
+            "data": {
+              "completion": "not_started",
+              "reason": "not_ready",
+              "domainId": "aab0e068add045cca99807bdb48c70cf",
+              "referenceGeneration": 0
+            }
+          }
+        },
+        "accepted_gate_delivery": {
+          "response_lost": "JSONDecodeError"
+        },
+        "fresh_http_request_succeeded": true
+      },
+      "elapsed_ms": 156.05400002095848
+    },
+    {
+      "name": "live_control_during_external_compile",
+      "passed": true,
+      "result": {
+        "live_state": "ready",
+        "control_finished_before_exec": true,
+        "result": 42
+      },
+      "elapsed_ms": 148.71420001145452
+    },
+    {
+      "name": "compile_error_and_recovery",
+      "passed": true,
+      "result": {
+        "success": false,
+        "message": "Compile error:\nL15: The name 'MissingAuditSymbol' does not exist in the current context",
+        "data": {
+          "completion": "not_started",
+          "reason": "compile_error",
+          "diagnostics": [
+            {
+              "id": "CS0103",
+              "severity": "error",
+              "message": "The name 'MissingAuditSymbol' does not exist in the current context",
+              "line": 15,
+              "column": 8
+            }
+          ]
+        }
+      },
+      "elapsed_ms": 66.45230000140145
+    },
+    {
+      "name": "reference_manifest_invalidation",
+      "passed": true,
+      "result": {
+        "before": 0,
+        "after": 1
+      },
+      "elapsed_ms": 631.2200999818742
+    },
+    {
+      "name": "domain_reload_preserves_host",
+      "passed": true,
+      "result": {
+        "previous_domain": "aab0e068add045cca99807bdb48c70cf",
+        "new_domain": "9fbe61cc9cd74128a515aa8f2384939a",
+        "host_pid": 25768,
+        "revision": 1
+      },
+      "elapsed_ms": 1396.601299988106
+    },
+    {
+      "name": "play_pause_state_and_execution_guard",
+      "passed": true,
+      "result": [
+        {
+          "event": {
+            "expected": "paused",
+            "observed": "paused",
+            "matches": true,
+            "event_ms": 5.8133
+          },
+          "guard": {
+            "accepted": true,
+            "instance": {
+              "state": "paused",
+              "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+              "port": 8091,
+              "pid": 47768,
+              "unityVersion": "6000.3.13f1",
+              "connectorVersion": "0.3.0-rc.2",
+              "timestamp": 1789745889932,
+              "compileErrors": false,
+              "bridgeProtocol": 1,
+              "domainId": "cf6c5cdd4c6247cc852013e6d91c3624",
+              "referenceGeneration": 0
+            },
+            "rejection": null,
+            "operations": [
+              {
+                "Id": "84c438be9a3146d48b2b85fbc7c75dc0",
+                "Kind": "refresh",
+                "Domain": "6b7ad65c6fde47b28297546cd0beffad",
+                "Finished": true,
+                "ExplicitCompile": false,
+                "Compiling": false,
+                "Compiled": false,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": false,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "88c2d5c9e5a24e538289078739e865b0",
+                "Kind": "reserialize",
+                "Domain": "6b7ad65c6fde47b28297546cd0beffad",
+                "Finished": true,
+                "ExplicitCompile": false,
+                "Compiling": false,
+                "Compiled": false,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": false,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "3dd00deb57a94189a807c637376318f9",
+                "Kind": "refresh",
+                "Domain": "6b7ad65c6fde47b28297546cd0beffad",
+                "Finished": true,
+                "ExplicitCompile": true,
+                "Compiling": true,
+                "Compiled": true,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": true,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "f8b99ccb8d994f38b0efa3f1ec33a097",
+                "Kind": "refresh",
+                "Domain": "aab0e068add045cca99807bdb48c70cf",
+                "Finished": true,
+                "ExplicitCompile": true,
+                "Compiling": true,
+                "Compiled": true,
+                "CompileFailed": false,
+                "Reload": true,
+                "CodeImported": true,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "d7c2a1231f6a4839988215b7c1b46160",
+                "Kind": "play",
+                "Domain": "9fbe61cc9cd74128a515aa8f2384939a",
+                "Finished": false,
+                "ExplicitCompile": false,
+                "Compiling": false,
+                "Compiled": false,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": false,
+                "PlayEvent": true,
+                "Completed": true,
+                "Cancelled": false
+              }
+            ],
+            "compiling": false,
+            "updating": false
+          }
+        },
+        {
+          "event": {
+            "expected": "playing",
+            "observed": "playing",
+            "matches": true,
+            "event_ms": 4.897600000000001
+          },
+          "guard": {
+            "accepted": true,
+            "instance": {
+              "state": "playing",
+              "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+              "port": 8091,
+              "pid": 47768,
+              "unityVersion": "6000.3.13f1",
+              "connectorVersion": "0.3.0-rc.2",
+              "timestamp": 1789745890085,
+              "compileErrors": false,
+              "bridgeProtocol": 1,
+              "domainId": "cf6c5cdd4c6247cc852013e6d91c3624",
+              "referenceGeneration": 0
+            },
+            "rejection": null,
+            "operations": [
+              {
+                "Id": "84c438be9a3146d48b2b85fbc7c75dc0",
+                "Kind": "refresh",
+                "Domain": "6b7ad65c6fde47b28297546cd0beffad",
+                "Finished": true,
+                "ExplicitCompile": false,
+                "Compiling": false,
+                "Compiled": false,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": false,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "88c2d5c9e5a24e538289078739e865b0",
+                "Kind": "reserialize",
+                "Domain": "6b7ad65c6fde47b28297546cd0beffad",
+                "Finished": true,
+                "ExplicitCompile": false,
+                "Compiling": false,
+                "Compiled": false,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": false,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "3dd00deb57a94189a807c637376318f9",
+                "Kind": "refresh",
+                "Domain": "6b7ad65c6fde47b28297546cd0beffad",
+                "Finished": true,
+                "ExplicitCompile": true,
+                "Compiling": true,
+                "Compiled": true,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": true,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "f8b99ccb8d994f38b0efa3f1ec33a097",
+                "Kind": "refresh",
+                "Domain": "aab0e068add045cca99807bdb48c70cf",
+                "Finished": true,
+                "ExplicitCompile": true,
+                "Compiling": true,
+                "Compiled": true,
+                "CompileFailed": false,
+                "Reload": true,
+                "CodeImported": true,
+                "PlayEvent": false,
+                "Completed": true,
+                "Cancelled": false
+              },
+              {
+                "Id": "d7c2a1231f6a4839988215b7c1b46160",
+                "Kind": "play",
+                "Domain": "9fbe61cc9cd74128a515aa8f2384939a",
+                "Finished": false,
+                "ExplicitCompile": false,
+                "Compiling": false,
+                "Compiled": false,
+                "CompileFailed": false,
+                "Reload": false,
+                "CodeImported": false,
+                "PlayEvent": true,
+                "Completed": true,
+                "Cancelled": false
+              }
+            ],
+            "compiling": false,
+            "updating": false
+          }
+        }
+      ],
+      "elapsed_ms": 1361.9996000197716
+    }
+  ],
+  "passed": true,
+  "scope": "Empty-project batch-mode functional checks, not GUI or performance measurements.",
+  "initial_heartbeat": {
+    "state": "ready",
+    "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+    "port": 8090,
+    "pid": 47768,
+    "unityVersion": "6000.3.13f1",
+    "connectorVersion": "0.3.0-rc.2",
+    "timestamp": 1789745878153,
+    "compileErrors": false,
+    "bridgeProtocol": 1,
+    "domainId": "6b7ad65c6fde47b28297546cd0beffad",
+    "referenceGeneration": 0
+  },
+  "host_pid": 25768,
+  "stale_registry_recovery": {
+    "unrelated_pid": 52272,
+    "host_pid": 25768,
+    "passed": true
+  },
+  "context_summary": {
+    "domainId": "6b7ad65c6fde47b28297546cd0beffad",
+    "referenceGeneration": 0,
+    "languageVersion": "9.0",
+    "pid": 47768,
+    "reference_count": 157
+  },
+  "final_heartbeat": {
+    "state": "ready",
+    "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+    "port": 8091,
+    "pid": 47768,
+    "unityVersion": "6000.3.13f1",
+    "connectorVersion": "0.3.0-rc.2",
+    "timestamp": 1789745890264,
+    "compileErrors": false,
+    "bridgeProtocol": 1,
+    "domainId": "cf6c5cdd4c6247cc852013e6d91c3624",
+    "referenceGeneration": 0
+  },
+  "health": {
+    "protocol": 1,
+    "version": "0.3.0-rc.2",
+    "runtimeId": "e5dd5b026224e98a200e67af86da7fc4",
+    "pid": 25768,
+    "compiler": {
+      "compiler_version": "roslyn-5.0.0/wrapper-1",
+      "cache_hit": false,
+      "base_cache_hit": true,
+      "emit_reused": false,
+      "assembly_name": "UnityBridgeExec_bcb3405766f94647a98f1e77ae8b0443"
+    },
+    "compilerError": "",
+    "projects": [
+      {
+        "projectPath": "<repo>/.codex-deps/python-startup/final-native6/UnityProject",
+        "pid": 47768,
+        "port": 8091,
+        "protocol": 1,
+        "prewarmState": "ready",
+        "prewarmError": ""
+      }
+    ]
+  },
+  "unity_exit_code": 0,
+  "host_cleanup": {
+    "http_status": 200,
+    "result": {
+      "stopped": true
+    }
+  }
+}

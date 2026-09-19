@@ -39,8 +39,8 @@ def read(path):
 
 
 def wait_for(function, timeout=30):
-    deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
+    deadline = time.perf_counter() + timeout
+    while time.perf_counter() < deadline:
         result = function()
         if result:
             return result
@@ -122,7 +122,7 @@ def main():
         f"com.unity.modules.{name}": "1.0.0" for name in ("imgui", "imageconversion", "screencapture", "jsonserialize")}})
 
     env = dict(os.environ, PYTHONPATH=str(REPO / "src"), UNITY_BRIDGE_HOST_HOME=str(output / "host"),
-               UNITY_BRIDGE_SKIP_UPDATE_CHECK="1")
+               UNITY_BRIDGE_SKIP_UPDATE_CHECK="1", UNITY_BRIDGE_TIMING_DIR=str(output / 'timing'))
     cli = [str(args.cli_exe.resolve())] if args.cli_exe else [sys.executable, "-m", "unity_bridge"]
     register = (cli + ["_host", "register", "--executable", cli[0], "--worker", str(worker)]
                 if args.cli_exe else
@@ -278,6 +278,20 @@ def main():
                     "compile_error_recovery": True, "cli_protocol": endpoint()["cliProtocol"]}
         check("fast_cli_inputs_static_state_and_error_recovery", fast_cli_contracts)
 
+        def large_results():
+            code = 'return new string(\'한\', 524288) + "😀";'
+            expected = '한' * 524288 + '😀'
+            assert require_success(cli_exec('--code', code)) == expected
+            response = subprocess.run(cli + ['--project', str(project), '--no-update-check', 'session'],
+                input=json.dumps({'id': 'large', 'args': ['exec', '--code', code]}) + '\n',
+                env=env, capture_output=True, text=True, encoding='utf-8', timeout=60)
+            response.check_returncode()
+            value = json.loads(response.stdout)
+            assert value['id'] == 'large' and value['exit_code'] == 0
+            assert value['result']['data'] == expected
+            return {'characters': len(expected), 'utf8_bytes': len(expected.encode('utf-8')), 'cli_and_session': True}
+        check('large_unicode_cli_and_session_results', large_results)
+
         def operation_receipts():
             completed = []
             for command in (["refresh", "--wait"], ["reserialize", "--wait"],
@@ -326,7 +340,7 @@ def main():
             return compiler.request({"operation": "compile", "code": code, "usings": [],
                                      "language_version": current["languageVersion"], "references": current["references"],
                                      "project_id": project.as_posix(), "reference_generation": "native-audit",
-                                     "fresh_identity": fresh}, deadline=time.monotonic() + 30)
+                                     "fresh_identity": fresh}, deadline=time.perf_counter() + 30)
         static_pe = compile_bytes("return ++Counter; } public static int Counter; public static object Tail() { return null;")
         check("same_pe_reload_observation", lambda: require_success(host("host_connector_audit", {"assembly": static_pe["assembly_base64"]})))
 
@@ -397,14 +411,35 @@ def main():
         check("queued_old_listener_request_never_executes_after_restart", queued_listener_restart)
 
         def while_compiling():
-            code = "return 42; } " + " ".join(f"public static int M{i}() => {i};" for i in range(6000)) + " public static object Tail() { return null;"
-            compiled = pool.submit(host, "exec", {"code": code})
-            time.sleep(.1)
-            live = require_success(host("get_editor_state", {"request_id": "compiling-control"}))
-            still_compiling = not compiled.done()
-            value = require_success(compiled.result(timeout=45))
-            assert value == 42 and still_compiling, (value, still_compiling)
-            return {"live_state": live["instance"]["state"], "control_finished_before_exec": still_compiling, "result": value}
+            # Functional diagnostics, not a latency benchmark. Observe an actual
+            # compiler interval instead of assuming a compile lasts >100 ms.
+            require_success(host('exec', {'code': 'return 0;'}))
+            trace = output / 'timing' / f"{endpoint()['pid']}.jsonl"
+            def events():
+                rows = []
+                for line in trace.read_text(encoding='utf-8').splitlines():
+                    try:
+                        rows.append(json.loads(line))
+                    except ValueError:
+                        pass  # The final append may still be in flight.
+                return rows
+            attempts = []
+            for count in (6000, 24000):
+                previous = {e['request_id'] for e in events() if e['stage'] == 'compiler_request_begin'}
+                code = "return 42; } " + " ".join(f"public static int M{i}() => {i};" for i in range(count)) + " public static object Tail() { return null;"
+                compiled = pool.submit(host, "exec", {"code": code})
+                started = wait_for(lambda: next((e for e in events() if e['stage'] == 'compiler_request_begin'
+                                                 and e['request_id'] not in previous), None), 10)
+                live = require_success(host("get_editor_state", {"request_id": "compiling-control"}))
+                still_compiling = not any(e['stage'] == 'compiler_request_end' and e['request_id'] == started['request_id']
+                                          for e in events())
+                value = require_success(compiled.result(timeout=45))
+                assert value == 42, value
+                attempts.append({'methods': count, 'control_finished_during_compile': still_compiling})
+                if still_compiling:
+                    return {"live_state": live["instance"]["state"], "control_finished_before_exec": True,
+                            "result": value, 'attempts': attempts}
+            raise AssertionError(('No observable control response during a compiler interval', attempts))
         check("live_control_during_external_compile", while_compiling)
 
         def compilation_error():

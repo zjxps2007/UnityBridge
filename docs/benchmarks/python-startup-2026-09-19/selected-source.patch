@@ -1,0 +1,1773 @@
+diff --git a/compiler-worker/UnityBridge.Compiler.Tests/Program.cs b/compiler-worker/UnityBridge.Compiler.Tests/Program.cs
+index 7c19c6a..fb1d6d1 100644
+--- a/compiler-worker/UnityBridge.Compiler.Tests/Program.cs
++++ b/compiler-worker/UnityBridge.Compiler.Tests/Program.cs
+@@ -72,6 +72,37 @@ try
+         Check(engine.Process(Request("return \"한글🧪\";")).Success, "Unicode source is compiled.");
+     });
+ 
++    Test("Framework warmup never leaks implicit references or an executable result", () =>
++    {
++        var warmEngine = new CompilerEngine();
++        var warm = warmEngine.Process(new CompileRequest { Protocol = 1, Operation = "warmup", RequestId = "warm" });
++        Check(warm.Success && warm.AssemblyBase64 is null && warm.AssemblyName is null, "Warmup produces no loadable result.");
++        Check(warmEngine.Process(new CompileRequest { Protocol = 1, Operation = "warmup" }).Success, "Warmup is idempotent.");
++        Check(!warmEngine.Process(Request("return 42;", providedReferences: [Identity(fixturePath)])).Success, "Runtime references never become implicit Unity references.");
++        Check(warmEngine.Process(Request("return new UnityEngine.Object();")).Success, "Actual project references still compile after warmup.");
++    });
++
++    Test("Different snippets reuse only a compatible base compilation", () =>
++    {
++        var baseEngine = new CompilerEngine(reuseBaseCompilation: true);
++        var first = baseEngine.Process(Request("return 7101;"));
++        var second = baseEngine.Process(Request("return 7102;"));
++        Check(first.Success && second.Success && !first.BaseCacheHit && second.BaseCacheHit && !second.CacheHit, "New source reuses its reference context.");
++        Check(first.AssemblyName != second.AssemblyName && first.AssemblyBase64 != second.AssemblyBase64, "Base sharing never reuses a result or assembly identity.");
++        Check(!baseEngine.Process(Request("return 7103;", language: "8.0")).BaseCacheHit, "Language configuration is isolated.");
++        var missing = baseEngine.Process(Request("return 7104;", providedReferences: [Identity(fixturePath)]));
++        Check(!missing.Success && missing.ErrorCode == "compile_error", "A base cannot supply missing references.");
++    });
++
++    Test("Base compilation remains opt in after its latency experiment", () =>
++    {
++        var defaultEngine = new CompilerEngine();
++        var first = defaultEngine.Process(Request("return 8101;"));
++        var second = defaultEngine.Process(Request("return 8102;"));
++        Check(first.Success && second.Success && !first.BaseCacheHit && !second.BaseCacheHit,
++            "The default path does not retain an unproven base compilation.");
++    });
++
+     Test("Cached emission is byte identical only when explicitly requested", () =>
+     {
+         var first = engine.Process(Request("return 7123;", freshIdentity: false));
+diff --git a/compiler-worker/UnityBridge.Compiler/CompilerEngine.cs b/compiler-worker/UnityBridge.Compiler/CompilerEngine.cs
+index bf61bfb..9b8b610 100644
+--- a/compiler-worker/UnityBridge.Compiler/CompilerEngine.cs
++++ b/compiler-worker/UnityBridge.Compiler/CompilerEngine.cs
+@@ -19,6 +19,20 @@ public sealed class CompilerEngine
+     private readonly MetadataReferenceCache references = new();
+     // Bound compilation count and shared metadata retention independently of cache hits.
+     private readonly BoundedCache<CompilationEntry> compilations = new(64, 256L * 1024 * 1024);
++    private const string OptionsKey = "library;debug;unsafe=false;nullable=disable;nowarn=0105,1701,1702";
++    private bool warmed;
++    private readonly bool reuseBase;
++
++    public CompilerEngine() : this(
++        Environment.GetEnvironmentVariable("UNITY_BRIDGE_ENABLE_BASE_COMPILATION") == "1" &&
++        Environment.GetEnvironmentVariable("UNITY_BRIDGE_DISABLE_BASE_COMPILATION") != "1") { }
++
++    internal CompilerEngine(bool reuseBaseCompilation)
++    {
++        // The empty-project experiment did not improve new-code latency.
++        // Keep this optional until a representative workload demonstrates a gain.
++        reuseBase = reuseBaseCompilation;
++    }
+ 
+     public CompileResponse Process(CompileRequest request)
+     {
+@@ -28,6 +42,11 @@ public sealed class CompilerEngine
+                 return Fail(request, "unsupported_protocol", "Compiler protocol 1 is required.");
+             if (request.Operation == "ping")
+                 return new CompileResponse { RequestId = request.RequestId, Success = true };
++            if (request.Operation == "warmup")
++            {
++                Warmup();
++                return new CompileResponse { RequestId = request.RequestId, Success = true };
++            }
+             if (request.Operation != "compile")
+                 return Fail(request, "invalid_request", "Unknown compiler operation.");
+             if (string.IsNullOrEmpty(request.Code) || request.Code.Length > 1024 * 1024)
+@@ -78,10 +97,11 @@ public sealed class CompilerEngine
+         var keyBytes = Encoding.UTF8.GetBytes(string.Join("\0", new[]
+         {
+             CompilerVersion, request.ProjectId ?? "", source, ((int)languageVersion).ToString(System.Globalization.CultureInfo.InvariantCulture),
+-            "library;debug;unsafe=false;nullable=disable;nowarn=0105,1701,1702", string.Join("\0", identities),
++            OptionsKey, string.Join("\0", identities),
+         }));
+         var compilationKey = Convert.ToHexString(SHA256.HashData(keyBytes));
+         var cacheHit = compilations.TryGet(compilationKey, out var cached);
++        var baseCacheHit = false;
+         if (!cacheHit)
+         {
+             var tree = CSharpSyntaxTree.ParseText(SourceText.From(source, Encoding.UTF8), new CSharpParseOptions(languageVersion), path: "snippet.cs");
+@@ -95,16 +115,40 @@ public sealed class CompilerEngine
+                     ["CS1701"] = ReportDiagnostic.Suppress,
+                     ["CS1702"] = ReportDiagnostic.Suppress,
+                 });
+-            var compilation = CSharpCompilation.Create(NewAssemblyName(), [tree], referenceEntries.Select(entry => entry.Reference), options);
++            var resources = referenceEntries.Select(entry => new KeyValuePair<string, long>(entry.RetentionId, entry.Weight)).ToArray();
++            // Base and source entries share one LRU and retention budget. Roslyn
++            // carries observed metadata into new snippets. WithAssemblyName must
++            // still rebind assembly symbols (including InternalsVisibleTo).
++            var baseKey = "base:" + Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(string.Join("\0", new[]
++            {
++                CompilerVersion, request.ProjectId ?? "", languageVersion.ToString(), OptionsKey, string.Join("\0", identities),
++            }))));
++            CSharpCompilation compilation;
++            if (reuseBase)
++            {
++                baseCacheHit = compilations.TryGet(baseKey, out var basis);
++                if (!baseCacheHit)
++                {
++                    var empty = CSharpCompilation.Create(NewAssemblyName(), references: referenceEntries.Select(entry => entry.Reference), options: options);
++                    _ = empty.GetSpecialType(SpecialType.System_Object);
++                    basis = new CompilationEntry(empty, 64 * 1024L, resources);
++                    compilations.Add(baseKey, basis, basis.Weight, basis.SharedReferences);
++                }
++                compilation = basis.Compilation.WithAssemblyName(NewAssemblyName()).AddSyntaxTrees(tree);
++                // The retained metadata owns these exact image objects,
++                // even if the metadata LRU has since re-read the same MVID.
++                resources = basis.SharedReferences;
++            }
++            else compilation = CSharpCompilation.Create(NewAssemblyName(), [tree], referenceEntries.Select(entry => entry.Reference), options);
+             // Syntax/semantic structures cost more than just UTF-16 source. This
+             // remains a conservative retention estimate, not an RSS measurement.
+             cached = new CompilationEntry(compilation, 64 * 1024L + source.Length * 16L,
+-                referenceEntries.Select(entry => new KeyValuePair<string, long>(entry.RetentionId, entry.Weight)).ToArray());
++                resources);
+             compilations.Add(compilationKey, cached, cached.Weight, cached.SharedReferences);
+         }
+ 
+         if (!request.FreshIdentity && cached!.EmittedBytes is not null)
+-            return Succeed(request, cached.Compilation.AssemblyName!, cached.EmittedBytes, cached.Diagnostics, cacheHit, true);
++            return Succeed(request, cached.Compilation.AssemblyName!, cached.EmittedBytes, cached.Diagnostics, cacheHit, true, baseCacheHit);
+ 
+         var target = request.FreshIdentity ? cached!.Compilation.WithAssemblyName(NewAssemblyName()) : cached!.Compilation;
+         using var output = new MemoryStream();
+@@ -125,7 +169,23 @@ public sealed class CompilerEngine
+             cached.Diagnostics = diagnostics;
+             compilations.Add(compilationKey, cached, cached.Weight + image.LongLength, cached.SharedReferences);
+         }
+-        return Succeed(request, target.AssemblyName!, image, diagnostics, cacheHit, false);
++        return Succeed(request, target.AssemblyName!, image, diagnostics, cacheHit, false, baseCacheHit);
++    }
++
++    private void Warmup()
++    {
++        if (warmed) return;
++        // Load Roslyn's parser, metadata binder and emitter while Unity may still
++        // be importing. This framework-only image is discarded, never executed,
++        // and its references are never added to a user's Unity compilation.
++        var tree = CSharpSyntaxTree.ParseText("public static class Warmup { public static object Run() { return null; } }");
++        var core = MetadataReference.CreateFromFile(typeof(object).Assembly.Location);
++        var compilation = CSharpCompilation.Create("UnityBridgeWarmup", [tree], [core],
++            new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
++        using var output = new MemoryStream();
++        var result = compilation.Emit(output);
++        if (!result.Success) throw new InvalidOperationException("Compiler bootstrap preparation failed.");
++        warmed = true;
+     }
+ 
+     public static string BuildSource(string code, IEnumerable<string> extraUsings)
+@@ -146,12 +206,12 @@ public sealed class CompilerEngine
+             diagnostic.GetMessage(System.Globalization.CultureInfo.InvariantCulture), span?.Line + 1, span?.Character + 1);
+     }
+ 
+-    private static CompileResponse Succeed(CompileRequest request, string name, byte[] bytes, CompilerDiagnostic[] diagnostics, bool cacheHit, bool emitReused)
++    private static CompileResponse Succeed(CompileRequest request, string name, byte[] bytes, CompilerDiagnostic[] diagnostics, bool cacheHit, bool emitReused, bool baseCacheHit)
+         => new()
+         {
+             RequestId = request.RequestId, Success = true, AssemblyName = name,
+             AssemblyBase64 = Convert.ToBase64String(bytes), ReferenceGeneration = request.ReferenceGeneration,
+-            CacheHit = cacheHit, EmitReused = emitReused, Diagnostics = diagnostics,
++            CacheHit = cacheHit, BaseCacheHit = baseCacheHit, EmitReused = emitReused, Diagnostics = diagnostics,
+         };
+ 
+     private static CompileResponse Fail(CompileRequest request, string code, string error, CompilerDiagnostic[]? diagnostics = null)
+diff --git a/compiler-worker/UnityBridge.Compiler/Protocol.cs b/compiler-worker/UnityBridge.Compiler/Protocol.cs
+index aa42003..6889992 100644
+--- a/compiler-worker/UnityBridge.Compiler/Protocol.cs
++++ b/compiler-worker/UnityBridge.Compiler/Protocol.cs
+@@ -32,6 +32,7 @@ public sealed class CompileResponse
+     public string? AssemblyName { get; init; }
+     public string? ReferenceGeneration { get; init; }
+     public bool CacheHit { get; init; }
++    public bool BaseCacheHit { get; init; }
+     public bool EmitReused { get; init; }
+     public CompilerDiagnostic[] Diagnostics { get; init; } = [];
+     public string? ErrorCode { get; init; }
+diff --git a/src/unity_bridge/_bootstrap.py b/src/unity_bridge/_bootstrap.py
+index 8bbb0b4..7b367d3 100644
+--- a/src/unity_bridge/_bootstrap.py
++++ b/src/unity_bridge/_bootstrap.py
+@@ -1,16 +1,30 @@
+ """Small entry point: most exec calls need neither argparse nor the full client."""
+ import sys
++from ._timing import mark
+ 
+ 
+ def main(argv=None):
++    mark('python_entry')
++    try:
++        return _main(argv)
++    finally:
++        mark('python_result')
++
++
++def _main(argv=None):
+     args = list(sys.argv[1:] if argv is None else argv)
++    if args[:1] == ["_host"]:
++        from .host.cli import main as host_main
++        mark('host_cli_imported')
++        return host_main(args[1:])
+     stdin_text = None
+-    if "exec" in args:
+-        from ._fast_exec import try_exec
+-        result, stdin_text = try_exec(args)
+-        if result is not None:
+-            return result
++    from ._fast_exec import try_exec
++    mark('fast_cli_imported')
++    result, stdin_text = try_exec(args)
++    if result is not None:
++        return result
+     from .cli import main as full_main
++    mark('full_cli_imported')
+     if stdin_text is None:
+         return full_main(args)
+     # A connection can fail before dispatch after stdin was read. Replay only
+diff --git a/src/unity_bridge/_cli/commands.py b/src/unity_bridge/_cli/commands.py
+index 8e0df11..73b2ccf 100644
+--- a/src/unity_bridge/_cli/commands.py
++++ b/src/unity_bridge/_cli/commands.py
+@@ -119,3 +119,9 @@ def execute_command(args: argparse.Namespace, client: UnityClient) -> UnityActio
+         params = parse_params(args.params)
+         return client.call(args.unity_command, params)
+     raise DiscoveryError(f"unsupported built-in command: {args.command}")
++
++
++def result_exit_code(result) -> int:
++    # Instance/list results represent successful discovery. Action results and
++    # raw Connector responses both expose the same success contract.
++    return 0 if getattr(result, "success", True) else 1
+diff --git a/src/unity_bridge/_cli/output.py b/src/unity_bridge/_cli/output.py
+index d8b7ae4..c5bf3ec 100644
+--- a/src/unity_bridge/_cli/output.py
++++ b/src/unity_bridge/_cli/output.py
+@@ -11,26 +11,28 @@ from ..client import CommandResponse, Instance, UnityBridgeError, UnityClient
+ from .versions import version_key
+ 
+ 
+-def print_result(value: Any, *, json_output: bool) -> None:
++def print_result(value: Any, *, json_output: bool, stdout=None, stderr=None) -> None:
++    stdout = stdout or sys.stdout
++    stderr = stderr or sys.stderr
+     if json_output:
+-        print(json.dumps(to_jsonable(value), ensure_ascii=False, indent=2))
++        print(json.dumps(to_jsonable(value), ensure_ascii=False, indent=2), file=stdout)
+         return
+ 
+     if isinstance(value, list):
+         if not value:
+-            print("No Unity instances found.")
++            print("No Unity instances found.", file=stdout)
+             return
+         for instance in value:
+-            _print_instance(instance)
++            _print_instance(instance, stdout=stdout, stderr=stderr)
+         return
+     if isinstance(value, Instance):
+-        _print_instance(value)
++        _print_instance(value, stdout=stdout, stderr=stderr)
+         return
+     from ..adapter import UnityActionResult
+     if isinstance(value, (CommandResponse, UnityActionResult)):
+-        print(render_action_result(value, json_output=False), end="")
++        print(render_action_result(value, json_output=False), end="", file=stdout)
+         return
+-    print(value)
++    print(value, file=stdout)
+ 
+ 
+ def render_action_result(value: Any, *, json_output: bool) -> str:
+@@ -43,20 +45,21 @@ def render_action_result(value: Any, *, json_output: bool) -> str:
+     return text
+ 
+ 
+-def _print_instance(instance: Instance) -> None:
++def _print_instance(instance: Instance, *, stdout=None, stderr=None) -> None:
++    stdout = stdout or sys.stdout
+     age = instance.heartbeat_age_seconds
+     age_label = "unknown" if age is None else f"{age:.1f}s"
+-    print(f"Unity (port {instance.port}): {instance.state}")
+-    print(f" Project: {instance.project_path}")
+-    print(f" Version: {instance.unity_version or 'unknown'}")
+-    print(f" Connector: {instance.connector_version or 'unknown'}")
+-    print(f" PID: {instance.pid}")
+-    print(f" Heartbeat age: {age_label}")
++    print(f"Unity (port {instance.port}): {instance.state}", file=stdout)
++    print(f" Project: {instance.project_path}", file=stdout)
++    print(f" Version: {instance.unity_version or 'unknown'}", file=stdout)
++    print(f" Connector: {instance.connector_version or 'unknown'}", file=stdout)
++    print(f" PID: {instance.pid}", file=stdout)
++    print(f" Heartbeat age: {age_label}", file=stdout)
+     if instance.host_status is not None:
+         host = instance.host_status
+         print(f" Host: {host.get('state', 'unavailable')}" +
+-              (f" ({host['version']})" if host.get('version') else ""))
+-    print_connector_version_warning(instance, json_output=False)
++              (f" ({host['version']})" if host.get('version') else ""), file=stdout)
++    print_connector_version_warning(instance, json_output=False, stderr=stderr)
+ 
+ 
+ def warn_for_selected_connector_version(client: UnityClient, *, json_output: bool) -> None:
+@@ -66,12 +69,12 @@ def warn_for_selected_connector_version(client: UnityClient, *, json_output: boo
+     print_connector_version_warning(instance, json_output=json_output)
+ 
+ 
+-def print_connector_version_warning(instance: Instance, *, json_output: bool) -> None:
++def print_connector_version_warning(instance: Instance, *, json_output: bool, stderr=None) -> None:
+     if json_output:
+         return
+     warning = _connector_version_warning(instance)
+     if warning:
+-        print(warning, file=sys.stderr)
++        print(warning, file=stderr or sys.stderr)
+ 
+ 
+ def _connector_version_warning(instance: Instance) -> str | None:
+diff --git a/src/unity_bridge/_cli/session.py b/src/unity_bridge/_cli/session.py
+index 96c14d5..05afe90 100644
+--- a/src/unity_bridge/_cli/session.py
++++ b/src/unity_bridge/_cli/session.py
+@@ -2,12 +2,15 @@
+ from __future__ import annotations
+ 
+ import argparse
+-from contextlib import redirect_stderr, redirect_stdout
+ from io import StringIO
+ import json
+ import sys
+ 
+-from .arguments import GLOBAL_VALUE_OPTIONS, _find_command_index
++from .arguments import (GLOBAL_VALUE_OPTIONS, KNOWN_COMMANDS, _find_command_index,
++                        build_parser, is_direct_tool_invocation, parse_direct_tool_args)
++from .commands import execute_command, result_exit_code
++from .output import to_jsonable
++from ..client import UnityBridgeError
+ 
+ MAX_REQUEST_CHARS = 1024 * 1024
+ 
+@@ -21,8 +24,65 @@ def _decode_output(value: str):
+         return value.rstrip()
+ 
+ 
++class SessionExecutor:
++    """One sequential session owns its parsers and diagnostics, never sys.stdout."""
++
++    def __init__(self):
++        self.stdout, self.stderr = StringIO(), StringIO()
++        self.parsers = {}
++        self.pool = None
++        owner = self
++
++        class Parser(argparse.ArgumentParser):
++            def _print_message(self, message, file=None):
++                if message:
++                    (owner.stdout if file is sys.stdout else owner.stderr).write(message)
++
++        self.parser_class = Parser
++
++    def invoke(self, argv):
++        from ..cli import _create_client
++        self.stdout, self.stderr = StringIO(), StringIO()
++        try:
++            direct = is_direct_tool_invocation(argv)
++            if direct:
++                parsed = parse_direct_tool_args(argv)
++            else:
++                index = _find_command_index(argv)
++                selected = argv[index] if index is not None and argv[index] in KNOWN_COMMANDS else None
++                if selected not in self.parsers:
++                    self.parsers[selected] = build_parser(selected, parser_class=self.parser_class)
++                parsed = self.parsers[selected].parse_args(argv)
++            client = _create_client(parsed)
++            if parsed.command not in {"instances", "status"}:
++                if self.pool is None:
++                    from ..host.transport import ConnectionPool
++                    self.pool = ConnectionPool()
++                client._connection_pool = self.pool
++            if direct:
++                result = client.call(parsed.command, parsed.params, instance=client.discover_instance())
++            else:
++                result = execute_command(parsed, client)
++            return result_exit_code(result), to_jsonable(result), None
++        except SystemExit as exc:
++            return int(exc.code or 0), _decode_output(self.stdout.getvalue()), _decode_output(self.stderr.getvalue())
++        except UnityBridgeError as exc:
++            return 1, None, {"ok": False, "error": str(exc)}
++
++    def close(self):
++        if self.pool is not None:
++            self.pool.close()
++
++
+ def run_session(args: argparse.Namespace) -> int:
+-    from ..cli import main
++    executor = SessionExecutor()
++    try:
++        return _run_session(args, executor)
++    finally:
++        executor.close()
++
++
++def _run_session(args: argparse.Namespace, executor: SessionExecutor) -> int:
+ 
+     inherited = ["--json"]
+     for option, name in GLOBAL_VALUE_OPTIONS.items():
+@@ -55,14 +115,8 @@ def run_session(args: argparse.Namespace) -> int:
+                 raise ValueError("Session requests cannot invoke session, update, or _host")
+             if "--stdin" in argv:
+                 raise ValueError("Use --code or --code-file in a session; stdin carries JSONL requests")
+-            stdout, stderr = StringIO(), StringIO()
+-            with redirect_stdout(stdout), redirect_stderr(stderr):
+-                try:
+-                    code = main(inherited + argv)
+-                except SystemExit as exc:
+-                    code = int(exc.code or 0)
+-            response = {"id": request_id, "exit_code": code,
+-                        "result": _decode_output(stdout.getvalue()), "error": _decode_output(stderr.getvalue())}
++            code, result, error = executor.invoke(inherited + argv)
++            response = {"id": request_id, "exit_code": code, "result": result, "error": error}
+         except (ValueError, TypeError) as exc:
+             response = {"id": request_id, "exit_code": 2, "result": None, "error": str(exc)}
+         output.write(json.dumps(response, ensure_ascii=False, separators=(",", ":")) + "\n")
+diff --git a/src/unity_bridge/_cli/standalone.py b/src/unity_bridge/_cli/standalone.py
+index 4d39a81..b7d4c02 100644
+--- a/src/unity_bridge/_cli/standalone.py
++++ b/src/unity_bridge/_cli/standalone.py
+@@ -8,6 +8,7 @@ from pathlib import Path
+ from urllib.parse import quote
+ 
+ from ..client import DiscoveryError
++from .._runtime import executable_path
+ 
+ 
+ DEFAULT_WINDOWS_ASSET_NAME = "unity-bridge-windows-amd64.zip"
+@@ -16,7 +17,8 @@ DEFAULT_INSTALL_SHELL_SCRIPT_URL = "https://raw.githubusercontent.com/zjxps2007/
+ 
+ 
+ def is_standalone_build() -> bool:
+-    return bool(getattr(sys, "frozen", False))
++    from .._runtime import is_standalone
++    return is_standalone()
+ 
+ 
+ def install_mode() -> str:
+@@ -49,7 +51,7 @@ def _standalone_windows_update_command(version: str, *, wait_pid: int | None = N
+         + "$script = Join-Path $env:TEMP 'unity-bridge-install.ps1'; "
+         + f"Invoke-WebRequest -Uri '{installer_url}' -OutFile $script; "
+         + f"& $script -Version '{_escape_powershell_single_quoted(version)}' "
+-        + f"-InstallDir '{_escape_powershell_single_quoted(str(Path(sys.executable).parent))}' -NoPathUpdate"
++        + f"-InstallDir '{_escape_powershell_single_quoted(str(Path(executable_path()).parent))}' -NoPathUpdate"
+     )
+     return [
+         "powershell",
+@@ -79,7 +81,7 @@ def _standalone_posix_update_command(version: str, *, wait_pid: int | None = Non
+         + f"wget -qO \"$script\" {_sh_quote(installer_url)}; "
+         + "else echo 'curl or wget is required to update UnityBridge.' >&2; exit 1; fi; "
+         + f"sh \"$script\" --version {_sh_quote(version)} "
+-        + f"--install-dir {_sh_quote(str(Path(sys.executable).parent))} --no-path-update; "
++        + f"--install-dir {_sh_quote(str(Path(executable_path()).parent))} --no-path-update; "
+         + "rm -f \"$script\""
+     )
+     return ["sh", "-c", script]
+diff --git a/src/unity_bridge/_fast_exec.py b/src/unity_bridge/_fast_exec.py
+index f225c2b..fc6030b 100644
+--- a/src/unity_bridge/_fast_exec.py
++++ b/src/unity_bridge/_fast_exec.py
+@@ -1,6 +1,6 @@
+-"""Python-only fast path through an authenticated, already running local host.
++"""Python-only fast CLI through an authenticated, already running local host.
+ 
+-The check below admits only known exec syntax. The host still uses the public
++The check below admits only known command syntax. The host still uses the public
+ argument parser, client discovery, adapter and ordered execution queue. Every
+ unsupported case returns to the full CLI before transmitting a command.
+ """
+@@ -11,32 +11,40 @@ import time
+ 
+ from . import __version__
+ 
++SUPPORTED_COMMANDS = ("exec", "instances", "status", "console", "tools", "wait-ready")
++
+ 
+ def _enabled(name):
+     return os.environ.get(name, "").strip().lower() in {"1", "true", "yes", "on"}
+ 
+ 
+ def _options(argv):
+-    values = {"--project", "--port", "--timeout-ms", "--instances-dir", "--backend",
+-              "--code", "--code-file", "--file", "--using"}
+-    command, sources = False, 0
+-    options = {"json": False, "no_update": False, "timeout": 120_000, "usings": []}
++    globals_ = {"--project", "--port", "--timeout-ms", "--instances-dir", "--backend"}
++    local = {"exec": {"--code", "--code-file", "--file", "--using"},
++             "console": {"--count", "--lines", "--type", "--stacktrace"},
++             "wait-ready": {"--timeout-sec"}}
++    command, sources = None, 0
++    options = {"json": False, "no_update": False, "timeout": 120_000, "usings": [], "kind": None}
+     index = 0
+     while index < len(argv):
+         arg = argv[index]
+         index += 1
+-        if arg == "exec" and not command:
+-            command = True
++        if arg in SUPPORTED_COMMANDS and command is None:
++            command = arg
++            options["command"] = arg
+             continue
+         if arg in {"--json", "--no-update-check"}:
+             options["json" if arg == "--json" else "no_update"] = True
+             continue
+-        if arg == "--stdin" and command:
++        if arg == "--clear" and command == "console":
++            options["clear"] = True
++            continue
++        if arg == "--stdin" and command == "exec":
+             options["kind"] = "stdin"
+             sources += 1
+             continue
+         name, assigned, value = arg.partition("=")
+-        if name not in values:
++        if name not in globals_ and name not in local.get(command, ()):
+             return None
+         if not assigned:
+             if index == len(argv) or argv[index].startswith("--"):
+@@ -44,28 +52,29 @@ def _options(argv):
+             value = argv[index]
+             index += 1
+         if name in {"--code", "--code-file", "--file"}:
+-            if not command:
+-                return None
+             options.update(kind=name, source=value)
+             sources += 1
+         elif name == "--using":
+-            if not command:
+-                return None
+             options["usings"].append(value)
+         elif name == "--backend":
+             options["backend"] = value
+             if value not in {"auto", "host"}:
+                 return None
+-        elif name in {"--port", "--timeout-ms"}:
++        elif name in {"--port", "--timeout-ms", "--timeout-sec"}:
+             try:
+                 number = int(value)
+             except ValueError:
+                 return None
+-            if not 0 < number <= (65535 if name == "--port" else 86_400_000):
++            limit = {"--port": 65535, "--timeout-ms": 86_400_000, "--timeout-sec": 86400}[name]
++            if not 0 < number <= limit:
+                 return None
+             if name == "--timeout-ms":
+                 options["timeout"] = number
+-    return options if command and sources == 1 else None
++            elif name == "--timeout-sec":
++                options["wait_timeout"] = number * 1000
++    if command == "wait-ready":
++        options["timeout"] = options.get("wait_timeout", 300_000)
++    return options if command and (command != "exec" or sources == 1) else None
+ 
+ 
+ def _read_json(path):
+@@ -119,12 +128,13 @@ def _endpoint():
+         return None
+     if not isinstance(argv, list) or not argv or not isinstance(argv[0], str):
+         return None
++    from ._runtime import executable_path, is_standalone
+     try:
+-        if not os.path.samefile(argv[0], sys.executable):
++        if not os.path.samefile(argv[0], executable_path()):
+             return None
+     except OSError:
+         return None
+-    if not getattr(sys, "frozen", False) and argv[1:3] != ["-m", "unity_bridge"]:
++    if not is_standalone() and argv[1:3] != ["-m", "unity_bridge"]:
+         return None
+     endpoint = _read_json(os.path.join(root, "instances", runtime + ".json"))
+     if not endpoint:
+@@ -147,13 +157,14 @@ def _update_due(options):
+ 
+ 
+ def _unknown(options, code):
+-    message = "exec sent to host; completion could not be confirmed"
+-    data = {"accepted": True, "completion": "unknown", "command": "exec"}
++    command = options["command"]
++    message = f"{command} sent to host; completion could not be confirmed"
++    data = {"accepted": True, "completion": "unknown", "command": command}
+     if options["json"]:
+-        params = {"code": code}
++        params = {"code": code} if command == "exec" else {}
+         if options["usings"]:
+             params["usings"] = options["usings"]
+-        print(json.dumps({"tool": "exec", "command": "exec", "params": params, "success": True,
++        print(json.dumps({"tool": command, "command": command, "params": params, "success": True,
+                           "message": message, "data": data}, ensure_ascii=False, indent=2))
+     else:
+         print(message)
+@@ -162,7 +173,16 @@ def _unknown(options, code):
+ 
+ def try_exec(argv):
+     options = _options(argv)
+-    if options is None or _enabled("UNITY_BRIDGE_DISABLE_FAST_EXEC") or _update_due(options):
++    if options is None or _enabled("UNITY_BRIDGE_DISABLE_FAST_CLI"):
++        return None, None
++    # Snapshot-only commands are already cheap locally. The Windows RC2 A/B
++    # showed worse tail latency when forwarding them; retain the measured path
++    # by default, with an explicit switch for continued platform experiments.
++    if options['command'] in {'instances', 'status'} and not _enabled('UNITY_BRIDGE_FAST_SNAPSHOTS'):
++        return None, None
++    if _update_due(options):
++        return None, None
++    if options["command"] == "exec" and _enabled("UNITY_BRIDGE_DISABLE_FAST_EXEC"):
+         return None, None
+     backend = options.get("backend") or os.environ.get("UNITY_BRIDGE_BACKEND", "auto")
+     if backend not in {"auto", "host"}:
+@@ -170,17 +190,23 @@ def try_exec(argv):
+     endpoint = _endpoint()
+     if endpoint is None:
+         return None, None
++    # RC2 endpoints support only exec and have no capability list. Never send a
++    # newly optimized command to an older host and fall back after submission.
++    if options["command"] not in endpoint.get("cliCommands", ["exec"]):
++        return None, None
+     stdin_text = None
+     try:
+         if options["kind"] == "stdin":
+             code = stdin_text = sys.stdin.read()
+         elif options["kind"] == "--code":
+             code = options["source"]
+-        else:
++        elif options["kind"] is not None:
+             with open(options["source"], encoding="utf-8") as stream:
+                 code = stream.read()
++        else:
++            code = None
+         timeout = options["timeout"] / 1000
+-        deadline = time.monotonic() + timeout
++        deadline = time.perf_counter() + timeout
+         payload = json.dumps({"cli_protocol": 1, "version": __version__, "argv": argv, "cwd": os.getcwd(),
+                               "code": code, "token": endpoint["token"], "backend": backend,
+                               "instances_dir": os.path.expanduser("~/.unity-bridge/instances"),
+diff --git a/src/unity_bridge/_runtime.py b/src/unity_bridge/_runtime.py
+new file mode 100644
+index 0000000..bc00bb2
+--- /dev/null
++++ b/src/unity_bridge/_runtime.py
+@@ -0,0 +1,14 @@
++"""Cheap runtime identification shared by installed and compiled entry points."""
++import sys
++
++
++def is_standalone():
++    # Nuitka deliberately does not set sys.frozen. This module is included in
++    # the standalone build; source/pip installations have neither marker.
++    return bool(getattr(sys, "frozen", False) or "__compiled__" in globals())
++
++
++def executable_path():
++    # Nuitka standalone preserves Python's sys.executable semantics; argv[0]
++    # identifies the compiled entry point. PyInstaller uses its bootloader path.
++    return sys.argv[0] if "__compiled__" in globals() else sys.executable
+diff --git a/src/unity_bridge/_timing.py b/src/unity_bridge/_timing.py
+new file mode 100644
+index 0000000..8ff45b8
+--- /dev/null
++++ b/src/unity_bridge/_timing.py
+@@ -0,0 +1,22 @@
++"""Opt-in stage timings; no code, parameters, results, or credentials are logged."""
++import os
++
++_directory = os.environ.get('UNITY_BRIDGE_TIMING_DIR')
++
++
++def mark(stage, request_id=None):
++    if not _directory:
++        return
++    import json
++    import time
++    from pathlib import Path
++    try:
++        directory = Path(_directory)
++        directory.mkdir(parents=True, exist_ok=True)
++        # One append per event, separate files per process. No stdout changes.
++        value = {'stage': stage, 'pid': os.getpid(), 'ns': time.perf_counter_ns(),
++                 'unix_ns': time.time_ns(), 'request_id': request_id}
++        with (directory / f'{os.getpid()}.jsonl').open('a', encoding='utf-8') as stream:
++            stream.write(json.dumps(value) + '\n')
++    except OSError:
++        pass  # Diagnostics must not affect command semantics.
+diff --git a/src/unity_bridge/_wire.py b/src/unity_bridge/_wire.py
+index aaed2cb..fe821bb 100644
+--- a/src/unity_bridge/_wire.py
++++ b/src/unity_bridge/_wire.py
+@@ -1,6 +1,10 @@
+ """Bounded, length-prefixed loopback frames; no HTTP/parser imports at CLI startup."""
+ import time
+ 
++# Python 3.10-3.12 on Windows implement monotonic() with the coarse
++# GetTickCount64 clock. perf_counter() is also monotonic, but uses QPC and avoids
++# rounding a short request's remaining budget by a whole system timer tick.
++
+ MAX_MESSAGE_BYTES = 32 * 1024 * 1024
+ 
+ 
+@@ -8,7 +12,7 @@ def read_frame(connection, deadline):
+     def read_exact(count):
+         chunks = bytearray()
+         while len(chunks) < count:
+-            remaining = deadline - time.monotonic()
++            remaining = deadline - time.perf_counter()
+             if remaining <= 0:
+                 raise TimeoutError("Local request deadline expired")
+             connection.settimeout(remaining)
+@@ -26,7 +30,7 @@ def read_frame(connection, deadline):
+ def write_frame(connection, data, deadline):
+     if not 0 < len(data) <= MAX_MESSAGE_BYTES:
+         raise ValueError("Invalid local frame size")
+-    remaining = deadline - time.monotonic()
++    remaining = deadline - time.perf_counter()
+     if remaining <= 0:
+         raise TimeoutError("Local request deadline expired")
+     connection.settimeout(remaining)
+diff --git a/src/unity_bridge/cli.py b/src/unity_bridge/cli.py
+index 4d1900b..d358490 100644
+--- a/src/unity_bridge/cli.py
++++ b/src/unity_bridge/cli.py
+@@ -14,7 +14,7 @@ from ._cli.arguments import (
+     parse_direct_tool_args,
+     parser_for,
+ )
+-from ._cli.commands import execute_command
++from ._cli.commands import execute_command, result_exit_code
+ from ._cli.output import (
+     print_connector_version_warning,
+     print_error,
+@@ -64,13 +64,7 @@ def main(argv: list[str] | None = None) -> int:
+             result = execute_command(args, client)
+ 
+         print_result(result, json_output=args.json)
+-        if isinstance(result, CommandResponse):
+-            return 0 if result.success else 1
+-        if args.command not in {"instances", "status", "wait-ready"}:
+-            from .adapter import UnityActionResult
+-            if isinstance(result, UnityActionResult):
+-                return 0 if result.success else 1
+-        return 0
++        return result_exit_code(result)
+     except UnityBridgeError as exc:
+         print_error(exc, json_output=json_output)
+         return 1
+diff --git a/src/unity_bridge/client.py b/src/unity_bridge/client.py
+index e94516f..7162f08 100644
+--- a/src/unity_bridge/client.py
++++ b/src/unity_bridge/client.py
+@@ -145,6 +145,7 @@ class UnityClient:
+         self.cwd = Path(cwd) if cwd is not None else None
+         self.process_checker = process_checker
+         self.backend = backend or os.environ.get("UNITY_BRIDGE_BACKEND", "auto")
++        self._connection_pool = None
+         if self.backend not in {"auto", "host", "legacy"}:
+             raise DiscoveryError("backend must be auto, host, or legacy")
+ 
+@@ -197,13 +198,27 @@ class UnityClient:
+             if target.bridge_protocol == 1:
+                 from .host import try_host_command
+ 
+-                response = try_host_command(target, command, params, timeout, self.instances_dir)
++                if self._connection_pool is None:
++                    from .host.transport import ConnectionPool
++                    self._connection_pool = ConnectionPool()
++                response = try_host_command(target, command, params, timeout, self.instances_dir,
++                                            connection_pool=self._connection_pool)
+                 if response is not None:
+                     return response
+             if self.backend == "host":
+                 raise UnityConnectionError("no compatible UnityBridge host is ready for this Unity instance")
+         return send_command(target, command, params, timeout_ms=timeout)
+ 
++    def close(self) -> None:
++        if self._connection_pool is not None:
++            self._connection_pool.close()
++
++    def __enter__(self):
++        return self
++
++    def __exit__(self, *args):
++        self.close()
++
+     def wait_for_alive(self, *, timeout_ms: int | None = None) -> Instance:
+         return wait_for_alive(
+             self.discover_instance,
+diff --git a/src/unity_bridge/host/__init__.py b/src/unity_bridge/host/__init__.py
+index 7c37a56..7892415 100644
+--- a/src/unity_bridge/host/__init__.py
++++ b/src/unity_bridge/host/__init__.py
+@@ -53,7 +53,7 @@ def host_status(instance=None, instances_dir=None) -> dict[str, Any]:
+ 
+ 
+ def try_host_command(instance, command: str, params: Any, timeout_ms: int,
+-                     instances_dir=None):
++                     instances_dir=None, *, connection_pool=None):
+     """Return None only when no host request has been submitted.
+ 
+     Once a POST is attempted, an ambiguous result is represented as unknown
+@@ -71,7 +71,11 @@ def try_host_command(instance, command: str, params: Any, timeout_ms: int,
+                "target": {"projectPath": instance.project_path, "pid": instance.pid, "port": instance.port},
+                "request_id": uuid.uuid4().hex, "deadline_unix_ms": deadline}
+     try:
+-        response = post(endpoint["port"], descriptor["token"], "/command", payload, max(.001, timeout_ms / 1000))
++        response = post(endpoint["port"], descriptor["token"], "/command", payload, max(.001, timeout_ms / 1000),
++                        pool=connection_pool,
++                        key=(normalized_project(instance.project_path), "control" if command == "get_editor_state" else "execute"),
++                        identity=(endpoint["pid"], descriptor["runtimeId"], instance.pid,
++                                  instance.port, instance.domain_id, instance.reference_generation))
+         if not isinstance(response.get("success"), bool) or not isinstance(response.get("message"), str):
+             raise TransportError("Host returned an invalid command result")
+         return CommandResponse.from_dict(response)
+diff --git a/src/unity_bridge/host/cli.py b/src/unity_bridge/host/cli.py
+index 9b64d16..1cbdc83 100644
+--- a/src/unity_bridge/host/cli.py
++++ b/src/unity_bridge/host/cli.py
+@@ -63,13 +63,27 @@ def main(argv: list[str] | None = None) -> int:
+             print(json.dumps(post(endpoint["port"], descriptor["token"], "/stop", {}, 5)))
+             return 0
+         from pathlib import Path
+-        from .service import HostService
+         lock = ProcessLock(root / "locks" / f"{descriptor['runtimeId']}.lock")
+         if not lock.acquire():
+             return 0
+         try:
+-            service = HostService(root, descriptor, instances_dir=Path(args.instances_dir) if args.instances_dir else None)
+-            service.serve()
++            from .compiler import CompilerError, CompilerWorker
++            compiler = CompilerWorker(descriptor["workerPath"])
++            try:
++                # Runtime startup overlaps HTTP/parser imports. No project code
++                # or Unity API executes in this child process.
++                compiler_error = ""
++                try:
++                    compiler.start()
++                except CompilerError as exc:
++                    compiler_error = str(exc)
++                from .service import HostService
++                service = HostService(root, descriptor, compiler=compiler,
++                                      instances_dir=Path(args.instances_dir) if args.instances_dir else None)
++                service.compiler_error = compiler_error
++                service.serve()
++            finally:
++                compiler.close()
+         finally:
+             lock.close()
+         return 0
+diff --git a/src/unity_bridge/host/cli_request.py b/src/unity_bridge/host/cli_request.py
+index 2415bb3..0965d64 100644
+--- a/src/unity_bridge/host/cli_request.py
++++ b/src/unity_bridge/host/cli_request.py
+@@ -16,8 +16,9 @@ from typing import TYPE_CHECKING
+ import uuid
+ 
+ from .._cli.arguments import build_parser
+-from .._cli.output import _connector_version_warning, render_action_result
+-from ..adapter import UnityBridgeAdapter
++from .._cli.commands import execute_command, result_exit_code
++from .._cli.output import _connector_version_warning, print_result
++from .._fast_exec import _options, SUPPORTED_COMMANDS
+ from ..client import CommandResponse, DiscoveryError, UnityBridgeError, UnityClient, UnityConnectionError, send_command
+ from .registry import normalized_project
+ 
+@@ -39,18 +40,21 @@ class _LocalClient(UnityClient):
+ 
+     def call(self, command, params=None, *, timeout_ms=None, instance=None):
+         target = instance or self.discover_instance()
+-        remaining = self.deadline - int(time.time() * 1000)
++        now = int(time.time() * 1000)
++        call_deadline = min(self.deadline, now + (timeout_ms or self.timeout_ms))
++        remaining = call_deadline - now
+         if remaining <= 0:
+             from .service import not_started
+             return CommandResponse.from_dict(not_started("expired", "Request expired before Unity execution"))
+         service = self.service
+-        with service.projects_lock:
+-            registered = (normalized_project(target.project_path), target.pid) in service.projects
+-        if (self.backend != "legacy" and target.bridge_protocol == 1 and registered
++        if (self.backend != "legacy" and target.bridge_protocol == 1
+                 and normalized_project(self.instances_dir) == normalized_project(service.instances_dir)):
++            # submit refreshes authoritative discovery when the CLI observes a
++            # new instance before the watchdog. Initial negotiation must not
++            # force a direct compiler fallback or reject the first request.
+             return CommandResponse.from_dict(service.submit({
+                 "command": command, "params": params or {}, "request_id": uuid.uuid4().hex,
+-                "deadline_unix_ms": self.deadline,
++                "deadline_unix_ms": call_deadline,
+                 "target": {"projectPath": target.project_path, "pid": target.pid, "port": target.port},
+             }))
+         if self.backend == "host":
+@@ -85,18 +89,21 @@ def execute_cli(service: HostService, payload: dict) -> dict:
+                 or not isinstance(argv, list) or not 0 < len(argv) <= 4096
+                 or any(not isinstance(arg, str) for arg in argv)
+                 or not isinstance(cwd, str) or not Path(cwd).is_absolute()
+-                or not isinstance(code, str)
+                 or not isinstance(deadline, int) or isinstance(deadline, bool)):
+             raise DiscoveryError("Invalid fast CLI request")
+-        args = build_parser("exec", parser_class=Parser).parse_args(argv)
++        options = _options(argv)
++        selected = options["command"] if options else "exec"
++        args = build_parser(selected, parser_class=Parser).parse_args(argv)
+         json_output = args.json
+-        if args.command != "exec" or args.csc or args.dotnet:
+-            raise DiscoveryError("Fast CLI request only supports exec without compiler overrides")
++        if (args.command not in SUPPORTED_COMMANDS or getattr(args, "csc", None) or getattr(args, "dotnet", None)
++                or (args.command == "exec" and not isinstance(code, str))):
++            raise DiscoveryError("Unsupported fast CLI request")
+         if not 0 < args.timeout_ms <= 86_400_000:
+             raise DiscoveryError("--timeout-ms must be between 1 and 86400000")
+         # The caller sends its original absolute deadline. Receiving the request
+         # and parsing arguments must not restart the timeout.
+-        deadline = min(deadline, int(time.time() * 1000) + args.timeout_ms)
++        budget = args.timeout_sec * 1000 if args.command == "wait-ready" else args.timeout_ms
++        deadline = min(deadline, int(time.time() * 1000) + budget)
+         directory = args.instances_dir or payload.get("instances_dir")
+         if directory is not None:
+             if not isinstance(directory, str):
+@@ -105,13 +112,15 @@ def execute_cli(service: HostService, payload: dict) -> dict:
+         backend = args.backend or payload.get("backend") or "auto"
+         client = _LocalClient(service, deadline, project=args.project, port=args.port,
+                               timeout_ms=args.timeout_ms, instances_dir=directory, cwd=cwd, backend=backend)
+-        if not json_output:
++        if not json_output and args.command not in {"instances", "status", "wait-ready"}:
+             warning = _connector_version_warning(client.discover_instance())
+             if warning:
+                 stderr.write(warning + "\n")
+-        result = UnityBridgeAdapter(client=client).exec_csharp(code, usings=args.usings)
+-        stdout.write(render_action_result(result, json_output=json_output))
+-        return reply(0 if result.success else 1)
++        if args.command == "exec":
++            args.code = code
++        result = execute_command(args, client)
++        print_result(result, json_output=json_output, stdout=stdout, stderr=stderr)
++        return reply(result_exit_code(result))
+     except _ParseExit as exc:
+         return reply(exc.status)
+     except UnityBridgeError as exc:
+diff --git a/src/unity_bridge/host/cli_server.py b/src/unity_bridge/host/cli_server.py
+index 0b59091..3c257de 100644
+--- a/src/unity_bridge/host/cli_server.py
++++ b/src/unity_bridge/host/cli_server.py
+@@ -6,7 +6,12 @@ from socketserver import BaseRequestHandler, ThreadingTCPServer
+ import time
+ 
+ from .._wire import read_frame, write_frame
+-from .cli_request import execute_cli
++
++
++def execute_cli(service, payload):
++    # Listening and compiler startup do not depend on loading the full CLI.
++    from .cli_request import execute_cli as dispatch
++    return dispatch(service, payload)
+ 
+ 
+ def create_cli_server(service):
+@@ -14,7 +19,7 @@ def create_cli_server(service):
+         def handle(self):
+             self.request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+             try:
+-                payload = json.loads(read_frame(self.request, time.monotonic() + 5))
++                payload = json.loads(read_frame(self.request, time.perf_counter() + 5))
+                 if not isinstance(payload, dict):
+                     return
+                 token = payload.pop("token", None)
+@@ -25,7 +30,7 @@ def create_cli_server(service):
+                     response = {"cli_protocol": 1, "exit_code": 1, "stdout": "", "stderr": "ERROR: Host is stopping.\n"}
+                 else:
+                     response = execute_cli(service, payload)
+-                write_frame(self.request, json.dumps(response, ensure_ascii=False).encode("utf-8"), time.monotonic() + 5)
++                write_frame(self.request, json.dumps(response, ensure_ascii=False).encode("utf-8"), time.perf_counter() + 5)
+             except (OSError, ValueError):
+                 # A disconnected caller may have lost an execution result. Never
+                 # resubmit its command or leak request contents to diagnostic logs.
+diff --git a/src/unity_bridge/host/compiler.py b/src/unity_bridge/host/compiler.py
+index 3542cfb..5c00813 100644
+--- a/src/unity_bridge/host/compiler.py
++++ b/src/unity_bridge/host/compiler.py
+@@ -11,6 +11,7 @@ from pathlib import Path
+ from typing import Any
+ 
+ from .transport import MAX_MESSAGE_BYTES
++from .._timing import mark
+ 
+ 
+ class CompilerError(Exception):
+@@ -24,6 +25,8 @@ class CompilerWorker:
+     def __init__(self, executable: str, *, argv: list[str] | None = None):
+         self.argv = argv or [str(Path(executable).resolve())]
+         self.lock = threading.Lock()
++        self.priority_lock = threading.Lock()
++        self.foreground_waiters = 0
+         self.process: subprocess.Popen | None = None
+         self.responses: queue.Queue = queue.Queue()
+         self.stderr_tail = ""
+@@ -36,12 +39,14 @@ class CompilerWorker:
+         self.responses = queue.Queue()
+         self.stderr_tail = ""
+         try:
++            mark('compiler_spawn_begin')
+             self.process = subprocess.Popen(self.argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                                             stderr=subprocess.PIPE, text=True, encoding="utf-8",
+                                             bufsize=1, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+         except OSError as exc:
+             raise CompilerError("compiler_unavailable", "Could not start the bundled C# compiler") from exc
+         process, responses = self.process, self.responses
++        mark('compiler_spawn_end')
+ 
+         def read_stdout():
+             try:
+@@ -89,17 +94,38 @@ class CompilerWorker:
+                 except OSError:
+                     pass
+ 
+-    def request(self, payload: dict[str, Any], *, deadline: float) -> dict[str, Any]:
+-        remaining = deadline - time.monotonic()
+-        if remaining <= 0 or not self.lock.acquire(timeout=max(0, remaining)):
++    def start(self) -> None:
++        """Start the runtime without waiting for project metadata or a compile."""
++        with self.lock:
++            self._start()
++
++    def request(self, payload: dict[str, Any], *, deadline: float, background: bool = False) -> dict[str, Any]:
++        """Use an absolute time.perf_counter() deadline, including queue time."""
++        remaining = deadline - time.perf_counter()
++        if background:
++            # Background preparation never joins the queue ahead of real work.
++            with self.priority_lock:
++                acquired = remaining > 0 and not self.foreground_waiters and self.lock.acquire(blocking=False)
++            if not acquired:
++                raise CompilerError("prewarm_deferred", "Compiler is serving an execution request")
++        else:
++            with self.priority_lock:
++                self.foreground_waiters += 1
++            try:
++                acquired = remaining > 0 and self.lock.acquire(timeout=max(0, remaining))
++            finally:
++                with self.priority_lock:
++                    self.foreground_waiters -= 1
++        if not acquired:
+             raise CompilerError("expired", "Request expired before the compiler was available")
+         try:
+-            remaining = deadline - time.monotonic()
++            remaining = deadline - time.perf_counter()
+             if remaining <= 0:
+                 raise CompilerError("expired", "Request expired before compilation")
+-            compile_deadline = min(deadline, time.monotonic() + 30.)
++            compile_deadline = min(deadline, time.perf_counter() + 30.)
+             self._start()
+             request_id = uuid.uuid4().hex
++            mark('compiler_request_begin', request_id)
+             message = dict(payload, protocol=1, request_id=request_id)
+             raw = json.dumps(message, ensure_ascii=False)
+             if len(raw.encode("utf-8")) > MAX_MESSAGE_BYTES:
+@@ -116,13 +142,13 @@ class CompilerWorker:
+                 except OSError:
+                     pass
+ 
+-            watchdog = threading.Timer(max(.001, compile_deadline - time.monotonic()), kill_hung_worker)
++            watchdog = threading.Timer(max(.001, compile_deadline - time.perf_counter()), kill_hung_worker)
+             watchdog.daemon = True
+             watchdog.start()
+             try:
+                 process.stdin.write(raw + "\n")
+                 process.stdin.flush()
+-                response = self.responses.get(timeout=max(.001, compile_deadline - time.monotonic()))
++                response = self.responses.get(timeout=max(.001, compile_deadline - time.perf_counter()))
+             except (OSError, BrokenPipeError, queue.Empty) as exc:
+                 self._stop()
+                 raise CompilerError("compiler_timeout", "Compiler failed to respond within its time limit") from exc
+@@ -145,13 +171,17 @@ class CompilerWorker:
+                 raise CompilerError(str(response.get("error_code", "compile_error")),
+                                     str(response.get("error", "Compilation failed")), response.get("diagnostics"))
+             self.last_info = {key: response[key] for key in
+-                              ("compiler_version", "cache_hit", "emit_reused", "assembly_name") if key in response}
++                              ("compiler_version", "cache_hit", "base_cache_hit", "emit_reused", "assembly_name") if key in response}
++            mark('compiler_request_end', request_id)
+             return response
+         finally:
+             self.lock.release()
+ 
+     def prewarm(self) -> dict[str, Any]:
+-        return self.request({"operation": "ping"}, deadline=time.monotonic() + 30)
++        return self.request({"operation": "ping"}, deadline=time.perf_counter() + 30)
++
++    def warmup(self) -> dict[str, Any]:
++        return self.request({"operation": "warmup"}, deadline=time.perf_counter() + 30, background=True)
+ 
+     def close(self) -> None:
+         with self.lock:
+diff --git a/src/unity_bridge/host/service.py b/src/unity_bridge/host/service.py
+index a0227ba..a66e2bf 100644
+--- a/src/unity_bridge/host/service.py
++++ b/src/unity_bridge/host/service.py
+@@ -18,7 +18,8 @@ from .compiler import CompilerError, CompilerWorker
+ from .context import PreparedContext
+ from .registry import (PROTOCOL, atomic_json, endpoint_path, load_launcher, normalized_project,
+                        process_alive, read_json)
+-from .transport import MAX_MESSAGE_BYTES, TransportError, post
++from .transport import MAX_MESSAGE_BYTES, ConnectionPool, TransportError, post
++from .._timing import mark
+ 
+ BUSY_STATES = {"compiling", "refreshing", "reloading", "entering_playmode", "exiting_playmode"}
+ 
+@@ -89,6 +90,7 @@ class HostService:
+         self.instances_dir = instances_dir or (Path(descriptor["instancesDir"]) if descriptor.get("instancesDir")
+                                               else default_instances_dir())
+         self.compiler = compiler or CompilerWorker(descriptor["workerPath"])
++        self.connections = ConnectionPool()
+         self.idle_seconds, self.scan_interval = idle_seconds, scan_interval
+         self.projects: dict[tuple[str, int], Project] = {}
+         self.projects_lock = threading.Lock()
+@@ -99,8 +101,10 @@ class HostService:
+         self.server: ThreadingHTTPServer | None = None
+         self.cli_server = None
+         self.last_registry = None
+-        self.last_active = time.monotonic()
++        self.last_active = time.perf_counter()
+         self.compiler_error = ""
++        self.bootstrap_warming = False
++        self.bootstrap_warmed = False
+ 
+     @property
+     def port(self) -> int:
+@@ -124,7 +128,8 @@ class HostService:
+                                         "prewarmState": project.prewarm_state,
+                                         "prewarmError": project.prewarm_error})
+             targets.sort(key=lambda p: (p["projectPath"], p["pid"]))
+-            value = {"protocol": PROTOCOL, "cliProtocol": 1,
++            from .._fast_exec import SUPPORTED_COMMANDS
++            value = {"protocol": PROTOCOL, "cliProtocol": 1, "cliCommands": list(SUPPORTED_COMMANDS),
+                      "cliPort": self.cli_server.server_address[1] if self.cli_server else 0,
+                      "runtimeId": self.descriptor["runtimeId"],
+                      "version": self.descriptor["version"], "pid": os.getpid(), "port": self.port,
+@@ -144,11 +149,12 @@ class HostService:
+             snapshot = dict(project.snapshot)
+             key = Project.key(snapshot)
+         request_id = uuid.uuid4().hex
++        mark('reference_negotiation_begin', request_id)
+         try:
+-            response = post(int(snapshot["port"]), self.descriptor["token"], "/command", {
++            response = self._post(snapshot, {
+                 "command": "bridge_context", "params": {}, "request_id": request_id,
+                 "deadline_unix_ms": int(time.time() * 1000) + 2000,
+-            }, 2.)
++            }, 2., "negotiate")
+             context = response.get("data")
+             if (not response.get("success") or not isinstance(context, dict)
+                     or context.get("protocol") != PROTOCOL or context.get("pid") != snapshot["pid"]
+@@ -159,6 +165,7 @@ class HostService:
+                     or not isinstance(context.get("languageVersion"), str)):
+                 return
+             prepared = PreparedContext.from_connector(context)
++            mark('reference_negotiation_end', request_id)
+             warm_context = False
+             with project.condition:
+                 if Project.key(project.snapshot) == key:
+@@ -179,7 +186,7 @@ class HostService:
+             with project.condition:
+                 project.negotiating = False
+                 changed = Project.key(project.snapshot) != key
+-                project.next_negotiate = 0. if changed else time.monotonic() + 1.
++                project.next_negotiate = 0. if changed else time.perf_counter() + 1.
+             if changed:
+                 self.discovery_wakeup.set()
+             self._write_registry()
+@@ -187,16 +194,19 @@ class HostService:
+     def _prewarm_context(self, project: Project, context: PreparedContext, key: tuple) -> None:
+         # Compile an innocuous wrapper only. Its assembly is never loaded into Unity.
+         job = Job({"command": "exec", "params": {"code": "return null;"}},
+-                  time.monotonic() + 30., "prewarm")
++                  time.perf_counter() + 30., "prewarm")
+         state, error = "ready", ""
+         try:
+-            self._compile(context, job)
++            if self.has_work():
++                state = "pending"
++            else:
++                self._compile(context, job, background=True)
+         except CompilerError as exc:
+-            state, error = "failed", str(exc)
++            state, error = (("pending", "") if exc.code == "prewarm_deferred" else ("failed", str(exc)))
+         except Exception:
+             state, error = "failed", "Compiler context preparation failed"
+         with project.condition:
+-            if project.warmed_key == key:
++            if project.warmed_key == key and project.prewarm_state != "ready":
+                 project.prewarm_state, project.prewarm_error = state, error
+         self._write_registry()
+ 
+@@ -240,13 +250,22 @@ class HostService:
+                 project.snapshot, project.alive = snapshot, True
+                 project.condition.notify_all()
+                 if (project.context_key != Project.key(snapshot) and not project.negotiating
+-                        and time.monotonic() >= project.next_negotiate
++                        and time.perf_counter() >= project.next_negotiate
+                         and snapshot.get("state") not in BUSY_STATES):
+                     project.negotiating = True
+                     start_negotiation = True
+             if start_negotiation:
+                 threading.Thread(target=self._negotiate, args=(project,), daemon=True,
+                                  name="unity-host-negotiate").start()
++            elif not self.has_work():
++                with project.condition:
++                    if (project.prewarm_state == "pending" and project.context is not None
++                            and project.context_key == Project.key(snapshot)
++                            and snapshot.get("state") not in BUSY_STATES):
++                        project.prewarm_state = "warming"
++                        threading.Thread(target=self._prewarm_context,
++                                         args=(project, project.context, project.context_key), daemon=True,
++                                         name="unity-host-reference-prewarm").start()
+         with self.projects_lock:
+             projects = list(self.projects.items())
+         for key, project in projects:
+@@ -274,9 +293,16 @@ class HostService:
+                     self.request_stop()
+                     return
+                 self.scan_once()
++                if (not self.bootstrap_warmed and not self.bootstrap_warming and not self.has_work()
++                        and not any(p.negotiating or p.context for p in self._project_list())
++                        and callable(getattr(self.compiler, "warmup", None))
++                        and os.environ.get("UNITY_BRIDGE_DISABLE_COMPILER_WARMUP") != "1"):
++                    self.bootstrap_warming = True
++                    threading.Thread(target=self._warm_bootstrap, daemon=True,
++                                     name="unity-host-bootstrap-warmup").start()
+                 if any(p.alive for p in self._project_list()) or self.has_work():
+-                    self.last_active = time.monotonic()
+-                elif time.monotonic() - self.last_active >= self.idle_seconds:
++                    self.last_active = time.perf_counter()
++                elif time.perf_counter() - self.last_active >= self.idle_seconds:
+                     self.request_stop()
+                     return
+             except OSError:
+@@ -284,10 +310,21 @@ class HostService:
+                 pass
+             self.discovery_wakeup.wait(self.scan_interval)
+ 
++    def _warm_bootstrap(self) -> None:
++        try:
++            self.compiler.warmup()
++            self.bootstrap_warmed = True
++        except CompilerError as exc:
++            if exc.code != "prewarm_deferred":
++                self.compiler_error = str(exc)
++                self.bootstrap_warmed = True
++        finally:
++            self.bootstrap_warming = False
++
+     def _wait_context(self, project: Project, job: Job) -> PreparedContext | None:
+         with project.condition:
+             while not job.done.is_set() and not self.stopping.is_set():
+-                remaining = job.deadline - time.monotonic()
++                remaining = job.deadline - time.perf_counter()
+                 if remaining <= 0:
+                     return None
+                 if not project.alive:
+@@ -299,7 +336,7 @@ class HostService:
+                 project.condition.wait(min(.1, remaining))
+         return None
+ 
+-    def _compile(self, context: PreparedContext, job: Job) -> dict[str, Any]:
++    def _compile(self, context: PreparedContext, job: Job, *, background: bool = False) -> dict[str, Any]:
+         params = job.payload.get("params") or {}
+         if not isinstance(params, dict):
+             raise CompilerError("compile_error", "exec parameters must be an object")
+@@ -319,7 +356,7 @@ class HostService:
+             "language_version": context.language_version, "references": context.references,
+             "project_id": context.project_id,
+             "reference_generation": generation, "fresh_identity": True,
+-        }, deadline=job.deadline)
++        }, deadline=job.deadline, background=background)
+         if (result.get("reference_generation") != generation
+                 or not isinstance(result.get("assembly_base64"), str)):
+             raise CompilerError("compiler_protocol", "Compiler returned a mismatched assembly result")
+@@ -332,7 +369,13 @@ class HostService:
+             project.condition.notify_all()
+         self.discovery_wakeup.set()
+ 
++    def _post(self, snapshot, payload, timeout, lane="execute"):
++        return post(snapshot["port"], self.descriptor["token"], "/command", payload, timeout,
++                    pool=self.connections, key=(normalized_project(snapshot["projectPath"]), lane),
++                    identity=Project.key(snapshot))
++
+     def _execute(self, project: Project, job: Job) -> None:
++        mark('host_execution_begin', job.payload.get('request_id'))
+         command = str(job.payload["command"])
+         for attempt in range(2):
+             context = self._wait_context(project, job)
+@@ -345,6 +388,9 @@ class HostService:
+                                            and (forwarded_params.get("csc") or forwarded_params.get("dotnet"))):
+                 try:
+                     compiled = self._compile(context, job)
++                    with project.condition:
++                        if project.context is context:
++                            project.prewarm_state, project.prewarm_error = "ready", ""
+                 except CompilerError as exc:
+                     if exc.code == "stale_reference" and attempt == 0:
+                         self._invalidate_context(project)
+@@ -366,7 +412,7 @@ class HostService:
+                     continue
+                 job.complete(not_started("stale_domain", "Unity changed while preparing the request"))
+                 return
+-            remaining = job.deadline - time.monotonic()
++            remaining = job.deadline - time.perf_counter()
+             with job.lock:
+                 if job.done.is_set():
+                     return
+@@ -386,7 +432,9 @@ class HostService:
+                 "domain_id": context.domain_id, "reference_generation": context.reference_generation,
+             }
+             try:
+-                response = post(snapshot["port"], self.descriptor["token"], "/command", forwarded, remaining)
++                mark('unity_roundtrip_begin', job.payload['request_id'])
++                response = self._post(snapshot, forwarded, remaining)
++                mark('unity_roundtrip_end', job.payload['request_id'])
+             except TransportError:
+                 job.complete(unknown(command))
+                 return
+@@ -443,6 +491,9 @@ class HostService:
+                 or not isinstance(unix_deadline, (int, float)) or isinstance(unix_deadline, bool)):
+             return not_started("invalid_request", "Invalid host command envelope")
+         remaining = (unix_deadline - time.time() * 1000) / 1000
++        # Anchor once, before discovery or lock waits. Recreating a monotonic
++        # deadline after those waits would silently extend the caller's budget.
++        deadline = time.perf_counter() + remaining
+         if not 0 < remaining <= 86400:
+             return not_started("expired", "Request deadline has expired or is invalid")
+         if command in {"bridge_context", "bridge_exec_assembly"}:
+@@ -464,8 +515,10 @@ class HostService:
+                                              sort_keys=True, separators=(",", ":")).encode()).hexdigest()
+         control = command == "get_editor_state"
+         with project.condition:
+-            if project.context is None:
+-                return not_started("unsupported_connector", "The Unity Connector is not available")
++            # Discovery verifies protocol/identity before creating this project.
++            # Initial reference negotiation may still be in flight when the first
++            # CLI arrives. Queue it under its original deadline; _wait_context
++            # gates execution, while live control queries do not need references.
+             job = project.jobs.get(request_id)
+             if job is not None:
+                 if job.signature != signature:
+@@ -480,7 +533,8 @@ class HostService:
+                             project.jobs.pop(previous_id)
+                 if sum(not item.done.is_set() for item in project.jobs.values()) >= 256:
+                     return not_started("queue_full", "The project's request queue is full")
+-                job = Job(dict(payload), time.monotonic() + remaining, signature)
++                job = Job(dict(payload), deadline, signature)
++                mark('host_queued', request_id)
+                 project.jobs[request_id] = job
+                 if control:
+                     threading.Thread(target=self._run_control, args=(project, job), daemon=True,
+@@ -492,7 +546,7 @@ class HostService:
+                         threading.Thread(target=self._project_loop, args=(project,), daemon=True,
+                                          name="unity-host-project").start()
+                     project.condition.notify_all()
+-        if not job.done.wait(max(0., min(job.deadline - time.monotonic(), remaining))):
++        if not job.done.wait(max(0., min(job.deadline - time.perf_counter(), remaining))):
+             return job.expire()
+         return job.response
+ 
+@@ -500,7 +554,7 @@ class HostService:
+         # Live readiness observes compiling/reloading states as well as ready.
+         with project.condition:
+             snapshot = dict(project.snapshot)
+-        remaining = job.deadline - time.monotonic()
++        remaining = job.deadline - time.perf_counter()
+         if remaining <= 0:
+             job.expire()
+             return
+@@ -509,10 +563,10 @@ class HostService:
+                 return
+             job.state = "dispatched"
+         try:
+-            result = post(snapshot["port"], self.descriptor["token"], "/command", {
++            result = self._post(snapshot, {
+                 "command": "get_editor_state", "params": job.payload.get("params", {}),
+                 "request_id": job.payload["request_id"], "deadline_unix_ms": job.payload["deadline_unix_ms"],
+-            }, remaining)
++            }, remaining, "control")
+             job.complete(result)
+         except TransportError:
+             job.complete(unknown("get_editor_state"))
+@@ -532,21 +586,31 @@ class HostService:
+         service = self
+ 
+         class Handler(BaseHTTPRequestHandler):
+-            protocol_version = "HTTP/1.0"
++            protocol_version = "HTTP/1.1"
+             # Headers and a small JSON body are written separately. Nagle can hold
+             # the second write until a delayed ACK (~40 ms), adding a round trip
+             # even on loopback. Disable it on accepted host sockets, not globally.
+             disable_nagle_algorithm = True
++            timeout = 5.
++
++            def handle(self):
++                try:
++                    super().handle()
++                except (ConnectionError, TimeoutError):
++                    # A client may retire an idle persistent connection at any time.
++                    self.close_connection = True
+ 
+             def log_message(self, format, *args):
+                 pass
+ 
+             def do_POST(self):
+                 if self.headers.get("Origin") is not None:
++                    self.close_connection = True
+                     self.reply(403, {"error": "Browser requests are not allowed"})
+                     return
+                 if not hmac.compare_digest(self.headers.get("X-UnityBridge-Token", "").encode("utf-8"),
+                                            service.descriptor["token"].encode("utf-8")):
++                    self.close_connection = True
+                     self.reply(403, {"error": "Authentication required"})
+                     return
+                 try:
+@@ -558,6 +622,7 @@ class HostService:
+                     if not isinstance(payload, dict):
+                         raise ValueError()
+                 except (ValueError, OSError):
++                    self.close_connection = True
+                     self.reply(400, {"error": "Invalid JSON request"})
+                     return
+                 if self.path == "/health":
+@@ -591,6 +656,8 @@ class HostService:
+                     self.send_response(status)
+                     self.send_header("Content-Type", "application/json")
+                     self.send_header("Content-Length", str(len(raw)))
++                    if self.close_connection:
++                        self.send_header("Connection", "close")
+                     self.end_headers()
+                     self.wfile.write(raw)
+                 except OSError:
+@@ -608,14 +675,11 @@ class HostService:
+         self.server.daemon_threads = True
+         self._write_registry()
+ 
+-        def prewarm():
+-            try:
+-                self.compiler.prewarm()
+-            except CompilerError as exc:
+-                self.compiler_error = str(exc)
+-
+-        threading.Thread(target=prewarm, name="unity-host-prewarm", daemon=True).start()
++        mark('host_listening')
+         threading.Thread(target=self._scan_loop, name="unity-host-discovery", daemon=True).start()
++        def prepare_cli():
++            from . import cli_request  # noqa: F401; load alongside compiler preparation
++        threading.Thread(target=prepare_cli, name="unity-host-cli-prewarm", daemon=True).start()
+         try:
+             self.server.serve_forever(poll_interval=.1)
+         finally:
+@@ -625,6 +689,7 @@ class HostService:
+             self.cli_server.server_close()
+             cli_thread.join(2)
+             self.compiler.close()
++            self.connections.close()
+             path = endpoint_path(self.root, self.descriptor["runtimeId"])
+             saved = read_json(path)
+             if saved and saved.get("pid") == os.getpid() and saved.get("port") == self.port:
+diff --git a/src/unity_bridge/host/transport.py b/src/unity_bridge/host/transport.py
+index 6ee0ee3..7903cbd 100644
+--- a/src/unity_bridge/host/transport.py
++++ b/src/unity_bridge/host/transport.py
+@@ -3,6 +3,11 @@ from __future__ import annotations
+ 
+ import http.client
+ import json
++import os
++import select
++import threading
++import time
++from collections import OrderedDict
+ from typing import Any
+ 
+ MAX_MESSAGE_BYTES = 32 * 1024 * 1024
+@@ -12,20 +17,14 @@ class TransportError(Exception):
+     pass
+ 
+ 
+-def post(port: int, token: str, path: str, payload: dict[str, Any], timeout: float) -> dict[str, Any]:
+-    if not isinstance(port, int) or isinstance(port, bool) or not 0 < port < 65536:
+-        raise TransportError("Invalid local endpoint")
+-    if path not in {"/command", "/health", "/stop", "/changed"}:
+-        raise TransportError("Invalid local operation")
+-    # The destination is always a fixed loopback HTTP endpoint. Generic urllib
+-    # openers also initialize HTTPS and the Windows certificate store, even for
+-    # these HTTP-only calls; doing that per forward adds avoidable startup work.
+-    # HTTPConnection neither consults proxy settings nor follows redirects.
+-    connection = http.client.HTTPConnection("127.0.0.1", port, timeout=max(.001, timeout))
++def _exchange(connection, token, path, payload, timeout):
++    connection.timeout = max(.001, timeout)
++    if connection.sock is not None:
++        connection.sock.settimeout(connection.timeout)
++    connection.request("POST", path, body=json.dumps(payload).encode("utf-8"),
++                       headers={"Content-Type": "application/json", "X-UnityBridge-Token": token})
++    response = connection.getresponse()
+     try:
+-        connection.request("POST", path, body=json.dumps(payload).encode("utf-8"),
+-                           headers={"Content-Type": "application/json", "X-UnityBridge-Token": token})
+-        response = connection.getresponse()
+         if response.status != 200:
+             raise TransportError("Local endpoint did not accept the request")
+         raw = response.read(MAX_MESSAGE_BYTES + 1)
+@@ -35,7 +34,100 @@ def post(port: int, token: str, path: str, payload: dict[str, Any], timeout: flo
+         if not isinstance(value, dict):
+             raise TransportError("Local endpoint returned an invalid response")
+         return value
++    finally:
++        response.close()
++
++
++class _Entry:
++    def __init__(self, port, identity):
++        self.identity = identity
++        self.connection = http.client.HTTPConnection("127.0.0.1", port)
++        self.lock = threading.Lock()
++        self.retired = False
++        self.used_at = 0.
++
++    def retire(self):
++        self.retired = True
++        if self.lock.acquire(blocking=False):
++            try:
++                self.connection.close()
++            finally:
++                self.lock.release()
++
++
++class ConnectionPool:
++    """Bounded, serialized connections per logical lane and endpoint generation.
++
++    A failed exchange is never retried. Retiring a busy connection closes it
++    after its response, so discovery cannot interrupt an in-flight operation.
++    """
++    def __init__(self, capacity=32):
++        self.capacity = capacity
++        self.entries = OrderedDict()
++        self.lock = threading.Lock()
++
++    def close(self):
++        with self.lock:
++            entries, self.entries = self.entries, OrderedDict()
++        for entry in entries.values():
++            entry.retire()
++
++    def post(self, port, token, path, payload, timeout, key, identity):
++        deadline = time.perf_counter() + timeout
++        identity = (port, token, identity)
++        with self.lock:
++            entry = self.entries.pop(key, None)
++            if entry is not None and entry.identity != identity:
++                entry.retire()
++                entry = None
++            if entry is None:
++                entry = _Entry(port, identity)
++            self.entries[key] = entry
++            while len(self.entries) > self.capacity:
++                _, oldest = self.entries.popitem(last=False)
++                oldest.retire()
++        remaining = deadline - time.perf_counter()
++        if remaining <= 0 or not entry.lock.acquire(timeout=max(0., remaining)):
++            raise TransportError("Local request expired while waiting for its connection")
++        try:
++            remaining = deadline - time.perf_counter()
++            if remaining <= 0:
++                raise TransportError("Local request expired before transmission")
++            sock = entry.connection.sock
++            # A closed idle socket is safe to replace BEFORE writing this request.
++            # Never replay a request after request()/sendall() has been attempted.
++            if sock is not None and (time.perf_counter() - entry.used_at > 2.
++                                     or select.select([sock], [], [], 0)[0]):
++                entry.connection.close()
++            return _exchange(entry.connection, token, path, payload, remaining)
++        except (OSError, ValueError, http.client.HTTPException, TransportError):
++            entry.connection.close()
++            raise
++        finally:
++            entry.used_at = time.perf_counter()
++            if entry.retired:
++                entry.connection.close()
++            entry.lock.release()
++
++
++def post(port: int, token: str, path: str, payload: dict[str, Any], timeout: float,
++         *, pool: ConnectionPool | None = None, key=None, identity=None) -> dict[str, Any]:
++    if not isinstance(port, int) or isinstance(port, bool) or not 0 < port < 65536:
++        raise TransportError("Invalid local endpoint")
++    if path not in {"/command", "/health", "/stop", "/changed"}:
++        raise TransportError("Invalid local operation")
++    # The destination is always a fixed loopback HTTP endpoint. Generic urllib
++    # openers also initialize HTTPS and the Windows certificate store, even for
++    # these HTTP-only calls; doing that per forward adds avoidable startup work.
++    # HTTPConnection neither consults proxy settings nor follows redirects.
++    connection = None
++    try:
++        if pool is not None and os.environ.get("UNITY_BRIDGE_DISABLE_CONNECTION_REUSE") != "1":
++            return pool.post(port, token, path, payload, timeout, key, identity)
++        connection = http.client.HTTPConnection("127.0.0.1", port)
++        return _exchange(connection, token, path, payload, timeout)
+     except (OSError, ValueError, http.client.HTTPException) as exc:
+         raise TransportError("Local endpoint did not return a complete valid response") from exc
+     finally:
+-        connection.close()
++        if connection is not None:
++            connection.close()
+diff --git a/unity-bridge-connector/Editor/BridgeHostLauncher.cs b/unity-bridge-connector/Editor/BridgeHostLauncher.cs
+index 679db12..d5df3b9 100644
+--- a/unity-bridge-connector/Editor/BridgeHostLauncher.cs
++++ b/unity-bridge-connector/Editor/BridgeHostLauncher.cs
+@@ -98,15 +98,26 @@ namespace UnityBridgeConnector
+         static BridgeHostLauncher()
+         {
+             if (AssetDatabase.IsAssetImportWorkerProcess()) return;
++            // Only filesystem/process work is started here. Unity references and
++            // commands still wait for the host's live ready/context negotiation.
++            if (Environment.GetEnvironmentVariable("UNITY_BRIDGE_DISABLE_EARLY_HOST") != "1")
++                ScheduleCheck();
+             EditorApplication.delayCall += Check;
+             EditorApplication.update += Check;
+         }
+ 
+         static void Check()
+         {
+-            if (EditorApplication.timeSinceStartup < s_NextCheck || EditorApplication.isCompiling || EditorApplication.isUpdating)
++            if (Environment.GetEnvironmentVariable("UNITY_BRIDGE_DISABLE_EARLY_HOST") == "1" &&
++                (EditorApplication.isCompiling || EditorApplication.isUpdating)) return;
++            if (EditorApplication.timeSinceStartup < s_NextCheck)
+                 return;
+             s_NextCheck = EditorApplication.timeSinceStartup + 5;
++            ScheduleCheck();
++        }
++
++        static void ScheduleCheck()
++        {
+             if (Interlocked.Exchange(ref s_CheckRunning, 1) != 0) return;
+             // No filesystem probes or process startup waits run on the Editor thread.
+             _ = Task.Run(() =>
+diff --git a/unity-bridge-connector/Editor/BridgeTiming.cs b/unity-bridge-connector/Editor/BridgeTiming.cs
+new file mode 100644
+index 0000000..087e80e
+--- /dev/null
++++ b/unity-bridge-connector/Editor/BridgeTiming.cs
+@@ -0,0 +1,37 @@
++using System;
++using System.Diagnostics;
++using System.IO;
++using Newtonsoft.Json.Linq;
++
++namespace UnityBridgeConnector
++{
++    // Explicit diagnostics only. Performance gates run with this disabled.
++    // No Unity API, request parameters, source code, results or tokens are logged.
++    internal static class BridgeTiming
++    {
++        static readonly string DirectoryPath = Environment.GetEnvironmentVariable("UNITY_BRIDGE_TIMING_DIR");
++        static readonly object Gate = new object();
++        static readonly int Pid = Process.GetCurrentProcess().Id;
++
++        internal static void Mark(string stage, string requestId)
++        {
++            if (string.IsNullOrEmpty(DirectoryPath)) return;
++            try
++            {
++                var value = new JObject
++                {
++                    ["stage"] = stage, ["pid"] = Pid, ["request_id"] = requestId,
++                    ["ticks"] = Stopwatch.GetTimestamp(), ["frequency"] = Stopwatch.Frequency,
++                    ["unix_ms"] = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
++                };
++                lock (Gate)
++                {
++                    Directory.CreateDirectory(DirectoryPath);
++                    File.AppendAllText(Path.Combine(DirectoryPath, "unity-" + Pid + ".jsonl"),
++                        value.ToString(Newtonsoft.Json.Formatting.None) + "\n");
++                }
++            }
++            catch (Exception) { /* Timing output must not alter command behavior. */ }
++        }
++    }
++}
+diff --git a/unity-bridge-connector/Editor/BridgeTiming.cs.meta b/unity-bridge-connector/Editor/BridgeTiming.cs.meta
+new file mode 100644
+index 0000000..08d9136
+--- /dev/null
++++ b/unity-bridge-connector/Editor/BridgeTiming.cs.meta
+@@ -0,0 +1,2 @@
++fileFormatVersion: 2
++guid: 6a79dc247b5f420390a492c3f8f41d5d
+diff --git a/unity-bridge-connector/Editor/CommandRouter.cs b/unity-bridge-connector/Editor/CommandRouter.cs
+index b2622cb..252e116 100644
+--- a/unity-bridge-connector/Editor/CommandRouter.cs
++++ b/unity-bridge-connector/Editor/CommandRouter.cs
+@@ -46,12 +46,14 @@ namespace UnityBridgeConnector
+                 // A timeout/domain change may occur while queued behind another tool.
+                 rejected = BridgeProtocol.Validate(request, request != null && request.Authenticated);
+                 if (rejected != null) return rejected;
++                BridgeTiming.Mark("unity_execution_begin", request?.RequestId);
+                 if (command == "bridge_exec_assembly")
+                     return BridgeProtocol.ExecuteAssembly(parameters, request);
+                 return await DispatchInternal(command, parameters);
+             }
+             finally
+             {
++                BridgeTiming.Mark("unity_execution_end", request?.RequestId);
+                 s_Lock.Release();
+             }
+         }
+diff --git a/unity-bridge-connector/Editor/HttpServer.cs b/unity-bridge-connector/Editor/HttpServer.cs
+index f81a073..1c6e83b 100644
+--- a/unity-bridge-connector/Editor/HttpServer.cs
++++ b/unity-bridge-connector/Editor/HttpServer.cs
+@@ -227,6 +227,7 @@ namespace UnityBridgeConnector
+ 
+         static async void ProcessItem(WorkItem item)
+         {
++            BridgeTiming.Mark("unity_main_thread", item.Request?.RequestId);
+             try
+             {
+                 var r = await CommandRouter.Dispatch(item.Command, item.Parameters, item.Request);
+@@ -242,7 +243,12 @@ namespace UnityBridgeConnector
+         {
+             // Custom tools may return objects whose properties/converters use
+             // Unity APIs. Keep their serialization on the dispatch thread.
+-            try { item.Tcs.TrySetResult(JsonConvert.SerializeObject(result)); }
++            try
++            {
++                var json = JsonConvert.SerializeObject(result);
++                BridgeTiming.Mark("unity_serialized", item.Request?.RequestId);
++                item.Tcs.TrySetResult(json);
++            }
+             catch (Exception ex) { item.Tcs.TrySetException(ex); }
+         }
+ 
+@@ -309,6 +315,7 @@ namespace UnityBridgeConnector
+ 
+             object result = null;
+             string responseJson = null;
++            string timingId = null;
+ 
+             try
+             {
+@@ -356,6 +363,8 @@ namespace UnityBridgeConnector
+                         }
+                         else
+                         {
++                            timingId = metadata.RequestId;
++                            BridgeTiming.Mark("unity_queued", timingId);
+                             var tcs = new TaskCompletionSource<string>(TaskCreationOptions.RunContinuationsAsynchronously);
+                             s_Queue.Enqueue(new WorkItem
+                             {
+@@ -381,6 +390,7 @@ namespace UnityBridgeConnector
+             response.ContentLength64 = buffer.Length;
+             await response.OutputStream.WriteAsync(buffer, 0, buffer.Length).ConfigureAwait(false);
+             response.Close();
++            BridgeTiming.Mark("unity_response_sent", timingId);
+         }
+     }
+ }

@@ -26,8 +26,8 @@ from unity_bridge.host.transport import TransportError, post
 
 
 def eventually(predicate, timeout=4):
-    deadline = time.monotonic() + timeout
-    while time.monotonic() < deadline:
+    deadline = time.perf_counter() + timeout
+    while time.perf_counter() < deadline:
         if predicate():
             return
         time.sleep(.01)
@@ -45,10 +45,10 @@ class FakeCompiler:
     def prewarm(self):
         return {"protocol": 1, "success": True}
 
-    def request(self, payload, *, deadline):
+    def request(self, payload, *, deadline, background=False):
         self.calls.append(payload)
         self.started.set()
-        if not self.release.wait(max(0, deadline - time.monotonic())):
+        if not self.release.wait(max(0, deadline - time.perf_counter())):
             # A timed-out worker cannot produce a successful assembly. Windows
             # waits may return just before monotonic() crosses the deadline.
             raise CompilerError("compiler_timeout", "Fixture compilation timed out")
@@ -177,6 +177,54 @@ class HostServiceTests(unittest.TestCase):
         self.assertEqual(self.compiler.calls, [])
         self.assertEqual(self.executed, ["mutate"] * 3)
         self.assertEqual(host_status(self.instance(), self.instances)["state"], "running")
+
+    def test_discovery_wait_does_not_restart_request_deadline(self):
+        from unittest.mock import patch
+        payload = self.payload('must-not-run', timeout=.02)
+        payload['target']['port'] += 1  # Force the discovery refresh path.
+        with patch.object(self.service, 'scan_once', side_effect=lambda: time.sleep(.08)):
+            response = self.service.submit(payload)
+        self.assertEqual(response['data']['completion'], 'not_started')
+        self.assertEqual(self.executed, [])
+
+    def test_first_request_waits_for_initial_context_without_blocking_control(self):
+        project = self.service._project_list()[0]
+        with project.condition:
+            prepared, context_key = project.context, project.context_key
+            project.context = project.context_key = None
+            project.negotiating = True
+        payload = self.payload('first-after-start')
+        with ThreadPoolExecutor(max_workers=1) as pool:
+            pending = pool.submit(self.service.submit, payload)
+            try:
+                eventually(lambda: payload['request_id'] in project.jobs)
+                self.assertFalse(pending.done())
+                self.assertEqual(self.executed, [])
+                self.assertTrue(self.call('get_editor_state')['success'])
+            finally:
+                with project.condition:
+                    project.context, project.context_key = prepared, context_key
+                    project.negotiating = False
+                    project.condition.notify_all()
+            self.assertTrue(pending.result(timeout=2)['success'])
+        self.assertEqual(self.executed, ['first-after-start'])
+
+    def test_expired_first_request_does_not_run_when_context_arrives(self):
+        project = self.service._project_list()[0]
+        with project.condition:
+            prepared, context_key = project.context, project.context_key
+            project.context = project.context_key = None
+            project.negotiating = True
+        try:
+            result = self.service.submit(self.payload('expired-first', timeout=.05))
+            self.assertEqual(result['data']['reason'], 'expired')
+        finally:
+            with project.condition:
+                project.context, project.context_key = prepared, context_key
+                project.negotiating = False
+                project.condition.notify_all()
+        self.assertTrue(self.call('after-expired-first')['success'])
+        self.assertEqual(self.executed, ['after-expired-first'])
 
     def test_change_notification_wakes_long_periodic_scan(self):
         self.service.scan_interval = 30

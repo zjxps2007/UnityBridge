@@ -1,0 +1,581 @@
+{
+  "unity_version": "6000.3.13f1",
+  "baseline_ref": "v0.3.0-rc.2",
+  "baseline_host": true,
+  "baseline_working_tree_connector": false,
+  "sessions": [
+    {
+      "number": 1,
+      "variant": "candidate",
+      "source_sha256": {
+        "BridgeHostLauncher.cs": "d88a3f396079d01b2895d2a86584ba8502b68eb8f5c8079947f9c74c8054c86a",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+        "CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+        "HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+        "ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+        "Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+        "Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+        "Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+        "Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+        "Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+        "Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+        "Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+        "Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+        "Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+        "Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+        "Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+        "Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+        "Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+        "Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 259.40850004553795
+        },
+        {
+          "name": "warmed_new_snippet",
+          "ms": 98.6716000479646
+        },
+        {
+          "name": "prewarm_only_first_exec",
+          "ms": 114.16950001148507
+        },
+        {
+          "name": "frame_idle_start",
+          "ms": 105.85430002538487
+        },
+        {
+          "name": "frame_idle_stop",
+          "ms": 116.15289998007938
+        },
+        {
+          "name": "status",
+          "ms": 76.5049999463372
+        },
+        {
+          "name": "console",
+          "ms": 71.2305000051856
+        },
+        {
+          "name": "tools",
+          "ms": 75.49249997828156
+        },
+        {
+          "name": "instances",
+          "ms": 68.39400000171736
+        },
+        {
+          "name": "wait_ready",
+          "ms": 90.18669999204576
+        },
+        {
+          "name": "status",
+          "ms": 74.00590000906959
+        },
+        {
+          "name": "console",
+          "ms": 74.08109999960288
+        },
+        {
+          "name": "tools",
+          "ms": 72.20169994980097
+        },
+        {
+          "name": "instances",
+          "ms": 68.49949999013916
+        },
+        {
+          "name": "wait_ready",
+          "ms": 70.7651999546215
+        },
+        {
+          "name": "status",
+          "ms": 77.93410000158474
+        },
+        {
+          "name": "console",
+          "ms": 68.08719999389723
+        },
+        {
+          "name": "tools",
+          "ms": 69.3250999902375
+        },
+        {
+          "name": "instances",
+          "ms": 66.74169999314472
+        },
+        {
+          "name": "wait_ready",
+          "ms": 68.09189997147769
+        },
+        {
+          "name": "frame_exec_start",
+          "ms": 95.40259995264933
+        },
+        {
+          "name": "unique_exec",
+          "ms": 109.03679998591542
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 83.98410002700984
+        },
+        {
+          "name": "unique_exec",
+          "ms": 89.25250003812835
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 113.49379998864606
+        },
+        {
+          "name": "unique_exec",
+          "ms": 99.89140002289787
+        },
+        {
+          "name": "repeat_exec",
+          "ms": 83.39200000045821
+        },
+        {
+          "name": "frame_exec_stop",
+          "ms": 96.32060001604259
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 147.98049995442852
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 136.44259999273345
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 138.16079997923225
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 138.88550002593547
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 139.3087999895215
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 137.49599998118356
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 140.43750002747402
+        },
+        {
+          "name": "refresh_wait",
+          "ms": 153.50180002860725
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 86.13920002244413
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 90.31010000035167
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 86.61189995473251
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 107.09700000006706
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 84.44250002503395
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 107.30899998452514
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 90.43929999461398
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 89.0468000434339
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 86.6459000390023
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 96.92229999927804
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 85.35370003664866
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 81.47010003449395
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 120.91850000433624
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 91.10560000408441
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 92.72219997365028
+        },
+        {
+          "name": "rotating_exec",
+          "ms": 84.73449997836724
+        },
+        {
+          "name": "session_first",
+          "ms": 90.45870002591982
+        },
+        {
+          "name": "session_console",
+          "ms": 4.368199966847897
+        },
+        {
+          "name": "session_console",
+          "ms": 4.168099956586957
+        },
+        {
+          "name": "session_console",
+          "ms": 4.115800024010241
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+      "executable_sha256": "39ad76387cd6ecf2f109de5d5e23964b31ad2d210ef67baa3aabdf020fc3408b",
+      "installed_bytes": 135226276,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-timing/1-candidate/UnityProject",
+        "port": 8090,
+        "pid": 53236,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789750459947,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "b2cf5b30572b42aabd0b69fe2036a347",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 6120.344900002237,
+      "cold_service_samples_ms": [
+        259.4591000233777
+      ],
+      "unity_start_to_first_result_ms": 6379.810499958694,
+      "after_ready_to_first_result_ms": 259.4655999564566,
+      "cold_service_to_first_result_ms": 259.4591000233777,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "04da9345b08c3cfff121dc28fd60e96f",
+        "pid": 13404,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_2be47a617c644d0fb295bb03b8dac312"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-timing/1-candidate/UnityProject",
+            "pid": 53236,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "idle_editor_gaps": [
+        1.5328000000004067,
+        1.249199999999746,
+        4.971900000000005,
+        2.10799999999972,
+        3.295599999999922,
+        5.425999999999931,
+        1.134099999999762,
+        1.0588999999999942,
+        5.5448999999998705,
+        1.1084000000000742,
+        3.0360999999998057,
+        1.0070999999998094,
+        1.0526999999997315,
+        5.538199999999961,
+        1.0580999999997402,
+        3.1728000000002794,
+        1.0104000000001179,
+        1.1228000000000975
+      ],
+      "exec_editor_gaps": [
+        1.253700000000208,
+        1.0505999999995765,
+        3.1711999999997715,
+        1.0939999999991414,
+        1.0075000000006185,
+        1.1688999999996668,
+        1.1304999999993015,
+        1.1715999999996711,
+        1.2192999999997483,
+        1.083400000000438,
+        1.073699999999917,
+        1.2070999999996275,
+        5.667499999999563,
+        1.1596999999992477,
+        1.1523999999999432,
+        2.212999999999738,
+        1.139100000000326,
+        1.0936000000001513,
+        1.0540000000000873,
+        1.2917999999999665,
+        1.1588000000001557,
+        1.063799999999901,
+        1.037000000000262,
+        1.181300000000192,
+        1.1165000000000873
+      ],
+      "rotating_cache_hits": [
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        false,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true,
+        true
+      ],
+      "unity_working_set_bytes": 457572352,
+      "host_after": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "04da9345b08c3cfff121dc28fd60e96f",
+        "pid": 24900,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": true,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_d26ff80e6de34326928a09d5dbda2c49"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-timing/1-candidate/UnityProject",
+            "pid": 53236,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "host_working_set_bytes": 32251904,
+      "worker_working_set_bytes": 203808768
+    }
+  ],
+  "scope": "Windows, empty projects, batchmode/nographics, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms",
+  "configuration": {
+    "unity_editor": "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.13f1\\Editor\\Unity.exe",
+    "unity_version": "6000.3.13f1",
+    "baseline_bin": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+    "candidate_bin": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+    "baseline_ref": "v0.3.0-rc.2",
+    "baseline_host": true,
+    "baseline_working_tree_connector": false,
+    "variants": [
+      "candidate"
+    ],
+    "samples": 3,
+    "exec_samples": 3,
+    "cold_samples": 1,
+    "session_samples": 3,
+    "large_samples": 0,
+    "candidate_env": [],
+    "startup_host": true,
+    "startup_only": false,
+    "reuse_projects": false,
+    "gui": null,
+    "extended": true,
+    "output": "<repo>\\.codex-deps\\python-startup\\accepted-timing"
+  },
+  "summary": {
+    "baseline": {
+      "instances": {},
+      "wait_ready": {},
+      "status": {},
+      "console": {},
+      "tools": {},
+      "unique_exec": {},
+      "repeat_exec": {},
+      "first_exec": {},
+      "warmed_new_snippet": {},
+      "prewarm_only_first_exec": {},
+      "cold_service_to_first_result": {},
+      "idle_editor_gaps": {},
+      "exec_editor_gaps": {},
+      "unity_ready_ms_new_project": {},
+      "unity_ready_ms_reused": {},
+      "unity_start_to_first_result_ms_new_project": {},
+      "unity_start_to_first_result_ms_reused": {},
+      "after_ready_to_first_result_ms_new_project": {},
+      "after_ready_to_first_result_ms_reused": {}
+    },
+    "candidate": {
+      "instances": {
+        "n": 3,
+        "p50_ms": 68.39400000171736,
+        "p95_ms": 68.49949999013916,
+        "max_ms": 68.49949999013916
+      },
+      "wait_ready": {
+        "n": 3,
+        "p50_ms": 70.7651999546215,
+        "p95_ms": 90.18669999204576,
+        "max_ms": 90.18669999204576
+      },
+      "status": {
+        "n": 3,
+        "p50_ms": 76.5049999463372,
+        "p95_ms": 77.93410000158474,
+        "max_ms": 77.93410000158474
+      },
+      "console": {
+        "n": 3,
+        "p50_ms": 71.2305000051856,
+        "p95_ms": 74.08109999960288,
+        "max_ms": 74.08109999960288
+      },
+      "tools": {
+        "n": 3,
+        "p50_ms": 72.20169994980097,
+        "p95_ms": 75.49249997828156,
+        "max_ms": 75.49249997828156
+      },
+      "unique_exec": {
+        "n": 3,
+        "p50_ms": 99.89140002289787,
+        "p95_ms": 109.03679998591542,
+        "max_ms": 109.03679998591542
+      },
+      "repeat_exec": {
+        "n": 3,
+        "p50_ms": 83.98410002700984,
+        "p95_ms": 113.49379998864606,
+        "max_ms": 113.49379998864606
+      },
+      "first_exec": {
+        "n": 1,
+        "p50_ms": 259.40850004553795,
+        "p95_ms": 259.40850004553795,
+        "max_ms": 259.40850004553795
+      },
+      "warmed_new_snippet": {
+        "n": 1,
+        "p50_ms": 98.6716000479646,
+        "p95_ms": 98.6716000479646,
+        "max_ms": 98.6716000479646
+      },
+      "prewarm_only_first_exec": {
+        "n": 1,
+        "p50_ms": 114.16950001148507,
+        "p95_ms": 114.16950001148507,
+        "max_ms": 114.16950001148507
+      },
+      "refresh_wait": {
+        "n": 8,
+        "p50_ms": 138.88550002593547,
+        "p95_ms": 153.50180002860725,
+        "max_ms": 153.50180002860725
+      },
+      "rotating_exec": {
+        "n": 16,
+        "p50_ms": 89.0468000434339,
+        "p95_ms": 120.91850000433624,
+        "max_ms": 120.91850000433624
+      },
+      "session_first": {
+        "n": 1,
+        "p50_ms": 90.45870002591982,
+        "p95_ms": 90.45870002591982,
+        "max_ms": 90.45870002591982
+      },
+      "session_console": {
+        "n": 3,
+        "p50_ms": 4.168099956586957,
+        "p95_ms": 4.368199966847897,
+        "max_ms": 4.368199966847897
+      },
+      "cold_service_to_first_result": {
+        "n": 1,
+        "p50_ms": 259.4591000233777,
+        "p95_ms": 259.4591000233777,
+        "max_ms": 259.4591000233777
+      },
+      "idle_editor_gaps": {
+        "n": 18,
+        "p50_ms": 1.249199999999746,
+        "p95_ms": 5.5448999999998705,
+        "max_ms": 5.5448999999998705
+      },
+      "exec_editor_gaps": {
+        "n": 25,
+        "p50_ms": 1.1523999999999432,
+        "p95_ms": 3.1711999999997715,
+        "max_ms": 5.667499999999563
+      },
+      "unity_ready_ms_new_project": {
+        "n": 1,
+        "p50_ms": 6120.344900002237,
+        "p95_ms": 6120.344900002237,
+        "max_ms": 6120.344900002237
+      },
+      "unity_ready_ms_reused": {},
+      "unity_start_to_first_result_ms_new_project": {
+        "n": 1,
+        "p50_ms": 6379.810499958694,
+        "p95_ms": 6379.810499958694,
+        "max_ms": 6379.810499958694
+      },
+      "unity_start_to_first_result_ms_reused": {},
+      "after_ready_to_first_result_ms_new_project": {
+        "n": 1,
+        "p50_ms": 259.4655999564566,
+        "p95_ms": 259.4655999564566,
+        "max_ms": 259.4655999564566
+      },
+      "after_ready_to_first_result_ms_reused": {}
+    }
+  },
+  "ordinary_command_gates": {},
+  "functional_passed": true,
+  "performance_gates_evaluated": false,
+  "passed": null
+}

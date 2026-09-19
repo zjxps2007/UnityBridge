@@ -6,7 +6,12 @@ from socketserver import BaseRequestHandler, ThreadingTCPServer
 import time
 
 from .._wire import read_frame, write_frame
-from .cli_request import execute_cli
+
+
+def execute_cli(service, payload):
+    # Listening and compiler startup do not depend on loading the full CLI.
+    from .cli_request import execute_cli as dispatch
+    return dispatch(service, payload)
 
 
 def create_cli_server(service):
@@ -14,7 +19,7 @@ def create_cli_server(service):
         def handle(self):
             self.request.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
             try:
-                payload = json.loads(read_frame(self.request, time.monotonic() + 5))
+                payload = json.loads(read_frame(self.request, time.perf_counter() + 5))
                 if not isinstance(payload, dict):
                     return
                 token = payload.pop("token", None)
@@ -25,7 +30,7 @@ def create_cli_server(service):
                     response = {"cli_protocol": 1, "exit_code": 1, "stdout": "", "stderr": "ERROR: Host is stopping.\n"}
                 else:
                     response = execute_cli(service, payload)
-                write_frame(self.request, json.dumps(response, ensure_ascii=False).encode("utf-8"), time.monotonic() + 5)
+                write_frame(self.request, json.dumps(response, ensure_ascii=False).encode("utf-8"), time.perf_counter() + 5)
             except (OSError, ValueError):
                 # A disconnected caller may have lost an execution result. Never
                 # resubmit its command or leak request contents to diagnostic logs.

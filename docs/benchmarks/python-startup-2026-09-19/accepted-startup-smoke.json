@@ -1,0 +1,507 @@
+{
+  "unity_version": "6000.3.13f1",
+  "baseline_ref": "v0.3.0-rc.2",
+  "baseline_host": true,
+  "baseline_working_tree_connector": false,
+  "sessions": [
+    {
+      "number": 1,
+      "variant": "baseline",
+      "source_sha256": {
+        "Attributes/UnityBridgeToolAttribute.cs": "8b4fcf47917924c72fb19512ce10f4c01efab6cf25f8fa32d4e72bb6574d7ebb",
+        "BridgeHostLauncher.cs": "a4b7514c48ad7a8d0f15fbdbec6be524933b21146d034d288f593cc8fa7d5a95",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "CommandRouter.cs": "d14f3f3b26b95a9cda520d95a84039b17b50a1f078ca176e13d6e8b7a1c989ac",
+        "Core/AtomicFile.cs": "fa8600931d84edff930cfa55fa4dbabf962fb993ab1b954a515b581063bbe696",
+        "Core/ParamCoercion.cs": "73b13494f7f1c0dae39738c24abd8b8ecb2f7896d212725ecea0c69c52f3c6d0",
+        "Core/Response.cs": "86e3f785175b6a55442bab304e8a803b180b21dd74ce71ac8a62e548bcffce32",
+        "Core/StringCaseUtility.cs": "ac3826f8fc7ef689c9346af53bbf527b67cc2dbc1158dd68275da897626e8581",
+        "Core/ToolParams.cs": "7957b15878eaf4054bd9bee23e63b921ddf008b7025d1606fadd7cde3b4b1d22",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "6d1e6b6d57550dc8326c99103b6c97f55a14e6584ba9bd381677e12e7b4ddaa2",
+        "HttpServer.cs": "206d8c4511eeba6fb0a8446e5cf74aef01bf26178ab8ac41ad231795ba55f119",
+        "ToolDiscovery.cs": "63131c303f5cf4ac214ad4f0797a0a9be7973a3de1dfe31ce72d012aab4f40ec",
+        "Tools/EditorScreenshot.cs": "8da5112b871490fe4625d62cc9edb7da322bf07ab3b047e4601e3cc604a0f7a2",
+        "Tools/ExecuteCsharp.cs": "5a2646697c5e45f753b84ef94492cf9c1703de24c5e5ae4d01c9fe967e85a289",
+        "Tools/ExecuteMenuItem.cs": "73588a00aed26cadd7d85ec220a85ae227838902d496b44f3f47dd4038207f58",
+        "Tools/ManageEditor.cs": "e7f5f65a189eb2af4639abece0bb21139a9b67dae56994d1abde6a0981c0ca84",
+        "Tools/ManageProfiler.cs": "f1b01a6c80d6c553e5b92127665589e9498f603c592d5591f6a50ce7f5c7d848",
+        "Tools/ReadConsole.cs": "83a3d18560753acbce9e3701e3be9099a3f23da9a1a12a701ed429e192f76d38",
+        "Tools/RefreshUnity.cs": "657b45dfbc40a136b088b13efb1e36a958780f225c5b8cdf53ce251cd88aa333",
+        "Tools/ReserializeAssets.cs": "f0f2460b4ec0f81e687702c6dfa1e1a2183b5c9924197db8a76926155018066a"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 830.2673000143841
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+      "executable_sha256": "585c23be16579c16c9217aa295b58c1e9f28201cad0d1cb5f06c4169121ec385",
+      "installed_bytes": 135202789,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/baseline/UnityProject",
+        "port": 8090,
+        "pid": 36276,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789747759034,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "1b430de320bc4e71bc8dcbf28444a24e",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 6085.685199999716,
+      "cold_service_samples_ms": [
+        830.2999000297859
+      ],
+      "unity_start_to_first_result_ms": 6915.993999980856,
+      "after_ready_to_first_result_ms": 830.3087999811396,
+      "cold_service_to_first_result_ms": 830.2999000297859,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "719f03f618886df4c02d57afb1fa8b92",
+        "pid": 30460,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_9cb21ead2973404989af5c1858a894d7"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/baseline/UnityProject",
+            "pid": 36276,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "unity_working_set_bytes": 448794624,
+      "host_working_set_bytes": 31191040,
+      "worker_working_set_bytes": 154836992
+    },
+    {
+      "number": 2,
+      "variant": "candidate",
+      "source_sha256": {
+        "BridgeHostLauncher.cs": "d88a3f396079d01b2895d2a86584ba8502b68eb8f5c8079947f9c74c8054c86a",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+        "CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+        "HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+        "ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+        "Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+        "Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+        "Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+        "Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+        "Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+        "Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+        "Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+        "Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+        "Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+        "Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+        "Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+        "Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+        "Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+        "Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 236.52819998096675
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+      "executable_sha256": "39ad76387cd6ecf2f109de5d5e23964b31ad2d210ef67baa3aabdf020fc3408b",
+      "installed_bytes": 135226276,
+      "reused_project": false,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/candidate/UnityProject",
+        "port": 8090,
+        "pid": 27380,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789747766761,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "86902a0aabf64cbd8e08041913387a92",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 6066.988700011279,
+      "cold_service_samples_ms": [
+        236.5583999780938
+      ],
+      "unity_start_to_first_result_ms": 6303.55499999132,
+      "after_ready_to_first_result_ms": 236.56629998004064,
+      "cold_service_to_first_result_ms": 236.5583999780938,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "04da9345b08c3cfff121dc28fd60e96f",
+        "pid": 7252,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_7ef2d20d2b114b95b4438e7394ca9fc3"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/candidate/UnityProject",
+            "pid": 27380,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "unity_working_set_bytes": 452673536,
+      "host_working_set_bytes": 31248384,
+      "worker_working_set_bytes": 160026624
+    },
+    {
+      "number": 3,
+      "variant": "baseline",
+      "source_sha256": {
+        "Attributes/UnityBridgeToolAttribute.cs": "8b4fcf47917924c72fb19512ce10f4c01efab6cf25f8fa32d4e72bb6574d7ebb",
+        "BridgeHostLauncher.cs": "a4b7514c48ad7a8d0f15fbdbec6be524933b21146d034d288f593cc8fa7d5a95",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "CommandRouter.cs": "d14f3f3b26b95a9cda520d95a84039b17b50a1f078ca176e13d6e8b7a1c989ac",
+        "Core/AtomicFile.cs": "fa8600931d84edff930cfa55fa4dbabf962fb993ab1b954a515b581063bbe696",
+        "Core/ParamCoercion.cs": "73b13494f7f1c0dae39738c24abd8b8ecb2f7896d212725ecea0c69c52f3c6d0",
+        "Core/Response.cs": "86e3f785175b6a55442bab304e8a803b180b21dd74ce71ac8a62e548bcffce32",
+        "Core/StringCaseUtility.cs": "ac3826f8fc7ef689c9346af53bbf527b67cc2dbc1158dd68275da897626e8581",
+        "Core/ToolParams.cs": "7957b15878eaf4054bd9bee23e63b921ddf008b7025d1606fadd7cde3b4b1d22",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "6d1e6b6d57550dc8326c99103b6c97f55a14e6584ba9bd381677e12e7b4ddaa2",
+        "HttpServer.cs": "206d8c4511eeba6fb0a8446e5cf74aef01bf26178ab8ac41ad231795ba55f119",
+        "ToolDiscovery.cs": "63131c303f5cf4ac214ad4f0797a0a9be7973a3de1dfe31ce72d012aab4f40ec",
+        "Tools/EditorScreenshot.cs": "8da5112b871490fe4625d62cc9edb7da322bf07ab3b047e4601e3cc604a0f7a2",
+        "Tools/ExecuteCsharp.cs": "5a2646697c5e45f753b84ef94492cf9c1703de24c5e5ae4d01c9fe967e85a289",
+        "Tools/ExecuteMenuItem.cs": "73588a00aed26cadd7d85ec220a85ae227838902d496b44f3f47dd4038207f58",
+        "Tools/ManageEditor.cs": "e7f5f65a189eb2af4639abece0bb21139a9b67dae56994d1abde6a0981c0ca84",
+        "Tools/ManageProfiler.cs": "f1b01a6c80d6c553e5b92127665589e9498f603c592d5591f6a50ce7f5c7d848",
+        "Tools/ReadConsole.cs": "83a3d18560753acbce9e3701e3be9099a3f23da9a1a12a701ed429e192f76d38",
+        "Tools/RefreshUnity.cs": "657b45dfbc40a136b088b13efb1e36a958780f225c5b8cdf53ce251cd88aa333",
+        "Tools/ReserializeAssets.cs": "f0f2460b4ec0f81e687702c6dfa1e1a2183b5c9924197db8a76926155018066a"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 840.5013000010513
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+      "executable_sha256": "585c23be16579c16c9217aa295b58c1e9f28201cad0d1cb5f06c4169121ec385",
+      "installed_bytes": 135202789,
+      "reused_project": true,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/baseline/UnityProject",
+        "port": 8090,
+        "pid": 53036,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789747772039,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "1d122ac257314d9693eb0c22544d5739",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 2939.851400034968,
+      "cold_service_samples_ms": [
+        840.5268000205979
+      ],
+      "unity_start_to_first_result_ms": 3780.382900033146,
+      "after_ready_to_first_result_ms": 840.5314999981783,
+      "cold_service_to_first_result_ms": 840.5268000205979,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "719f03f618886df4c02d57afb1fa8b92",
+        "pid": 45652,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_a7dd0cee362142cc9c2556e32cae3623"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/baseline/UnityProject",
+            "pid": 53036,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "unity_working_set_bytes": 424529920,
+      "host_working_set_bytes": 31109120,
+      "worker_working_set_bytes": 154722304
+    },
+    {
+      "number": 4,
+      "variant": "candidate",
+      "source_sha256": {
+        "BridgeHostLauncher.cs": "d88a3f396079d01b2895d2a86584ba8502b68eb8f5c8079947f9c74c8054c86a",
+        "BridgeProtocol.cs": "561e39b0c2207e569cd096af59447020db5c0f747c984e177135e43f3e549265",
+        "BridgeTiming.cs": "2790dcafc1b5d6ddb1fb9b2032af63238da7a2c8d0f1e7480c3519791f726cdd",
+        "CommandRouter.cs": "23f662976c637046a18695e2c9976a3349d87af920e1a34d63903512d299ed27",
+        "EditorOperations.cs": "06d744983dccc164933ac821efb716d3b1986d11e636d8987c9d2bfa571ecdc7",
+        "Heartbeat.cs": "513fd4fc4a8d5e415c130fd5ffdf4a41482b94c5f44fa9999a70aae00cc7efe0",
+        "HttpServer.cs": "24c362cf62b2014224e334031ecb739dff2c17bb3d91be7a944e98bf175a33eb",
+        "ToolDiscovery.cs": "1f0d0969249f664659be058ee601570b90745fb73e91e55b20a41c1f2f30f5e7",
+        "Attributes/UnityBridgeToolAttribute.cs": "87c6391a9c2491184836dd8be02fbdf2dcd60aec5f8f8bd07c8e9693956bcf83",
+        "Core/AtomicFile.cs": "dd0b6379759cc41b944bd526dbfceff29620fc429d23bfcb4c7cddc48cd16114",
+        "Core/ParamCoercion.cs": "81c72862d3d01d82ed3f2359ad2f5764e4157fe219a0204ec12b6282bda701ff",
+        "Core/Response.cs": "a5d02625c4babce3dcc64abbcb8195e03c7022893e9e1e58c60e9e2adbd32399",
+        "Core/StringCaseUtility.cs": "303cff505f966ec0207aa4281a13a8ef373817e63886d7aac284354d472d9b7b",
+        "Core/ToolParams.cs": "40750363f211c84e9d3f8d75ee3d003d5ca2b94425b3e148be6e713d7608c4e8",
+        "Tools/EditorScreenshot.cs": "b7180ea1ea4c070c4a41052402495f0b2a3451a75e3096bf4a515b3df7886b85",
+        "Tools/ExecuteCsharp.cs": "d1c868f08ec662934013e21cd0ce9b88c83b73e2db8b1f8cb9ae0486b3ca63e5",
+        "Tools/ExecuteMenuItem.cs": "50a2d695acf6729129351a76d1f4f65cf531563149f9c5869fd531f7be8f23be",
+        "Tools/ManageEditor.cs": "5ff30c9cf958b8d72b12d5597c545a53818a0f3ed98bbfde19520a56b664fb33",
+        "Tools/ManageProfiler.cs": "e94fbb855669b6225b070ae7356af6a16dc831dd5b3aaf34274cc05dbdce650c",
+        "Tools/ReadConsole.cs": "22be4528738ed68018ceb7566b3b5fe6ea665d978c2c76c1b939d828157a8830",
+        "Tools/RefreshUnity.cs": "9de97f6f809c5b928e571caac455c73ed3c001391fd3c6b4848a02e3fa68d5c8",
+        "Tools/ReserializeAssets.cs": "b2f93ce46e74d59fb62cbd53faa1410f3a725f5d29546ab376d38ecd2015c306"
+      },
+      "version": "0.3.0-rc.2",
+      "calls": [
+        {
+          "name": "first_exec",
+          "ms": 218.32619997439906
+        }
+      ],
+      "passed": true,
+      "executable": "<repo>\\.codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+      "executable_sha256": "39ad76387cd6ecf2f109de5d5e23964b31ad2d210ef67baa3aabdf020fc3408b",
+      "installed_bytes": 135226276,
+      "reused_project": true,
+      "initial_heartbeat": {
+        "state": "ready",
+        "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/candidate/UnityProject",
+        "port": 8090,
+        "pid": 45800,
+        "unityVersion": "6000.3.13f1",
+        "connectorVersion": "0.3.0-rc.2",
+        "timestamp": 1789747776611,
+        "compileErrors": false,
+        "bridgeProtocol": 1,
+        "domainId": "36f25ff9720d4fd1be5bbadffb637deb",
+        "referenceGeneration": 0
+      },
+      "unity_ready_ms": 3000.561100023333,
+      "cold_service_samples_ms": [
+        218.35569996619597
+      ],
+      "unity_start_to_first_result_ms": 3218.9223000314087,
+      "after_ready_to_first_result_ms": 218.36120000807568,
+      "cold_service_to_first_result_ms": 218.35569996619597,
+      "host_before": {
+        "protocol": 1,
+        "version": "0.3.0-rc.2",
+        "runtimeId": "04da9345b08c3cfff121dc28fd60e96f",
+        "pid": 11856,
+        "compiler": {
+          "compiler_version": "roslyn-5.0.0/wrapper-1",
+          "cache_hit": false,
+          "base_cache_hit": false,
+          "emit_reused": false,
+          "assembly_name": "UnityBridgeExec_b89936ceb6ed4789974aee269070464d"
+        },
+        "compilerError": "",
+        "projects": [
+          {
+            "projectPath": "<repo>/.codex-deps/python-startup/accepted-startup-smoke/projects/candidate/UnityProject",
+            "pid": 45800,
+            "port": 8090,
+            "protocol": 1,
+            "prewarmState": "ready",
+            "prewarmError": ""
+          }
+        ]
+      },
+      "unity_working_set_bytes": 429420544,
+      "host_working_set_bytes": 31326208,
+      "worker_working_set_bytes": 160448512
+    }
+  ],
+  "scope": "Windows, empty projects, batchmode/nographics, standalone subprocess latency, no reboot/disk cache purge; Editor gap samples include only intervals above 1 ms",
+  "configuration": {
+    "unity_editor": "C:\\Program Files\\Unity\\Hub\\Editor\\6000.3.13f1\\Editor\\Unity.exe",
+    "unity_version": "6000.3.13f1",
+    "baseline_bin": ".codex-deps\\rc0302\\fresh\\custom install\\unity-bridge.exe",
+    "candidate_bin": ".codex-deps\\python-startup\\accepted\\unity-bridge\\unity-bridge.exe",
+    "baseline_ref": "v0.3.0-rc.2",
+    "baseline_host": true,
+    "baseline_working_tree_connector": false,
+    "variants": [
+      "baseline",
+      "candidate",
+      "baseline",
+      "candidate"
+    ],
+    "samples": 0,
+    "exec_samples": 0,
+    "cold_samples": 1,
+    "session_samples": 20,
+    "candidate_env": [],
+    "startup_host": true,
+    "startup_only": true,
+    "reuse_projects": true,
+    "gui": null,
+    "extended": false,
+    "output": ".codex-deps\\python-startup\\accepted-startup-smoke"
+  },
+  "summary": {
+    "baseline": {
+      "instances": {},
+      "wait_ready": {},
+      "status": {},
+      "console": {},
+      "tools": {},
+      "unique_exec": {},
+      "repeat_exec": {},
+      "first_exec": {
+        "n": 2,
+        "p50_ms": 830.2673000143841,
+        "p95_ms": 840.5013000010513,
+        "max_ms": 840.5013000010513
+      },
+      "warmed_new_snippet": {},
+      "prewarm_only_first_exec": {},
+      "cold_service_to_first_result": {
+        "n": 2,
+        "p50_ms": 830.2999000297859,
+        "p95_ms": 840.5268000205979,
+        "max_ms": 840.5268000205979
+      },
+      "idle_editor_gaps": {},
+      "exec_editor_gaps": {},
+      "unity_ready_ms_new_project": {
+        "n": 1,
+        "p50_ms": 6085.685199999716,
+        "p95_ms": 6085.685199999716,
+        "max_ms": 6085.685199999716
+      },
+      "unity_ready_ms_reused": {
+        "n": 1,
+        "p50_ms": 2939.851400034968,
+        "p95_ms": 2939.851400034968,
+        "max_ms": 2939.851400034968
+      },
+      "unity_start_to_first_result_ms_new_project": {
+        "n": 1,
+        "p50_ms": 6915.993999980856,
+        "p95_ms": 6915.993999980856,
+        "max_ms": 6915.993999980856
+      },
+      "unity_start_to_first_result_ms_reused": {
+        "n": 1,
+        "p50_ms": 3780.382900033146,
+        "p95_ms": 3780.382900033146,
+        "max_ms": 3780.382900033146
+      },
+      "after_ready_to_first_result_ms_new_project": {
+        "n": 1,
+        "p50_ms": 830.3087999811396,
+        "p95_ms": 830.3087999811396,
+        "max_ms": 830.3087999811396
+      },
+      "after_ready_to_first_result_ms_reused": {
+        "n": 1,
+        "p50_ms": 840.5314999981783,
+        "p95_ms": 840.5314999981783,
+        "max_ms": 840.5314999981783
+      }
+    },
+    "candidate": {
+      "instances": {},
+      "wait_ready": {},
+      "status": {},
+      "console": {},
+      "tools": {},
+      "unique_exec": {},
+      "repeat_exec": {},
+      "first_exec": {
+        "n": 2,
+        "p50_ms": 218.32619997439906,
+        "p95_ms": 236.52819998096675,
+        "max_ms": 236.52819998096675
+      },
+      "warmed_new_snippet": {},
+      "prewarm_only_first_exec": {},
+      "cold_service_to_first_result": {
+        "n": 2,
+        "p50_ms": 218.35569996619597,
+        "p95_ms": 236.5583999780938,
+        "max_ms": 236.5583999780938
+      },
+      "idle_editor_gaps": {},
+      "exec_editor_gaps": {},
+      "unity_ready_ms_new_project": {
+        "n": 1,
+        "p50_ms": 6066.988700011279,
+        "p95_ms": 6066.988700011279,
+        "max_ms": 6066.988700011279
+      },
+      "unity_ready_ms_reused": {
+        "n": 1,
+        "p50_ms": 3000.561100023333,
+        "p95_ms": 3000.561100023333,
+        "max_ms": 3000.561100023333
+      },
+      "unity_start_to_first_result_ms_new_project": {
+        "n": 1,
+        "p50_ms": 6303.55499999132,
+        "p95_ms": 6303.55499999132,
+        "max_ms": 6303.55499999132
+      },
+      "unity_start_to_first_result_ms_reused": {
+        "n": 1,
+        "p50_ms": 3218.9223000314087,
+        "p95_ms": 3218.9223000314087,
+        "max_ms": 3218.9223000314087
+      },
+      "after_ready_to_first_result_ms_new_project": {
+        "n": 1,
+        "p50_ms": 236.56629998004064,
+        "p95_ms": 236.56629998004064,
+        "max_ms": 236.56629998004064
+      },
+      "after_ready_to_first_result_ms_reused": {
+        "n": 1,
+        "p50_ms": 218.36120000807568,
+        "p95_ms": 218.36120000807568,
+        "max_ms": 218.36120000807568
+      }
+    }
+  },
+  "ordinary_command_gates": {},
+  "functional_passed": true,
+  "performance_gates_evaluated": false,
+  "passed": null
+}
