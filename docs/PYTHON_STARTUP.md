@@ -2,9 +2,11 @@
 
 [한국어](PYTHON_STARTUP.ko.md) | [README](../README.md)
 
-This work follows the public **v0.3.0-rc.2** release. It does not change the
-published RC2 assets or stable v0.2.3. Python remains the CLI and host language;
-Roslyn remains a separate process. Python package support still starts at 3.10.
+These changes are included in **v0.3.0-rc.3**. Measurements compare the public
+**v0.3.0-rc.2** executable with the development build before the RC3 version bump.
+The raw samples retain their original versions and source hashes. Python remains
+the CLI and host language; Roslyn remains a separate process. Python package
+support still starts at 3.10.
 
 ## Implementation
 
@@ -132,7 +134,7 @@ Warmed commands and repeated sessions improved. **The 20% p50 target for a newly
 
 [Raw samples, checksums and experiment cohorts](benchmarks/python-startup-2026-09-19/README.md)
 
-**Final performance acceptance is on hold:** two valid foreground cohorts showed approximately 337 ms new-code execution. Subsequent runs of the identical binary did not reproduce it, but its cause is unresolved. The improvements below do not establish absence of regressions across all conditions. Five-platform CI is also pending resolution of signing.
+**Final performance acceptance is on hold:** two valid foreground cohorts showed approximately 337 ms new-code execution. Subsequent runs of the identical binary did not reproduce it, but its cause is unresolved. The improvements below do not establish absence of regressions across all conditions. The CI status below describes the measurement snapshot; RC3 publication additionally requires the release workflow to pass on all five platforms.
 
 ### Public RC2 versus the current candidate in batchmode
 
@@ -294,7 +296,7 @@ The first Nuitka build took 60.82 seconds including C compiler download; a cache
 
 Python tests: **212 passed, one privilege-dependent symlink test skipped**. Compiler tests: **18 passed**. The final executable passes **19 live checks each in Unity 2021 and 6**, covering large Unicode/emoji results, static isolation, reference changes, reloads, concurrent control, expiry and lost-response non-replay. The real Windows installer passes fresh install, reinstall, public-RC2 upgrade and registered-path host relaunch; only downloads are substituted with local files and user PATH is untouched.
 
-**Five-platform CI is not complete.** The validation commit failed at GPG pinentry under the existing global `commit.gpgsign=true` setting. Signing was not bypassed; Linux/macOS execution or distribution validation of the new code is not claimed. After resolving signing, dispatch the workflow on this branch with an empty `release_tag` to validate all five artifacts without publishing a release.
+**Historical CI status:** at the time of this measurement snapshot, five-platform CI was pending after a GPG pinentry timeout. The development changes were subsequently signed and pushed as `f456717`. Original evidence records are retained unchanged. The [RC3 release workflow](https://github.com/zjxps2007/UnityBridge/actions/workflows/release.yml) separately gates publication on client, compiler and extracted-bundle checks across all five platforms; it does not resolve the inconsistent foreground performance result.
 
 The instrumented run is in `accepted-timing.json`, per-process JSONL and `timing-summary.json`. It separates CLI process startup, Python entry/import, host readiness, reference negotiation, compiler request, Unity queue/execution and serialization/delivery. These few diagnostic samples include file-I/O overhead and are excluded from adoption gates. Compiler intervals also include IPC/reference validation; overlapping phases must not be summed.
 

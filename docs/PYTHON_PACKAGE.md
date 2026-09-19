@@ -7,7 +7,7 @@ Python package mode is for development and Python programs that need to import
 recommended because it does not require Python on the target machine.
 
 The stable version is **v0.2.3**. The independent-host options in
-this document describe prerelease **0.3.0-rc.2**. Installing the
+this document describe prerelease **0.3.0-rc.3**. Installing the
 Python package alone does not download .NET or the Roslyn worker.
 
 ## When To Use
@@ -36,16 +36,16 @@ Install a specific tag:
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
 
-For the **v0.3.0-rc.2** Python package, explicitly select the RC tag:
+For the **v0.3.0-rc.3** Python package, explicitly select the RC tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.2"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.3"
 ```
 
 Use the matching Unity Package Manager URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.3
 ```
 
 This does not install the compiler runtime. The `auto` backend keeps the direct

@@ -5,7 +5,7 @@
 Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/프로그램 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.
 
-정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 **0.3.0-rc.2 프리릴리스**
+정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 **0.3.0-rc.3 프리릴리스**
 기능입니다. Python 패키지만 설치하면 .NET이나 Roslyn
 워커를 다운로드하지 않습니다.
 
@@ -35,16 +35,16 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
 ```
 
-**v0.3.0-rc.2** Python 패키지는 RC 태그를 직접 지정합니다.
+**v0.3.0-rc.3** Python 패키지는 RC 태그를 직접 지정합니다.
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.2"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.3"
 ```
 
 Unity Package Manager에도 같은 태그의 URL을 사용합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.2
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.3
 ```
 
 이 명령은 컴파일러 런타임을 설치하지 않습니다. 일치하는 호스트가 등록되지 않으면

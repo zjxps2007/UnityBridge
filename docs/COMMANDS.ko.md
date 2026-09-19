@@ -3,7 +3,7 @@
 한국어 | [English](COMMANDS.md) | [README](../README.ko.md)
 
 이 문서는 `unity-bridge` CLI에서 지금 사용할 수 있는 명령어를 정리합니다.
-실행 경로 옵션은 **v0.3.0-rc.2** 기능입니다. 정식 **v0.2.3**은 기존 Connector
+실행 경로 옵션은 **v0.3.0-rc.3** 기능입니다. 정식 **v0.2.3**은 기존 Connector
 직접 연결을 사용합니다. 같은 태그의 설치기와 Unity 패키지는
 [RC 설치 안내](INSTALL.ko.md#프리릴리스)를 참고하세요.
 

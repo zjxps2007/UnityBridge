@@ -24,7 +24,7 @@ release.
 
 ## Prerelease: Independent Host And Compiler
 
-**v0.3.0-rc.2** is the release candidate for the independent host and compiler;
+**v0.3.0-rc.3** is the release candidate for the independent host and compiler;
 the stable release remains **v0.2.3**. The quick-start commands below select stable.
 To try the RC, use its [tagged installer and matching Unity package](docs/INSTALL.md#prerelease).
 The RC is developed on `codex/external-host-compiler` and is not merged into `main`.
@@ -67,9 +67,9 @@ startup work when a compatible host is running. Existing command syntax and
 per-request execution are preserved. See the [exec comparison](docs/EXEC_OPTIMIZATION.md)
 for the separate follow-up measurement collected before the RC2 version bump.
 
-Work after RC2 starts external preparation earlier, extends lightweight command
-forwarding, and reuses session connections and compiler preparation. These are
-development changes, not part of the published RC2 archive. See the
+RC3 starts external preparation earlier, extends lightweight command forwarding,
+and reuses session connections and compiler preparation. Foreground new-code
+latency has an unresolved variation; see the
 [Python startup comparison](docs/PYTHON_STARTUP.md) for measurements, rejected
 defaults, runtime/packaging experiments, and verification limits.
 
