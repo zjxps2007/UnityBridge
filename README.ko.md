@@ -13,18 +13,17 @@ CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unit
 압축을 풉니다. 실행 파일 옆의 런타임 폴더를 함께 유지하세요. 설치기는 v0.2.1 이하의
 단일 실행 파일도 지원합니다. 자세한 내용은 [설치와 업데이트](docs/INSTALL.ko.md#standalone-cli)를 참고하세요.
 
-[v0.2.3 정식 릴리스](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3)는
-평상시 0.5초 갱신 주기를 유지하면서 Heartbeat 상태 변화를 더 빠르게 반영합니다.
-v0.2.2의 시작 속도 개선과 Connector 버전 표시 수정도 포함합니다.
-[v0.2.3 업그레이드 안내](docs/INSTALL.ko.md#v023으로-업그레이드)에 따라
-CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치는 최신 정식 릴리스를 선택합니다.
+[v0.3.0 정식 릴리스](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.0)는
+독립 호스트, 동봉 컴파일러, 빠른 사전 준비와 연속 명령 세션을 포함합니다.
+[v0.3.0 업그레이드 안내](docs/INSTALL.ko.md#v030으로-업그레이드)에 따라
+CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치와 버전을 지정하지 않은
+업데이트는 최신 정식 릴리스를 선택합니다.
 
-## 프리릴리스: 독립 호스트와 컴파일러
+## 독립 호스트와 컴파일러
 
-**v0.3.0-rc.3**은 독립 호스트와 컴파일러의 릴리스 후보이며, 정식 버전은
-**v0.2.3**입니다. 아래 빠른 시작 명령은 정식 버전을 선택합니다. RC를 시험하려면
-[같은 태그의 설치기와 Unity 패키지](docs/INSTALL.ko.md#프리릴리스)를 사용하세요.
-RC는 `codex/external-host-compiler`에서 개발하며 `main`에는 병합하지 않았습니다.
+**v0.3.0**은 RC3 구현을 정식 버전으로 전환하여 `main`에 통합한 릴리스입니다.
+아래 빠른 시작 명령은 정식 버전을 설치합니다. CLI·Python 패키지·Unity Connector
+버전은 모두 **0.3.0**입니다.
 
 새 호스트는 Unity 도메인 밖에서 실행되어 재컴파일 중에도 아직 전달하지 않은 요청을
 보관합니다. 동봉된 Roslyn 워커가 C# 코드를 컴파일하고, Unity가 결과 DLL을 불러와
@@ -45,13 +44,13 @@ RC는 `codex/external-host-compiler`에서 개발하며 `main`에는 병합하�
 다만 [.NET 10 지원 운영체제](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md)가
 필요하며, 이는 Connector의 Unity 버전 호환성과 별개입니다.
 [실행 경로](docs/COMMANDS.ko.md#실행-경로)와
-[설치 조건](docs/INSTALL.ko.md#호스트-포함-프리릴리스-빌드)을 확인하세요.
+[설치 조건](docs/INSTALL.ko.md#호스트-포함-빌드)을 확인하세요.
 [최초 검증 보고서](docs/HOST_VALIDATION.ko.md)는 v0.2.3과 비교한 실측 응답 시간,
 첫 시작 비용, 메모리 사용량과 검증 범위를 기록합니다.
-[추가 최적화 보고서](docs/HOST_OPTIMIZATION.ko.md)는 이번 RC 이전 alpha 개발 커밋의
+[추가 최적화 보고서](docs/HOST_OPTIMIZATION.ko.md)는 이전 alpha 개발 커밋의
 후속 개선을 측정한 기록입니다.
 
-**RC2에는 RC1 이후 개선**을 포함합니다. CLI 초기 로딩 경량화,
+이번 정식 버전은 CLI 초기 로딩 경량화,
 JSONL 연속 명령용 `session`, 호스트 상태 변경 알림, 작업별 완료 확인,
 공유 참조를 고려한 캐시, 컴파일러 ReadyToRun 빌드를 추가했습니다.
 [실측 결과와 비용](docs/SPEED_FOLLOWUP.ko.md)을 참고하세요.
@@ -62,10 +61,9 @@ CLI와 호스트를 Python으로 유지하면서, 호환 호스트가 실행 중
 유지합니다. [exec 비교 보고서](docs/EXEC_OPTIMIZATION.ko.md)에 RC2 버전 변경 전에
 수행한 검증 결과를 별도로 기록합니다.
 
-RC3는 외부 준비를 앞당기고 경량 명령 전달과 세션 연결 및 컴파일 준비 재사용을
-확대합니다. 전경 새 코드 실행 지연은 일부 측정에서 원인이 확인되지 않았습니다.
-[Python 첫 응답 비교 보고서](docs/PYTHON_STARTUP.ko.md)에 실측 결과, 기본값에서
-보류한 변경, Python·배포 방식 실험과 검증 범위를 정리합니다.
+외부 준비를 앞당기고 경량 명령 전달과 세션 연결 및 컴파일 준비 재사용을
+확대합니다. [Python 첫 응답 비교 보고서](docs/PYTHON_STARTUP.ko.md)에 당시 실측
+결과와 검증 범위를 정리합니다.
 
 ## 빠른 시작
 

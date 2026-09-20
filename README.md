@@ -15,19 +15,17 @@ unpacked once during installation. Keep the runtime folder beside the executable
 The installer also supports the single-file assets used by v0.2.1 and older releases.
 See [installation and updates](docs/INSTALL.md#standalone-cli).
 
-Stable [v0.2.3](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.2.3)
-publishes Heartbeat state changes sooner while keeping the regular 0.5-second
-interval. It includes the startup improvements and Connector version fix from
-v0.2.2. Follow [upgrading to v0.2.3](docs/INSTALL.md#upgrade-to-v023) to update
-both the CLI and Unity Connector. Default installation selects the latest stable
-release.
+Stable [v0.3.0](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.0)
+includes the independent host, bundled compiler, earlier preparation and persistent
+sessions. Follow [upgrading to v0.3.0](docs/INSTALL.md#upgrade-to-v030) to update
+both the CLI and Unity Connector. Default installation and unqualified updates
+select the latest stable release.
 
-## Prerelease: Independent Host And Compiler
+## Independent Host And Compiler
 
-**v0.3.0-rc.3** is the release candidate for the independent host and compiler;
-the stable release remains **v0.2.3**. The quick-start commands below select stable.
-To try the RC, use its [tagged installer and matching Unity package](docs/INSTALL.md#prerelease).
-The RC is developed on `codex/external-host-compiler` and is not merged into `main`.
+**v0.3.0** promotes the RC3 implementation to stable and is integrated into `main`.
+The quick-start commands below install stable. The CLI, Python package and Unity
+Connector all use version **0.3.0**.
 
 The new host stays outside Unity's reloadable domain and keeps pending requests
 while Unity recompiles. A bundled Roslyn worker prepares C# independently; Unity
@@ -49,29 +47,28 @@ Host-enabled bundles include their .NET runtime; end users do not need an SDK.
 They require a [.NET 10 supported operating system](https://github.com/dotnet/core/blob/main/release-notes/10.0/supported-os.md),
 which is a separate requirement from the Connector's Unity version compatibility.
 See [backend behavior](docs/COMMANDS.md#execution-backend) and
-[installation requirements](docs/INSTALL.md#host-enabled-prerelease-builds).
+[installation requirements](docs/INSTALL.md#host-enabled-builds).
 The [initial validation report](docs/HOST_VALIDATION.md) records the comparison
 with v0.2.3, including cold-start costs, memory use, and verification limits.
 The [follow-up optimization report](docs/HOST_OPTIMIZATION.md) records later
-changes measured on the alpha development commits preceding this RC.
+changes measured on earlier alpha development commits.
 
-**RC2 includes the improvements after RC1**: lighter
+The release includes lighter
 CLI startup, a persistent JSONL `session`, immediate host state-change hints,
 operation-specific completion checks, shared-reference cache accounting, and
 ReadyToRun compiler publishing.
 See the [measurements and tradeoffs](docs/SPEED_FOLLOWUP.md). Automatic update
 checks keep their existing behavior.
 
-RC2 also keeps the CLI and host in Python while reducing single `exec`
+The CLI and host remain in Python while reducing single `exec`
 startup work when a compatible host is running. Existing command syntax and
 per-request execution are preserved. See the [exec comparison](docs/EXEC_OPTIMIZATION.md)
 for the separate follow-up measurement collected before the RC2 version bump.
 
-RC3 starts external preparation earlier, extends lightweight command forwarding,
-and reuses session connections and compiler preparation. Foreground new-code
-latency has an unresolved variation; see the
-[Python startup comparison](docs/PYTHON_STARTUP.md) for measurements, rejected
-defaults, runtime/packaging experiments, and verification limits.
+The release starts preparation earlier, forwards lightweight commands,
+and reuses session connections and compiler preparation. See the
+[Python startup comparison](docs/PYTHON_STARTUP.md) for historical measurements
+and their verification scope.
 
 ## Quick Start
 

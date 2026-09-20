@@ -5,9 +5,8 @@
 Python 패키지 모드는 `unity_bridge`를 Python 코드에서 직접 import해야 하는 개발용/프로그램 통합용
 설치 방식입니다. 일반 CLI 사용자는 대상 PC에 Python이 필요 없는 standalone 설치를 권장합니다.
 
-정식 버전은 **v0.2.3**입니다. 이 문서의 독립 호스트 옵션은 **0.3.0-rc.3 프리릴리스**
-기능입니다. Python 패키지만 설치하면 .NET이나 Roslyn
-워커를 다운로드하지 않습니다.
+정식 버전은 **v0.3.0**이며 독립 호스트 옵션을 포함합니다.
+Python 패키지만 설치하면 .NET이나 Roslyn 워커를 다운로드하지 않습니다.
 
 ## 언제 사용하나
 
@@ -32,48 +31,42 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 특정 tag를 설치하려면:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
-```
-
-**v0.3.0-rc.3** Python 패키지는 RC 태그를 직접 지정합니다.
-
-```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.3"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0"
 ```
 
 Unity Package Manager에도 같은 태그의 URL을 사용합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.3
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0
 ```
 
 이 명령은 컴파일러 런타임을 설치하지 않습니다. 일치하는 호스트가 등록되지 않으면
 `auto`는 직접 연결을 유지합니다. 독립 컴파일러를 쓰려면
-[RC standalone 묶음](INSTALL.ko.md#프리릴리스)도 설치하거나
+[정식 standalone 묶음](INSTALL.ko.md#v030으로-업그레이드)도 설치하거나
 [개발 안내](DEVELOPMENT.ko.md#독립-호스트와-컴파일러)에 따라 빌드·등록하세요.
 
 ## 브랜치에서 설치
 
 릴리스 전 변경을 시험하려면 Python CLI와 Unity Connector를 같은 Git 브랜치에서
-설치하세요. 개발 브랜치가 원격에 올라온 경우 아래 독립 호스트 브랜치를 사용할 수
-있습니다. 아직 푸시하지 않은 변경은 로컬 체크아웃에서 설치해야 합니다.
+설치하세요. 아래 예시는 통합된 `main`을 사용합니다. 다른 개발 브랜치를
+시험하려면 두 URL의 브랜치를 함께 바꾸세요. 미푸시 변경은 로컬 체크아웃에서 설치합니다.
 
 Windows PowerShell:
 
 ```powershell
-python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
+python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@main"
 ```
 
 macOS/Linux에서는 UnityBridge용 Python 환경에서 실행합니다.
 
 ```sh
-python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
+python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@main"
 ```
 
 Unity Package Manager에는 같은 브랜치의 Git URL을 사용합니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/external-host-compiler
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
 
 브랜치가 갱신되면 CLI 설치 명령을 다시 실행하고 Unity 패키지도 업데이트하세요. 브랜치의
@@ -217,5 +210,5 @@ Git 패키지 URL도 함께 출력하지만, Unity 프로젝트의 `Packages/man
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.2.3
+unity-bridge update --ref v0.3.0
 ```

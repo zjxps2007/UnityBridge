@@ -3,13 +3,13 @@
 [한국어](COMMANDS.ko.md) | English | [README](../README.md)
 
 This document lists the commands currently available in the `unity-bridge` CLI.
-The backend options describe **v0.3.0-rc.3**; stable **v0.2.3** continues to use
-direct Connector communication. See [RC installation](INSTALL.md#prerelease)
+The backend options are included in stable **v0.3.0**; earlier v0.2.3 uses
+direct Connector communication. See [stable installation](INSTALL.md#upgrade-to-v030)
 for the tagged installer and matching Unity package.
 
-## RC2: Persistent Session And Operation Completion
+## Persistent Session And Operation Completion
 
-The following changes are included in RC2. Start
+The following features are included in v0.3.0. Start
 `unity-bridge --project <path> --no-update-check session`, keep its
 stdin open, and send one JSON object per line:
 
@@ -209,7 +209,7 @@ not request compilation or guarantee that an unrelated task will not start later
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.2.3
+unity-bridge update --ref v0.3.0
 unity-bridge update --dry-run
 ```
 

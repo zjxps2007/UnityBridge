@@ -6,9 +6,8 @@ Python package mode is for development and Python programs that need to import
 `unity_bridge` directly. For normal CLI use, the standalone installer is
 recommended because it does not require Python on the target machine.
 
-The stable version is **v0.2.3**. The independent-host options in
-this document describe prerelease **0.3.0-rc.3**. Installing the
-Python package alone does not download .NET or the Roslyn worker.
+The stable version is **v0.3.0**, including the independent-host options.
+Installing the Python package alone does not download .NET or the Roslyn worker.
 
 ## When To Use
 
@@ -33,49 +32,43 @@ python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.gi
 Install a specific tag:
 
 ```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.2.3"
-```
-
-For the **v0.3.0-rc.3** Python package, explicitly select the RC tag:
-
-```powershell
-python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0-rc.3"
+python -m pip install --upgrade "git+https://github.com/zjxps2007/UnityBridge.git@v0.3.0"
 ```
 
 Use the matching Unity Package Manager URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0-rc.3
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.0
 ```
 
 This does not install the compiler runtime. The `auto` backend keeps the direct
 route unless a matching host is registered. To use the independent compiler,
-also install the [RC standalone bundle](INSTALL.md#prerelease), or build and
+also install the [stable standalone bundle](INSTALL.md#upgrade-to-v030), or build and
 register it with [the development guide](DEVELOPMENT.md#independent-host-and-compiler).
 
 ## Install From A Branch
 
 To test changes before a release, install the Python CLI and Unity Connector from
-the same Git branch. When the development branch is available on the remote,
-use the independent-host branch as follows; unpushed work must be installed from
-the local checkout instead.
+the same Git branch. The examples below use integrated `main`; replace both
+branch references together to test another published development branch.
+Unpushed work must be installed from the local checkout instead.
 
 Windows PowerShell:
 
 ```powershell
-python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
+python -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@main"
 ```
 
 macOS/Linux, in the Python environment you use for UnityBridge:
 
 ```sh
-python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@codex/external-host-compiler"
+python3 -m pip install --upgrade --force-reinstall "git+https://github.com/zjxps2007/UnityBridge.git@main"
 ```
 
 In Unity Package Manager, use the matching Git URL:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#codex/external-host-compiler
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#main
 ```
 
 Repeat the CLI install command and update the Unity package when the branch
@@ -224,5 +217,5 @@ Unity project's `Packages/manifest.json` automatically.
 ```powershell
 unity-bridge update --check
 unity-bridge update
-unity-bridge update --ref v0.2.3
+unity-bridge update --ref v0.3.0
 ```

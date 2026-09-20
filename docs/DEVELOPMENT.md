@@ -70,9 +70,8 @@ runtime and Roslyn, and does not precompile user snippets. See
 cache weights count shared reference images once across retained entries and keep
 per-snippet estimates separately. The 256 MiB accounting limit is not an RSS cap.
 
-The current branch targets prerelease **0.3.0-rc.3**; **v0.2.3** remains the
-stable baseline. The RC stays on `codex/external-host-compiler`, separate from `main`.
-Use the [tagged RC installer](INSTALL.md#prerelease) for packaged testing.
+Stable **v0.3.0** includes the independent host and compiler, integrated into `main`.
+Use the [tagged stable installer](INSTALL.md#upgrade-to-v030) for packaged testing.
 The service runs outside Unity, while the Connector still owns
 Unity API execution on the main thread. A reference context includes the domain
 and reference generation, actual DLL paths/MVIDs, and explicit C# language version.

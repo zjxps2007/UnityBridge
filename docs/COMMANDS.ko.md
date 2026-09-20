@@ -3,13 +3,13 @@
 한국어 | [English](COMMANDS.md) | [README](../README.ko.md)
 
 이 문서는 `unity-bridge` CLI에서 지금 사용할 수 있는 명령어를 정리합니다.
-실행 경로 옵션은 **v0.3.0-rc.3** 기능입니다. 정식 **v0.2.3**은 기존 Connector
+실행 경로 옵션은 정식 **v0.3.0** 기능입니다. 이전 **v0.2.3**은 기존 Connector
 직접 연결을 사용합니다. 같은 태그의 설치기와 Unity 패키지는
-[RC 설치 안내](INSTALL.ko.md#프리릴리스)를 참고하세요.
+[정식 버전 설치 안내](INSTALL.ko.md#v030으로-업그레이드)를 참고하세요.
 
-## RC2: 연속 명령과 작업 완료 확인
+## 연속 명령과 작업 완료 확인
 
-다음 기능은 RC2에 포함합니다.
+다음 기능은 v0.3.0에 포함합니다.
 `unity-bridge --project <경로> --no-update-check session`을 시작하고 stdin을
 열어 둔 상태에서 한 줄에 JSON 요청 하나씩 보냅니다.
 
@@ -199,7 +199,7 @@ Unity heartbeat는 평상시 갱신 간격을 0.5초, 즉 초당 약 2회로 유
 unity-bridge update
 unity-bridge update --check
 unity-bridge update --ref main
-unity-bridge update --ref v0.2.3
+unity-bridge update --ref v0.3.0
 unity-bridge update --dry-run
 ```
 
