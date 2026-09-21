@@ -77,7 +77,7 @@ with subprocess.Popen(
 Long-lived Python callers can use `with UnityClient(...) as client:` or call
 `client.close()` to release the connection pool. Discovery still runs per call.
 
-## Optional session pipeline (development branch)
+## Optional session pipeline (v0.3.1-rc.1)
 
 `unity-bridge --project <path> session --pipeline 4` accepts up to four outstanding
 requests. Supported window sizes are `1`, `2`, and `4`; the default `1` keeps the

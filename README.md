@@ -21,11 +21,17 @@ sessions. Follow [upgrading to v0.3.0](docs/INSTALL.md#upgrade-to-v030) to updat
 both the CLI and Unity Connector. Default installation and unqualified updates
 select the latest stable release.
 
+This branch provides [v0.3.1-rc.1](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.1-rc.1),
+with parallel reference validation and an opt-in `session --pipeline` for preparing
+the next inline command while Unity executes the previous one. The CLI, Python
+package and Connector use **0.3.1-rc.1**. See [prerelease installation](docs/INSTALL.md#prerelease)
+and [session usage](docs/COMMANDS.md#optional-session-pipeline-v031-rc1).
+
 ## Independent Host And Compiler
 
 **v0.3.0** promotes the RC3 implementation to stable and is integrated into `main`.
-The quick-start commands below install stable. The CLI, Python package and Unity
-Connector all use version **0.3.0**.
+The quick-start commands below install stable. The stable CLI, Python package and
+Unity Connector all use version **0.3.0**.
 
 The new host stays outside Unity's reloadable domain and keeps pending requests
 while Unity recompiles. A bundled Roslyn worker prepares C# independently; Unity

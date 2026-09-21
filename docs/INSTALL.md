@@ -176,6 +176,23 @@ host executable paths but does not change the Unity package reference automatica
 
 ## Prerelease
 
+The current candidate is **v0.3.1-rc.1**. Update the CLI explicitly:
+
+```text
+unity-bridge update --ref v0.3.1-rc.1
+```
+
+Select the matching Unity Package Manager Git URL separately:
+
+```text
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.1-rc.1
+```
+
+After Unity imports the package, `unity-bridge status` should report
+`Connector: 0.3.1-rc.1`. Run `unity-bridge update --check --ref v0.3.1-rc.1`
+to verify the CLI version. See the [release notes](RELEASE_NOTES.md#install-or-upgrade)
+for fresh installation commands.
+
 Default installation selects the latest stable release. To explicitly test a
 release candidate, use that RC tag for the installer's `-Version` / `--version`
 or `unity-bridge update --ref`, and select the same Unity package tag. Download

@@ -74,7 +74,7 @@ with subprocess.Popen(
 장기 실행 Python 프로그램은 `with UnityClient(...) as client:` 또는
 `client.close()`로 연결을 해제할 수 있습니다. Unity 탐색은 요청마다 수행합니다.
 
-## 선택적 세션 파이프라인 (개발 브랜치)
+## 선택적 세션 파이프라인 (v0.3.1-rc.1)
 
 `unity-bridge --project <경로> session --pipeline 4`는 최대 4개 요청을 미리 받습니다.
 `1`, `2`, `4`를 지원하며 기본값 `1`은 기존 순차 처리입니다. 요청을 보내면서 stdout도
