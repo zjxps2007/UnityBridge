@@ -52,6 +52,8 @@ class FakeCompiler:
             # A timed-out worker cannot produce a successful assembly. Windows
             # waits may return just before monotonic() crosses the deadline.
             raise CompilerError("compiler_timeout", "Fixture compilation timed out")
+        if payload.get('operation') == 'validate':
+            return {'reference_generation': payload['reference_generation']}
         return {"reference_generation": payload["reference_generation"],
                 "assembly_base64": base64.b64encode(payload["code"].encode()).decode()}
 
@@ -177,6 +179,146 @@ class HostServiceTests(unittest.TestCase):
         self.assertEqual(self.compiler.calls, [])
         self.assertEqual(self.executed, ["mutate"] * 3)
         self.assertEqual(host_status(self.instance(), self.instances)["state"], "running")
+
+    def pipeline(self, code, group='pipeline', timeout=3):
+        payload = self.payload('exec', timeout, {'code': code})
+        payload['pipeline_id'] = group
+        self.assertTrue(post(self.service.port, self.token, '/enqueue', payload, 2)['accepted'])
+        return payload
+
+    def test_pipeline_ack_control_fifo_and_head_reference_revalidation(self):
+        entered, release = threading.Event(), threading.Event()
+        original = self.service._post
+        def blocked(snapshot, payload, timeout, lane='execute'):
+            if payload['command'] == 'bridge_exec_assembly' and not entered.is_set():
+                entered.set()
+                release.wait(3)
+            return original(snapshot, payload, timeout, lane)
+        with patch.object(self.service, '_post', side_effect=blocked):
+            try:
+                first = self.pipeline('first')
+                self.assertTrue(entered.wait(2))
+                second = self.pipeline('second')
+                eventually(lambda: any(p.get('code') == 'second' for p in self.compiler.calls))
+                self.assertEqual(self.executed, [])
+                self.assertTrue(self.call('get_editor_state')['success'])
+            finally:
+                release.set()
+            for payload in (first, second):
+                self.assertTrue(post(self.service.port, self.token, '/result', payload, 4)['success'])
+        self.assertEqual(self.executed, ['first', 'second'])
+        self.assertEqual([p.get('code') for p in self.compiler.calls if p.get('operation') == 'compile'], ['first', 'second'])
+        self.assertEqual(sum(p.get('operation') == 'validate' for p in self.compiler.calls), 1)
+
+    def test_pipeline_expiry_cancel_and_unknown_never_replay_or_run_queued_work(self):
+        entered, release = threading.Event(), threading.Event()
+        original = self.service._post
+        def lost(snapshot, payload, timeout, lane='execute'):
+            if payload['command'] == 'bridge_exec_assembly':
+                entered.set()
+                release.wait(3)
+                raise TransportError('Response lost after transmission')
+            return original(snapshot, payload, timeout, lane)
+        with patch.object(self.service, '_post', side_effect=lost):
+            try:
+                first = self.pipeline('first')
+                self.assertTrue(entered.wait(2))
+                expired = self.pipeline('expired', timeout=.2)
+                self.assertEqual(self.service.pipeline_result(expired)['data']['completion'], 'not_started')
+                last = self.pipeline('last')
+            finally:
+                release.set()
+            self.assertEqual(self.service.pipeline_result(first)['data']['completion'], 'unknown')
+            self.assertEqual(self.service.pipeline_result(last)['data']['reason'], 'pipeline_aborted')
+        self.assertEqual(self.executed, [])
+        rejected = self.payload('exec', params={'code': 'never'})
+        rejected['pipeline_id'] = 'pipeline'
+        self.assertEqual(self.service.enqueue(rejected)['response']['data']['reason'], 'pipeline_aborted')
+        first['request_id'] = 'evicted-receipt'
+        self.assertEqual(self.service.pipeline_result(first)['data']['completion'], 'unknown')
+
+    def test_pipeline_cancel_before_dispatch_does_not_execute(self):
+        self.compiler.release.clear()
+        try:
+            first = self.pipeline('cancel-before-dispatch')
+            self.assertTrue(self.compiler.started.wait(2))
+            self.assertTrue(self.service.pipeline_result(first, cancel=True)['cancelled'])
+            self.assertEqual(self.service.pipeline_result(first)['data']['reason'], 'pipeline_aborted')
+        finally:
+            self.compiler.release.set()
+        self.assertEqual(self.executed, [])
+
+    def test_pipeline_cancel_preserves_the_receipt_of_dispatched_work(self):
+        entered, release = threading.Event(), threading.Event()
+        original = self.service._post
+        def blocked(snapshot, payload, timeout, lane='execute'):
+            if payload['command'] == 'bridge_exec_assembly' and not entered.is_set():
+                entered.set()
+                release.wait(3)
+            return original(snapshot, payload, timeout, lane)
+        with patch.object(self.service, '_post', side_effect=blocked):
+            try:
+                first = self.pipeline('already-dispatched')
+                self.assertTrue(entered.wait(2))
+                second = self.pipeline('still-queued')
+                self.assertTrue(self.service.pipeline_result(first, cancel=True)['cancelled'])
+                self.assertEqual(self.service.pipeline_result(second)['data']['reason'], 'pipeline_aborted')
+            finally:
+                release.set()
+            self.assertTrue(self.service.pipeline_result(first)['success'])
+        self.assertEqual(self.executed, ['already-dispatched'])
+
+    def test_pipeline_discards_preparation_from_an_earlier_domain(self):
+        entered, release = threading.Event(), threading.Event()
+        original = self.service._post
+        def reload_after_first(snapshot, payload, timeout, lane='execute'):
+            result = original(snapshot, payload, timeout, lane)
+            if payload['command'] == 'bridge_exec_assembly' and not entered.is_set():
+                entered.set()
+                release.wait(3)
+                self.snapshot['domainId'] = 'domain-after-first'
+                self.publish_snapshot()
+                self.service.scan_once()
+                fixtures_ready = lambda: ((context := self.service._project_list()[0].context) is not None
+                                          and context.domain_id == 'domain-after-first')
+                eventually(fixtures_ready)
+            return result
+        with patch.object(self.service, '_post', side_effect=reload_after_first):
+            try:
+                first = self.pipeline('first')
+                self.assertTrue(entered.wait(2))
+                second = self.pipeline('second')
+                project = self.service._project_list()[0]
+                eventually(lambda: project.jobs[second['request_id']].preparation.done.is_set())
+            finally:
+                release.set()
+            self.assertTrue(self.service.pipeline_result(second)['success'])
+        self.assertEqual(self.executed, ['first', 'second'])
+        self.assertEqual(sum(call.get('code') == 'second' for call in self.compiler.calls), 2)
+
+    def test_pipeline_rejects_speculative_error_only_after_fifo_head_retry(self):
+        original_compile, original_post = self.compiler.request, self.service._post
+        entered, release = threading.Event(), threading.Event()
+        def compile_request(payload, *, deadline, background=False):
+            if background and payload.get('code') == 'second':
+                raise CompilerError('compile_error', 'Reference not ready during speculation')
+            return original_compile(payload, deadline=deadline, background=background)
+        def blocked(snapshot, payload, timeout, lane='execute'):
+            if payload['command'] == 'bridge_exec_assembly' and not entered.is_set():
+                entered.set()
+                release.wait(3)
+            return original_post(snapshot, payload, timeout, lane)
+        with patch.object(self.compiler, 'request', side_effect=compile_request), patch.object(self.service, '_post', side_effect=blocked):
+            try:
+                first = self.pipeline('first')
+                self.assertTrue(entered.wait(2))
+                second = self.pipeline('second')
+                project = self.service._project_list()[0]
+                eventually(lambda: project.jobs[second['request_id']].preparation.done.is_set())
+            finally:
+                release.set()
+            self.assertTrue(self.service.pipeline_result(second)['success'])
+        self.assertEqual(self.executed, ['first', 'second'])
 
     def test_discovery_wait_does_not_restart_request_deadline(self):
         from unittest.mock import patch

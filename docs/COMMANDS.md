@@ -77,6 +77,27 @@ with subprocess.Popen(
 Long-lived Python callers can use `with UnityClient(...) as client:` or call
 `client.close()` to release the connection pool. Discovery still runs per call.
 
+## Optional session pipeline (development branch)
+
+`unity-bridge --project <path> session --pipeline 4` accepts up to four outstanding
+requests. Supported window sizes are `1`, `2`, and `4`; the default `1` keeps the
+sequential behavior. Keep reading stdout while supplying requests. Each response
+is flushed in input order, without waiting to fill the window or reach EOF.
+
+With a compatible host, inline `exec --code` can prepare the next compilation
+while preceding work runs. Unity API calls still execute in order. File input,
+ordinary commands, compiler overrides, and changes of target or connection are
+barriers. An older host uses the sequential path before submission. Request
+timeouts include time spent waiting in the pipeline.
+
+Use this for commands whose source is already known. If a later command needs a
+previous result, read that result before sending it, as in the example above.
+When a submitted command's completion is unknown, the session exits with code 1,
+reports the available receipts, and cancels queued work that has not reached
+Unity. Already dispatched work can still finish. It never automatically resends
+commands; check their effects before deciding what to submit again. Input that
+the session has not read when it stops has no receipt.
+
 ## Basic Form
 
 ```powershell

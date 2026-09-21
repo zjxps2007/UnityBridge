@@ -53,7 +53,7 @@ def host_status(instance=None, instances_dir=None) -> dict[str, Any]:
 
 
 def try_host_command(instance, command: str, params: Any, timeout_ms: int,
-                     instances_dir=None, *, connection_pool=None):
+                     instances_dir=None, *, connection_pool=None, parent_request_id=None):
     """Return None only when no host request has been submitted.
 
     Once a POST is attempted, an ambiguous result is represented as unknown
@@ -70,6 +70,8 @@ def try_host_command(instance, command: str, params: Any, timeout_ms: int,
     payload = {"command": command, "params": params if params is not None else {},
                "target": {"projectPath": instance.project_path, "pid": instance.pid, "port": instance.port},
                "request_id": uuid.uuid4().hex, "deadline_unix_ms": deadline}
+    if parent_request_id is not None:
+        payload['parent_request_id'] = parent_request_id
     try:
         response = post(endpoint["port"], descriptor["token"], "/command", payload, max(.001, timeout_ms / 1000),
                         pool=connection_pool,

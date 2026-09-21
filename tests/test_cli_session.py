@@ -3,6 +3,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import tempfile
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -67,6 +68,24 @@ class SessionTests(unittest.TestCase):
             module = adapter if name in {"UnityActionResult", "UnityBridgeAdapter"} else client
             self.assertIs(getattr(unity_bridge, name), getattr(module, name))
             self.assertIn(name, dir(unity_bridge))
+
+    def test_invalid_utf8_code_file_does_not_close_either_session_mode(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'invalid.cs'
+            path.write_bytes(b'\xff')
+            raw = ''.join(json.dumps(value) + '\n' for value in (
+                {'id': 'bad-file', 'args': ['exec', '--code-file', str(path)]},
+                {'id': 'after-error', 'args': ['instances']}))
+            for window in (1, 4):
+                with self.subTest(window=window):
+                    response = subprocess.run([sys.executable, '-B', '-m', 'unity_bridge', '--instances-dir',
+                                               'missing-fixture-directory', 'session', '--pipeline', str(window)],
+                                              input=raw, env=self.env(), cwd=ROOT, capture_output=True,
+                                              text=True, encoding='utf-8', timeout=10)
+                    self.assertEqual(response.returncode, 0, response.stderr)
+                    rows = [json.loads(line) for line in response.stdout.splitlines()]
+                    self.assertEqual([(r['id'], r['exit_code']) for r in rows], [('bad-file', 2), ('after-error', 0)])
+                    self.assertEqual(rows[1]['result'], [])
 
 
 if __name__ == "__main__":

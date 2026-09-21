@@ -14,7 +14,9 @@ import time
 from typing import Any
 import uuid
 
-from .compiler import CompilerError, CompilerWorker
+from .compiler import CompilerError
+from .compiler_pool import create_compiler
+from .results import not_started, unknown
 from .context import PreparedContext
 from .registry import (PROTOCOL, atomic_json, endpoint_path, load_launcher, normalized_project,
                        process_alive, read_json)
@@ -22,15 +24,6 @@ from .transport import MAX_MESSAGE_BYTES, ConnectionPool, TransportError, post
 from .._timing import mark
 
 BUSY_STATES = {"compiling", "refreshing", "reloading", "entering_playmode", "exiting_playmode"}
-
-
-def not_started(reason: str, message: str) -> dict[str, Any]:
-    return {"success": False, "message": message, "data": {"completion": "not_started", "reason": reason}}
-
-
-def unknown(command: str) -> dict[str, Any]:
-    return {"success": True, "message": f"{command} sent; completion could not be confirmed",
-            "data": {"accepted": True, "completion": "unknown", "command": command}}
 
 
 @dataclass
@@ -42,22 +35,50 @@ class Job:
     response: dict[str, Any] | None = None
     done: threading.Event = field(default_factory=threading.Event)
     lock: threading.Lock = field(default_factory=threading.Lock)
+    on_completed: Any = None
+    preparation: Any = None
 
     def complete(self, response: dict[str, Any]) -> None:
+        changed = False
         with self.lock:
             if self.response is None:
                 self.response = response
                 self.state = "completed"
                 self.done.set()
+                changed = True
+        if changed and self.on_completed is not None:
+            self.on_completed(self)
 
     def expire(self) -> dict[str, Any]:
+        changed = False
         with self.lock:
             if self.response is None:
                 self.response = (unknown(str(self.payload["command"])) if self.state == "dispatched"
                                  else not_started("expired", "Request expired before Unity execution"))
                 self.state = "completed"
                 self.done.set()
-            return self.response
+                changed = True
+            response = self.response
+        if changed and self.on_completed is not None:
+            self.on_completed(self)
+        return response
+
+    def cancel_queued(self) -> None:
+        with self.lock:
+            if self.state != "queued" or self.response is not None:
+                return
+            self.response = not_started("pipeline_aborted", "Pipeline stopped before Unity execution")
+            self.state = "completed"
+            self.done.set()
+        if self.on_completed is not None:
+            self.on_completed(self)
+
+
+@dataclass
+class Preparation:
+    context: PreparedContext
+    done: threading.Event = field(default_factory=threading.Event)
+    result: dict[str, Any] | None = None
 
 
 class Project:
@@ -76,6 +97,8 @@ class Project:
         self.jobs: OrderedDict[str, Job] = OrderedDict()
         self.worker_started = False
         self.running = False
+        self.current_job: Job | None = None
+        self.aborted_pipelines: OrderedDict[str, None] = OrderedDict()
 
     @staticmethod
     def key(snapshot: dict[str, Any]) -> tuple:
@@ -89,7 +112,7 @@ class HostService:
         self.root, self.descriptor = root, descriptor
         self.instances_dir = instances_dir or (Path(descriptor["instancesDir"]) if descriptor.get("instancesDir")
                                               else default_instances_dir())
-        self.compiler = compiler or CompilerWorker(descriptor["workerPath"])
+        self.compiler = compiler or create_compiler(descriptor["workerPath"])
         self.connections = ConnectionPool()
         self.idle_seconds, self.scan_interval = idle_seconds, scan_interval
         self.projects: dict[tuple[str, int], Project] = {}
@@ -130,6 +153,7 @@ class HostService:
             targets.sort(key=lambda p: (p["projectPath"], p["pid"]))
             from .._fast_exec import SUPPORTED_COMMANDS
             value = {"protocol": PROTOCOL, "cliProtocol": 1, "cliCommands": list(SUPPORTED_COMMANDS),
+                     "pipelineProtocol": 1,
                      "cliPort": self.cli_server.server_address[1] if self.cli_server else 0,
                      "runtimeId": self.descriptor["runtimeId"],
                      "version": self.descriptor["version"], "pid": os.getpid(), "port": self.port,
@@ -356,11 +380,87 @@ class HostService:
             "language_version": context.language_version, "references": context.references,
             "project_id": context.project_id,
             "reference_generation": generation, "fresh_identity": True,
+            "parent_request_id": job.payload.get("request_id"),
         }, deadline=job.deadline, background=background)
         if (result.get("reference_generation") != generation
                 or not isinstance(result.get("assembly_base64"), str)):
             raise CompilerError("compiler_protocol", "Compiler returned a mismatched assembly result")
         return result
+
+    def _prepared_compile(self, project: Project, context: PreparedContext, job: Job) -> dict[str, Any]:
+        preparation = job.preparation
+        if preparation is not None:
+            if not preparation.done.wait(max(0., job.deadline - time.perf_counter())):
+                raise CompilerError("expired", "Request expired while preparing compilation")
+            if preparation.context is context and preparation.result is not None:
+                # Speculation lengthens the interval before dispatch. Check the
+                # actual DLLs again, including replacements with unchanged mtime.
+                try:
+                    validated = self.compiler.request({
+                        "operation": "validate", "references": context.references,
+                        "reference_generation": context.compiler_reference_generation,
+                        "parent_request_id": job.payload.get("request_id"),
+                    }, deadline=job.deadline)
+                except CompilerError as exc:
+                    if exc.code == 'invalid_request':
+                        # A manually registered older protocol-1 compiler may not
+                        # support validation-only requests. Recompile before any
+                        # Unity dispatch instead of trusting speculative bytes.
+                        return self._compile(context, job)
+                    raise
+                if validated.get("reference_generation") != context.compiler_reference_generation:
+                    raise CompilerError("compiler_protocol", "Compiler returned mismatched reference validation")
+                mark('host_preparation_used', job.payload.get('request_id'))
+                return preparation.result
+        # Deferred or unsuccessful speculation is resolved at the FIFO head, with
+        # the current context. An earlier command can create a missing reference.
+        return self._compile(context, job)
+
+    def _prepare_next(self, project: Project, current: Job, context: PreparedContext) -> None:
+        pipeline_id = current.payload.get("pipeline_id")
+        if not pipeline_id:
+            return
+        with project.condition:
+            if not project.pending or self.stopping.is_set():
+                return
+            job = project.pending[0]
+            params = job.payload.get("params")
+            if (job.done.is_set() or job.preparation is not None or job.payload.get("pipeline_id") != pipeline_id
+                    or job.payload.get("command") != "exec" or not isinstance(params, dict)
+                    or params.get("csc") or params.get("dotnet") or not isinstance(params.get("code"), str)):
+                return
+            preparation = job.preparation = Preparation(context)
+
+        def prepare():
+            mark('host_preparation_begin', job.payload.get('request_id'))
+            try:
+                if not job.done.is_set():
+                    compiled = self._compile(context, job, background=True)
+                    if not job.done.is_set():
+                        preparation.result = compiled
+            except Exception:
+                pass  # Retry only compilation, at the head, never Unity execution.
+            finally:
+                preparation.done.set()
+                mark('host_preparation_end', job.payload.get('request_id'))
+        threading.Thread(target=prepare, daemon=True, name="unity-host-lookahead").start()
+
+    def _abort_pipeline(self, project: Project, pipeline_id: str) -> None:
+        with project.condition:
+            project.aborted_pipelines[pipeline_id] = None
+            while len(project.aborted_pipelines) > 256:
+                project.aborted_pipelines.popitem(last=False)
+            for job in project.jobs.values():
+                if job.payload.get("pipeline_id") == pipeline_id:
+                    job.cancel_queued()
+            project.condition.notify_all()
+
+    def _job_completed(self, project: Project, job: Job) -> None:
+        job.preparation = None
+        detail = (job.response or {}).get("data")
+        pipeline_id = job.payload.get("pipeline_id")
+        if pipeline_id and isinstance(detail, dict) and detail.get("completion") == "unknown":
+            self._abort_pipeline(project, pipeline_id)
 
     def _invalidate_context(self, project: Project) -> None:
         with project.condition:
@@ -387,7 +487,9 @@ class HostService:
             if command == "exec" and not (isinstance(forwarded_params, dict)
                                            and (forwarded_params.get("csc") or forwarded_params.get("dotnet"))):
                 try:
-                    compiled = self._compile(context, job)
+                    if getattr(self.compiler, 'can_prepare', lambda _: False)(context):
+                        self._prepare_next(project, job, context)
+                    compiled = self._prepared_compile(project, context, job)
                     with project.condition:
                         if project.context is context:
                             project.prewarm_state, project.prewarm_error = "ready", ""
@@ -432,6 +534,7 @@ class HostService:
                 "domain_id": context.domain_id, "reference_generation": context.reference_generation,
             }
             try:
+                self._prepare_next(project, job, context)
                 mark('unity_roundtrip_begin', job.payload['request_id'])
                 response = self._post(snapshot, forwarded, remaining)
                 mark('unity_roundtrip_end', job.payload['request_id'])
@@ -464,6 +567,7 @@ class HostService:
                     return
                 job = project.pending.popleft()
                 project.running = True
+                project.current_job = job
             try:
                 if not job.done.is_set():
                     self._execute(project, job)
@@ -475,15 +579,21 @@ class HostService:
             finally:
                 with project.condition:
                     project.running = False
+                    project.current_job = None
                     while len(project.jobs) > 256:
                         first_id, first = next(iter(project.jobs.items()))
                         if not first.done.is_set():
                             break
                         project.jobs.pop(first_id)
 
-    def submit(self, payload: dict[str, Any]) -> dict[str, Any]:
+    def _enqueue_job(self, payload: dict[str, Any]) -> Job | dict[str, Any]:
+        if self.stopping.is_set():
+            return not_started("host_stopping", "Host is stopping")
         command, target = payload.get("command"), payload.get("target")
         request_id, unix_deadline = payload.get("request_id"), payload.get("deadline_unix_ms")
+        pipeline_id = payload.get("pipeline_id")
+        if pipeline_id is not None and (not isinstance(pipeline_id, str) or not 0 < len(pipeline_id) <= 128):
+            return not_started("invalid_request", "Invalid pipeline identity")
         if (not isinstance(command, str) or not command or not isinstance(target, dict)
                 or not isinstance(target.get("projectPath"), str)
                 or not isinstance(target.get("pid"), int)
@@ -511,7 +621,8 @@ class HostService:
                 project = self.projects.get(key)
         if project is None:
             return not_started("unsupported_connector", "The host has not negotiated this Unity Connector")
-        signature = hashlib.sha256(json.dumps({"command": command, "params": payload.get("params"), "target": key},
+        signature = hashlib.sha256(json.dumps({"command": command, "params": payload.get("params"), "target": key,
+                                              "pipeline_id": pipeline_id},
                                              sort_keys=True, separators=(",", ":")).encode()).hexdigest()
         control = command == "get_editor_state"
         with project.condition:
@@ -524,6 +635,8 @@ class HostService:
                 if job.signature != signature:
                     return not_started("request_id_conflict", "Request ID was already used for different work")
             else:
+                if pipeline_id in project.aborted_pipelines:
+                    return not_started("pipeline_aborted", "Pipeline stopped before Unity execution")
                 # Bound finished request deduplication even for control-only clients.
                 if len(project.jobs) >= 256:
                     for previous_id, previous in list(project.jobs.items()):
@@ -534,7 +647,8 @@ class HostService:
                 if sum(not item.done.is_set() for item in project.jobs.values()) >= 256:
                     return not_started("queue_full", "The project's request queue is full")
                 job = Job(dict(payload), deadline, signature)
-                mark('host_queued', request_id)
+                job.on_completed = lambda finished: self._job_completed(project, finished)
+                mark('host_queued', request_id, parent_request_id=payload.get('parent_request_id'))
                 project.jobs[request_id] = job
                 if control:
                     threading.Thread(target=self._run_control, args=(project, job), daemon=True,
@@ -546,9 +660,53 @@ class HostService:
                         threading.Thread(target=self._project_loop, args=(project,), daemon=True,
                                          name="unity-host-project").start()
                     project.condition.notify_all()
-        if not job.done.wait(max(0., min(job.deadline - time.perf_counter(), remaining))):
+            current, context = project.current_job, project.context
+        # The next request may arrive after the previous POST has started.
+        if (current is not None and context is not None
+                and (current.state == "dispatched" or (current.state == "queued"
+                     and getattr(self.compiler, 'can_prepare', lambda _: False)(context)))):
+            self._prepare_next(project, current, context)
+        return job
+
+    @staticmethod
+    def _wait_job(job: Job) -> dict[str, Any]:
+        if not job.done.wait(max(0., job.deadline - time.perf_counter())):
             return job.expire()
         return job.response
+
+    def submit(self, payload: dict[str, Any]) -> dict[str, Any]:
+        job = self._enqueue_job(payload)
+        return self._wait_job(job) if isinstance(job, Job) else job
+
+    def enqueue(self, payload: dict[str, Any]) -> dict[str, Any]:
+        if not payload.get("pipeline_id"):
+            return {"accepted": False, "response": not_started("invalid_request", "Pipeline identity is required")}
+        job = self._enqueue_job(payload)
+        return ({"accepted": True, "request_id": job.payload["request_id"]} if isinstance(job, Job)
+                else {"accepted": False, "response": job})
+
+    def pipeline_result(self, payload: dict[str, Any], *, cancel: bool = False) -> dict[str, Any]:
+        target, pipeline_id = payload.get("target"), payload.get("pipeline_id")
+        if (not isinstance(target, dict) or not isinstance(target.get("projectPath"), str)
+                or not isinstance(target.get("pid"), int) or not isinstance(pipeline_id, str)
+                or not 0 < len(pipeline_id) <= 128):
+            return not_started("invalid_request", "Invalid pipeline request")
+        with self.projects_lock:
+            project = self.projects.get((normalized_project(target["projectPath"]), target["pid"]))
+        if project is None:
+            return unknown("exec")
+        if cancel:
+            self._abort_pipeline(project, pipeline_id)
+            return {"cancelled": True}
+        request_id = payload.get("request_id")
+        if not isinstance(request_id, str):
+            return not_started("invalid_request", "Request identity is required")
+        with project.condition:
+            job = project.jobs.get(request_id)
+        if job is None or job.payload.get("pipeline_id") != pipeline_id:
+            # A lost/evicted receipt cannot prove that the command did not execute.
+            return unknown("exec")
+        return self._wait_job(job)
 
     def _run_control(self, project: Project, job: Job) -> None:
         # Live readiness observes compiling/reloading states as well as ready.
@@ -642,6 +800,12 @@ class HostService:
                         self.reply(200, not_started("host_stopping", "Host is stopping"))
                     else:
                         self.reply(200, service.submit(payload))
+                elif self.path == "/enqueue":
+                    self.reply(200, service.enqueue(payload))
+                elif self.path == "/result":
+                    self.reply(200, service.pipeline_result(payload))
+                elif self.path == "/cancel":
+                    self.reply(200, service.pipeline_result(payload, cancel=True))
                 elif self.path == "/changed":
                     # An authenticated hint only: the discovery thread verifies the
                     # heartbeat, PID and negotiated context before trusting changes.

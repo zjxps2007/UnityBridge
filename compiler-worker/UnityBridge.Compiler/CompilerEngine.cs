@@ -9,7 +9,7 @@ namespace UnityBridge.Compiler;
 // This process only parses/emits bytes. It must never load or execute user assemblies.
 public sealed class CompilerEngine
 {
-    public const string CompilerVersion = "roslyn-5.0.0/wrapper-1";
+    public const string CompilerVersion = "roslyn-5.0.0/wrapper-2";
     private static readonly string[] DefaultUsings =
     [
         "System", "System.Collections.Generic", "System.IO", "System.Linq", "System.Reflection",
@@ -22,16 +22,20 @@ public sealed class CompilerEngine
     private const string OptionsKey = "library;debug;unsafe=false;nullable=disable;nowarn=0105,1701,1702";
     private bool warmed;
     private readonly bool reuseBase;
+    private readonly int referenceParallelism;
 
     public CompilerEngine() : this(
         Environment.GetEnvironmentVariable("UNITY_BRIDGE_ENABLE_BASE_COMPILATION") == "1" &&
         Environment.GetEnvironmentVariable("UNITY_BRIDGE_DISABLE_BASE_COMPILATION") != "1") { }
 
-    internal CompilerEngine(bool reuseBaseCompilation)
+    internal CompilerEngine(bool reuseBaseCompilation, int? referenceParallelism = null)
     {
         // The empty-project experiment did not improve new-code latency.
         // Keep this optional until a representative workload demonstrates a gain.
         reuseBase = reuseBaseCompilation;
+        var configured = Environment.GetEnvironmentVariable("UNITY_BRIDGE_REFERENCE_PARALLELISM");
+        this.referenceParallelism = referenceParallelism ?? (int.TryParse(configured, out var value) && value is 1 or 2 or 4
+            ? value : Environment.ProcessorCount >= 8 ? 4 : Environment.ProcessorCount >= 4 ? 2 : 1);
     }
 
     public CompileResponse Process(CompileRequest request)
@@ -47,20 +51,29 @@ public sealed class CompilerEngine
                 Warmup();
                 return new CompileResponse { RequestId = request.RequestId, Success = true };
             }
-            if (request.Operation != "compile")
+            if (request.Operation is not ("compile" or "validate"))
                 return Fail(request, "invalid_request", "Unknown compiler operation.");
+            if (request.References is null || request.References.Length is 0 or > 4096)
+                return Fail(request, "invalid_request", "Supply between 1 and 4096 Unity metadata references.");
+            if (request.Operation == "validate")
+            {
+                ResolveReferences(request);
+                return new CompileResponse { RequestId = request.RequestId, Success = true, ReferenceGeneration = request.ReferenceGeneration };
+            }
             if (string.IsNullOrEmpty(request.Code) || request.Code.Length > 1024 * 1024)
                 return Fail(request, "invalid_request", "Code must contain between 1 and 1048576 characters.");
             if (request.Usings is null || request.Usings.Length > 256 || request.Usings.Any(value => value is null))
                 return Fail(request, "invalid_request", "Invalid using directives.");
-            if (request.References is null || request.References.Length is 0 or > 4096)
-                return Fail(request, "invalid_request", "Supply between 1 and 4096 Unity metadata references.");
             if (string.IsNullOrEmpty(request.LanguageVersion)
                 || !LanguageVersionFacts.TryParse(request.LanguageVersion, out var languageVersion)
                 || languageVersion is LanguageVersion.Default or LanguageVersion.Latest or LanguageVersion.LatestMajor or LanguageVersion.Preview)
                 return Fail(request, "unsupported_language_version", "Supply an explicit language version supported by the Unity project.");
 
             return Compile(request, languageVersion);
+        }
+        catch (InvalidReferenceException ex)
+        {
+            return Fail(request, "invalid_request", ex.Message);
         }
         catch (StaleReferenceException ex)
         {
@@ -80,19 +93,8 @@ public sealed class CompilerEngine
     private CompileResponse Compile(CompileRequest request, LanguageVersion languageVersion)
     {
         var source = BuildSource(request.Code!, request.Usings);
-        var referenceEntries = new List<MetadataReferenceEntry>(request.References.Length);
-        var identities = new List<string>(request.References.Length);
-        foreach (var reference in request.References)
-        {
-            if (reference is null || string.IsNullOrEmpty(reference.Path)
-                || !Guid.TryParse(reference.Mvid, out var expectedMvid))
-                return Fail(request, "invalid_request", "Each Unity reference requires a path and valid MVID.");
-            if (!Path.IsPathFullyQualified(reference.Path))
-                return Fail(request, "invalid_request", "Unity reference paths must be absolute.");
-            var entry = references.Get(reference.Path, expectedMvid);
-            referenceEntries.Add(entry);
-            identities.Add(entry.Identity);
-        }
+        var referenceEntries = ResolveReferences(request);
+        var identities = referenceEntries.Select(entry => entry.Identity);
 
         var keyBytes = Encoding.UTF8.GetBytes(string.Join("\0", new[]
         {
@@ -152,7 +154,9 @@ public sealed class CompilerEngine
 
         var target = request.FreshIdentity ? cached!.Compilation.WithAssemblyName(NewAssemblyName()) : cached!.Compilation;
         using var output = new MemoryStream();
+        CompilerTiming.Mark("emit_begin", request);
         var result = target.Emit(output);
+        CompilerTiming.Mark("emit_end", request);
         var diagnostics = result.Diagnostics.Where(diagnostic => !diagnostic.IsSuppressed)
             .Select(FormatDiagnostic).ToArray();
         if (!result.Success)
@@ -170,6 +174,13 @@ public sealed class CompilerEngine
             compilations.Add(compilationKey, cached, cached.Weight + image.LongLength, cached.SharedReferences);
         }
         return Succeed(request, target.AssemblyName!, image, diagnostics, cacheHit, false, baseCacheHit);
+    }
+
+    private MetadataReferenceEntry[] ResolveReferences(CompileRequest request)
+    {
+        CompilerTiming.Mark("references_begin", request);
+        try { return references.GetMany(request.References, referenceParallelism); }
+        finally { CompilerTiming.Mark("references_end", request); }
     }
 
     private void Warmup()

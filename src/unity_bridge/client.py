@@ -190,6 +190,12 @@ class UnityClient:
     ) -> CommandResponse:
         target = instance or self.discover_instance()
         timeout = timeout_ms or self.timeout_ms
+        deadline = getattr(self, '_command_deadline', None)
+        if deadline is not None:
+            timeout = min(timeout, int((deadline - time.perf_counter()) * 1000))
+            if timeout <= 0:
+                return CommandResponse(False, 'Request expired before submission',
+                                       {'completion': 'not_started', 'reason': 'expired'})
         # Explicit compiler overrides retain their direct Connector semantics.
         compiler_override = command == "exec" and isinstance(params, dict) and any(
             str(key).casefold() in {"csc", "dotnet"} and value for key, value in params.items()
@@ -202,7 +208,8 @@ class UnityClient:
                     from .host.transport import ConnectionPool
                     self._connection_pool = ConnectionPool()
                 response = try_host_command(target, command, params, timeout, self.instances_dir,
-                                            connection_pool=self._connection_pool)
+                                            connection_pool=self._connection_pool,
+                                            parent_request_id=getattr(self, '_trace_parent_id', None))
                 if response is not None:
                     return response
             if self.backend == "host":

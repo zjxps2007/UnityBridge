@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import os
 import queue
 import subprocess
 import threading
@@ -22,8 +23,9 @@ class CompilerError(Exception):
 
 
 class CompilerWorker:
-    def __init__(self, executable: str, *, argv: list[str] | None = None):
+    def __init__(self, executable: str, *, argv: list[str] | None = None, environment: dict | None = None):
         self.argv = argv or [str(Path(executable).resolve())]
+        self.environment = dict(os.environ, **environment) if environment is not None else None
         self.lock = threading.Lock()
         self.priority_lock = threading.Lock()
         self.foreground_waiters = 0
@@ -42,7 +44,8 @@ class CompilerWorker:
             mark('compiler_spawn_begin')
             self.process = subprocess.Popen(self.argv, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                             stderr=subprocess.PIPE, text=True, encoding="utf-8",
-                                            bufsize=1, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                                            bufsize=1, env=self.environment,
+                                            creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
         except OSError as exc:
             raise CompilerError("compiler_unavailable", "Could not start the bundled C# compiler") from exc
         process, responses = self.process, self.responses
@@ -125,7 +128,7 @@ class CompilerWorker:
             compile_deadline = min(deadline, time.perf_counter() + 30.)
             self._start()
             request_id = uuid.uuid4().hex
-            mark('compiler_request_begin', request_id)
+            mark('compiler_request_begin', request_id, parent_request_id=payload.get('parent_request_id'))
             message = dict(payload, protocol=1, request_id=request_id)
             raw = json.dumps(message, ensure_ascii=False)
             if len(raw.encode("utf-8")) > MAX_MESSAGE_BYTES:
@@ -172,7 +175,7 @@ class CompilerWorker:
                                     str(response.get("error", "Compilation failed")), response.get("diagnostics"))
             self.last_info = {key: response[key] for key in
                               ("compiler_version", "cache_hit", "base_cache_hit", "emit_reused", "assembly_name") if key in response}
-            mark('compiler_request_end', request_id)
+            mark('compiler_request_end', request_id, parent_request_id=payload.get('parent_request_id'))
             return response
         finally:
             self.lock.release()

@@ -10,6 +10,7 @@ public sealed class CompileRequest
     public int Protocol { get; init; }
     public string? Operation { get; init; }
     public string? RequestId { get; init; }
+    public string? ParentRequestId { get; init; }
     public string? Code { get; init; }
     public string[] Usings { get; init; } = [];
     public string? LanguageVersion { get; init; }

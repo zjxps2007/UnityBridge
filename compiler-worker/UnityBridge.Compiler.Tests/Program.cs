@@ -190,6 +190,45 @@ try
         Check(restored.Success && restored.CacheHit && restored.EmitReused, "Restoring the same identity safely reuses cached compilation bytes.");
     });
 
+    Test("Parallel validation preserves order, fresh identities and deterministic failures", () =>
+    {
+        foreach (var degree in new[] { 1, 2, 4 })
+        {
+            var parallel = new CompilerEngine(reuseBaseCompilation: false, referenceParallelism: degree);
+            var cache = new MetadataReferenceCache();
+            var reversed = references.Reverse().ToArray();
+            var entries = cache.GetMany(reversed, degree);
+            Check(entries.Select(entry => entry.Reference.FilePath).SequenceEqual(reversed.Select(reference => reference.Path)), "References remain in input order.");
+            Check(entries.Select(entry => entry.Identity).SequenceEqual(cache.GetMany(reversed, degree).Select(entry => entry.Identity)), "Reference ordering survives cache hits.");
+            var first = parallel.Process(Request("return Fixture.Value;"));
+            var second = parallel.Process(Request("return Fixture.Value;"));
+            Check(first.Success && second.Success && first.AssemblyName != second.AssemblyName, "Every degree preserves independent assembly identity.");
+            Check(new CompilerEngine(false, degree).Process(Request("return Fixture.Value;", providedReferences: references.Concat(references).ToArray())).Success, "Repeated reference identities remain valid on a cold cache.");
+            var missing = new ReferenceIdentity(Path.Combine(temporary, "missing-first.dll"), Guid.NewGuid().ToString());
+            var malformed = new ReferenceIdentity(fixturePath, "invalid");
+            Check(parallel.Process(Request("return 1;", providedReferences: [missing, malformed])).ErrorCode == "stale_reference", "First input error wins over a later preflight error.");
+            Check(parallel.Process(Request("return 1;", providedReferences: [malformed, missing])).ErrorCode == "invalid_request", "Reversed input errors retain their order.");
+        }
+    });
+
+    Test("Validation-only requests check cached MVIDs without emitting executable bytes", () =>
+    {
+        var validating = new CompilerEngine(reuseBaseCompilation: false, referenceParallelism: 4);
+        var request = new CompileRequest { Protocol = 1, Operation = "validate", References = references,
+            RequestId = "validation", ReferenceGeneration = "generation-1" };
+        var result = validating.Process(request);
+        Check(result.Success && result.AssemblyBase64 is null && result.AssemblyName is null && result.RequestId == "validation", "Validation has no execution artifact.");
+        var original = File.ReadAllBytes(fixturePath);
+        var timestamp = File.GetLastWriteTimeUtc(fixturePath);
+        WriteFixture(fixturePath, framework, 91);
+        File.SetLastWriteTimeUtc(fixturePath, timestamp);
+        Check(validating.Process(request).ErrorCode == "stale_reference", "Cached reference with unchanged timestamp still validates actual MVID.");
+        File.WriteAllBytes(fixturePath, original);
+        File.SetLastWriteTimeUtc(fixturePath, timestamp);
+        Check(validating.Process(request).Success, "Failed validation does not poison the cache.");
+        using (File.Open(fixturePath, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
+    });
+
     Test("Worker never executes compiled code", () =>
     {
         var sentinel = Path.Combine(temporary, "must-not-exist.txt");

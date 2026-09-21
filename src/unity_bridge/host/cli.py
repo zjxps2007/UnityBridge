@@ -67,8 +67,9 @@ def main(argv: list[str] | None = None) -> int:
         if not lock.acquire():
             return 0
         try:
-            from .compiler import CompilerError, CompilerWorker
-            compiler = CompilerWorker(descriptor["workerPath"])
+            from .compiler import CompilerError
+            from .compiler_pool import create_compiler
+            compiler = create_compiler(descriptor["workerPath"])
             try:
                 # Runtime startup overlaps HTTP/parser imports. No project code
                 # or Unity API executes in this child process.

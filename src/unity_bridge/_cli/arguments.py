@@ -171,7 +171,9 @@ def build_parser(command: str | None = None, *, parser_class=argparse.ArgumentPa
         update.add_argument("--check", action="store_true", help="Check available versions without installing.")
 
     if command is None or command == "session":
-        sub.add_parser("session", parents=[parent], help="Process one JSON request per stdin line without restarting the CLI.")
+        session = sub.add_parser("session", parents=[parent], help="Process one JSON request per stdin line without restarting the CLI.")
+        session.add_argument("--pipeline", type=int, choices=(1, 2, 4), default=1,
+                             help="Maximum outstanding inline exec requests (default: sequential).")
     return parser
 
 

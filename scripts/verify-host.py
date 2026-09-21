@@ -74,6 +74,7 @@ def main():
     parser.add_argument("--worker", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--cli-exe", type=Path, help="Optional packaged CLI; source Python is the default.")
+    parser.add_argument("--session-pipeline", action="store_true", help="Also verify the optional session pipeline contract.")
     parser.add_argument("--stale-host-registry", action="store_true",
                         help="Seed a stale endpoint whose PID belongs to this live driver; verify automatic recovery.")
     args = parser.parse_args()
@@ -323,6 +324,34 @@ def main():
             assert require_success(rows[1]["result"]) == 19, rows
             return rows
         check("persistent_cli_session", cli_session)
+
+        if args.session_pipeline:
+            def pipeline_session():
+                static_code = "return ++Counter; } public static int Counter; public static object Tail() { return null;"
+                source = output / 'pipeline-source.cs'
+                before = require_success(host('exec', {'code': 'return HostConnectorAudit.Executions;'}))
+                requests = [
+                    ['exec', '--code', 'return ++HostConnectorAudit.Executions;'],
+                    ['exec', '--code', 'return ++HostConnectorAudit.Executions;'],
+                    ['exec', '--code', static_code], ['exec', '--code', static_code],
+                    ['exec', '--code', 'System.IO.File.WriteAllText(' + json.dumps(str(source)) + ', "return 72;"); return 71;'],
+                    ['exec', '--code-file', str(source)],
+                    ['exec', '--code', 'return MissingPipelineSymbol;'], ['exec', '--code', 'return 73;'],
+                    ['exec', '--code', 'return new string(\'한\', 524288) + "😀";'],
+                ]
+                raw = ''.join(json.dumps({'id': i, 'args': argv}) + '\n' for i, argv in enumerate(requests))
+                response = subprocess.run(cli + ['--project', str(project), '--no-update-check', 'session', '--pipeline', '4'],
+                                          input=raw, env=env, capture_output=True, text=True, encoding='utf-8', timeout=60)
+                assert response.returncode == 0 and not response.stderr, (response.returncode, response.stderr)
+                lines = [json.loads(line) for line in response.stdout.splitlines()]
+                assert [line['id'] for line in lines] == list(range(len(requests))), lines
+                values = [line['result']['data'] for line in lines]
+                assert values[:6] == [before + 1, before + 2, 1, 1, 71, 72], values[:6]
+                assert lines[6]['exit_code'] == 1 and values[6]['reason'] == 'compile_error', lines[6]
+                assert values[7] == 73 and values[8] == '한' * 524288 + '😀'
+                return {'fifo': True, 'fresh_static_results': values[2:4], 'file_barrier': True,
+                        'compile_error_recovery': True, 'large_unicode': True, 'response_count': len(lines)}
+            check('pipelined_session_execution_contracts', pipeline_session)
 
         def repeated_exec():
             values = [require_success(host("exec", {"code": "return 77;"})) for _ in range(2)]

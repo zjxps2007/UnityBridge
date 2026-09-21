@@ -114,7 +114,7 @@ def post(port: int, token: str, path: str, payload: dict[str, Any], timeout: flo
          *, pool: ConnectionPool | None = None, key=None, identity=None) -> dict[str, Any]:
     if not isinstance(port, int) or isinstance(port, bool) or not 0 < port < 65536:
         raise TransportError("Invalid local endpoint")
-    if path not in {"/command", "/health", "/stop", "/changed"}:
+    if path not in {"/command", "/health", "/stop", "/changed", "/enqueue", "/result", "/cancel"}:
         raise TransportError("Invalid local operation")
     # The destination is always a fixed loopback HTTP endpoint. Generic urllib
     # openers also initialize HTTPS and the Windows certificate store, even for
