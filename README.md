@@ -21,10 +21,11 @@ sessions. Follow [upgrading to v0.3.0](docs/INSTALL.md#upgrade-to-v030) to updat
 both the CLI and Unity Connector. Default installation and unqualified updates
 select the latest stable release.
 
-This branch provides [v0.3.1-rc.1](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.1-rc.1),
+This branch provides [v0.3.1-rc.2](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.1-rc.2),
 with parallel reference validation and an opt-in `session --pipeline` for preparing
 the next inline command while Unity executes the previous one. The CLI, Python
-package and Connector use **0.3.1-rc.1**. See [prerelease installation](docs/INSTALL.md#prerelease)
+package and Connector use **0.3.1-rc.2**. RC2 refines cached-reference checks and
+command initialization. See [prerelease installation](docs/INSTALL.md#prerelease)
 and [session usage](docs/COMMANDS.md#optional-session-pipeline-v031-rc1).
 
 ## Independent Host And Compiler

@@ -174,20 +174,20 @@ CLI는 `unity-bridge update --check`로 확인하세요. 설치기는 호스트�
 
 ## 프리릴리스
 
-현재 후보 버전은 **v0.3.1-rc.1**입니다. CLI 버전을 명시하여 업데이트합니다.
+현재 후보 버전은 **v0.3.1-rc.2**입니다. CLI 버전을 명시하여 업데이트합니다.
 
 ```text
-unity-bridge update --ref v0.3.1-rc.1
+unity-bridge update --ref v0.3.1-rc.2
 ```
 
 Unity Package Manager의 Git URL도 별도로 맞춥니다.
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.1-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.1-rc.2
 ```
 
-Unity import가 끝나면 `unity-bridge status`에서 `Connector: 0.3.1-rc.1`을 확인합니다.
-CLI 버전은 `unity-bridge update --check --ref v0.3.1-rc.1`로 확인하세요.
+Unity import가 끝나면 `unity-bridge status`에서 `Connector: 0.3.1-rc.2`을 확인합니다.
+CLI 버전은 `unity-bridge update --check --ref v0.3.1-rc.2`로 확인하세요.
 새 설치 명령은 [릴리스 노트](RELEASE_NOTES.md#install-or-upgrade)에 있습니다.
 
 일반 설치는 최신 정식 버전을 선택합니다. 릴리스 후보를 시험할 때만 설치기의

@@ -62,18 +62,32 @@ internal sealed class MetadataReferenceCache(int capacity = 512)
         {
             if (item.Cached)
             {
-                using var stream = File.Open(item.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
-                using var pe = new PEReader(stream);
-                ValidateMvid(pe, item.Mvid, item.Path);
+                using var file = File.OpenHandle(item.Path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                if (item.Entry!.Probe is { } probe && probe.TryRead(file, out var actualMvid))
+                {
+                    if (actualMvid != item.Mvid)
+                        throw new StaleReferenceException("Unity reference changed: " + item.Path);
+                }
+                else
+                {
+                    // Validate the same open file when the saved layout no longer
+                    // matches. Never trust only a timestamp, length or cached MVID.
+                    using var stream = new FileStream(file, FileAccess.Read);
+                    stream.Position = 0;
+                    using var pe = new PEReader(stream);
+                    ValidateMvid(pe, item.Mvid, item.Path);
+                }
             }
             else
             {
                 // This newly allocated array has one owner and is never mutated or
                 // exposed. Wrap it without making a second whole-file copy.
                 var image = ImmutableCollectionsMarshal.AsImmutableArray(File.ReadAllBytes(item.Path));
-                using (var pe = new PEReader(image)) ValidateMvid(pe, item.Mvid, item.Path);
+                using var pe = new PEReader(image);
+                ValidateMvid(pe, item.Mvid, item.Path);
+                var probe = ReferenceMvidProbe.Create(pe, image);
                 item.Entry = new MetadataReferenceEntry(item.Identity,
-                    MetadataReference.CreateFromImage(image, filePath: item.Path), image.Length);
+                    MetadataReference.CreateFromImage(image, filePath: item.Path), image.Length + (probe?.Weight ?? 0)) { Probe = probe };
             }
         }
         catch (Exception ex) { item.Error = ExceptionDispatchInfo.Capture(ex); }
@@ -101,6 +115,7 @@ internal sealed class MetadataReferenceCache(int capacity = 512)
 
 internal sealed record MetadataReferenceEntry(string Identity, PortableExecutableReference Reference, long Weight)
 {
+    internal ReferenceMvidProbe? Probe { get; init; }
     // Reloading an evicted image allocates different bytes even if path/MVID match.
     // Old compilations may still own the earlier image; charge both allocations.
     public string RetentionId { get; } = Guid.NewGuid().ToString("N");

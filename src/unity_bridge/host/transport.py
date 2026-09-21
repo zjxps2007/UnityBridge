@@ -10,6 +10,8 @@ import time
 from collections import OrderedDict
 from typing import Any
 
+from .._loopback_http import LoopbackHTTPConnection
+
 MAX_MESSAGE_BYTES = 32 * 1024 * 1024
 
 
@@ -41,7 +43,7 @@ def _exchange(connection, token, path, payload, timeout):
 class _Entry:
     def __init__(self, port, identity):
         self.identity = identity
-        self.connection = http.client.HTTPConnection("127.0.0.1", port)
+        self.connection = LoopbackHTTPConnection(port)
         self.lock = threading.Lock()
         self.retired = False
         self.used_at = 0.
@@ -124,7 +126,7 @@ def post(port: int, token: str, path: str, payload: dict[str, Any], timeout: flo
     try:
         if pool is not None and os.environ.get("UNITY_BRIDGE_DISABLE_CONNECTION_REUSE") != "1":
             return pool.post(port, token, path, payload, timeout, key, identity)
-        connection = http.client.HTTPConnection("127.0.0.1", port)
+        connection = LoopbackHTTPConnection(port)
         return _exchange(connection, token, path, payload, timeout)
     except (OSError, ValueError, http.client.HTTPException) as exc:
         raise TransportError("Local endpoint did not return a complete valid response") from exc

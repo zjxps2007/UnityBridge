@@ -61,7 +61,7 @@ class HostRegistryTests(unittest.TestCase):
     def test_reused_live_pid_without_an_authenticated_host_does_not_suppress_launch(self):
         descriptor, _ = self.registered_endpoint()
         with patch("unity_bridge.host.transport.post", side_effect=TransportError("not a host")) as health:
-            with patch("unity_bridge.host.registry.subprocess.Popen", return_value=Mock(pid=12345)) as child:
+            with patch("subprocess.Popen", return_value=Mock(pid=12345)) as child:
                 result = launch(self.root)
         self.assertTrue(result["started"])
         self.assertEqual(result["pid"], 12345)
@@ -73,7 +73,7 @@ class HostRegistryTests(unittest.TestCase):
         descriptor, endpoint = self.registered_endpoint()
         health_result = {key: endpoint[key] for key in ("protocol", "runtimeId", "version", "pid")}
         with patch("unity_bridge.host.transport.post", return_value=health_result) as health:
-            with patch("unity_bridge.host.registry.subprocess.Popen") as child:
+            with patch("subprocess.Popen") as child:
                 result = launch(self.root)
         self.assertFalse(result["started"])
         child.assert_not_called()
@@ -83,7 +83,7 @@ class HostRegistryTests(unittest.TestCase):
         _, endpoint = self.registered_endpoint()
         health_result = dict(endpoint, runtimeId="f" * 32)
         with patch("unity_bridge.host.transport.post", return_value=health_result):
-            with patch("unity_bridge.host.registry.subprocess.Popen", return_value=Mock(pid=12345)) as child:
+            with patch("subprocess.Popen", return_value=Mock(pid=12345)) as child:
                 result = launch(self.root)
         self.assertTrue(result["started"])
         child.assert_called_once()

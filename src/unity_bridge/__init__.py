@@ -1,6 +1,6 @@
 """Public Python API, loaded on demand for short-lived CLI invocations."""
 
-__version__ = "0.3.1-rc.1"
+__version__ = "0.3.1-rc.2"
 
 __all__ = [
     "CommandResponse",

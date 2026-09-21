@@ -1,13 +1,9 @@
 """User-scoped launcher discovery and atomic host process registration."""
 from __future__ import annotations
 
-import hashlib
 import json
 import os
 from pathlib import Path
-import secrets
-import subprocess
-import tempfile
 import time
 from typing import Any, Callable
 
@@ -46,6 +42,7 @@ def read_json(path: Path) -> dict[str, Any] | None:
 
 
 def atomic_json(path: Path, value: dict[str, Any]) -> None:
+    import tempfile
     path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
     fd, temporary = tempfile.mkstemp(prefix=".host-", suffix=".tmp", dir=path.parent)
     try:
@@ -86,6 +83,8 @@ def load_launcher(root: Path | None = None, runtime_id: str | None = None) -> di
 def register_launcher(executable: str, worker: str, *, python_module: bool = False,
                       version: str, root: Path | None = None,
                       instances_dir: str | None = None) -> dict[str, Any]:
+    import hashlib
+    import secrets
     root = root or host_home()
     executable_path, worker_path = Path(executable).resolve(), Path(worker).resolve()
     if not executable_path.is_file() or not worker_path.is_file():
@@ -119,6 +118,7 @@ def process_alive(pid: object) -> bool:
 
 
 def launch(root: Path | None = None) -> dict[str, Any]:
+    import subprocess
     root = root or host_home()
     descriptor = load_launcher(root)
     if descriptor is None:

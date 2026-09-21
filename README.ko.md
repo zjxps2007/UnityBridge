@@ -19,10 +19,11 @@ CLI는 `~/.unity-bridge/instances/*.json` heartbeat 파일로 실행 중인 Unit
 CLI와 Unity Connector를 함께 업데이트하세요. 기본 설치와 버전을 지정하지 않은
 업데이트는 최신 정식 릴리스를 선택합니다.
 
-이 브랜치는 [v0.3.1-rc.1](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.1-rc.1)
+이 브랜치는 [v0.3.1-rc.2](https://github.com/zjxps2007/UnityBridge/releases/tag/v0.3.1-rc.2)
 프리릴리스를 제공합니다. 참조 DLL 병렬 검증과, 앞선 Unity 실행 중 다음 코드를 준비하는
 선택적 `session --pipeline`을 포함합니다. CLI·Python 패키지·Connector 버전은
-**0.3.1-rc.1**입니다. [프리릴리스 설치](docs/INSTALL.ko.md#프리릴리스)와
+**0.3.1-rc.2**입니다. RC2에서는 캐시된 참조 검사와 명령 초기화를 개선했습니다.
+[프리릴리스 설치](docs/INSTALL.ko.md#프리릴리스)와
 [세션 사용법](docs/COMMANDS.ko.md#선택적-세션-파이프라인-v031-rc1)을 참고하세요.
 
 ## 독립 호스트와 컴파일러

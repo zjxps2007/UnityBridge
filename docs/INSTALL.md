@@ -176,20 +176,20 @@ host executable paths but does not change the Unity package reference automatica
 
 ## Prerelease
 
-The current candidate is **v0.3.1-rc.1**. Update the CLI explicitly:
+The current candidate is **v0.3.1-rc.2**. Update the CLI explicitly:
 
 ```text
-unity-bridge update --ref v0.3.1-rc.1
+unity-bridge update --ref v0.3.1-rc.2
 ```
 
 Select the matching Unity Package Manager Git URL separately:
 
 ```text
-https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.1-rc.1
+https://github.com/zjxps2007/UnityBridge.git?path=/unity-bridge-connector#v0.3.1-rc.2
 ```
 
 After Unity imports the package, `unity-bridge status` should report
-`Connector: 0.3.1-rc.1`. Run `unity-bridge update --check --ref v0.3.1-rc.1`
+`Connector: 0.3.1-rc.2`. Run `unity-bridge update --check --ref v0.3.1-rc.2`
 to verify the CLI version. See the [release notes](RELEASE_NOTES.md#install-or-upgrade)
 for fresh installation commands.
 

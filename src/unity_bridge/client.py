@@ -448,7 +448,7 @@ def send_command(
     *,
     timeout_ms: int = DEFAULT_TIMEOUT_MS,
 ) -> CommandResponse:
-    from http.client import HTTPConnection
+    from ._loopback_http import LoopbackHTTPConnection
 
     if params is None:
         params = {}
@@ -456,7 +456,7 @@ def send_command(
     # This endpoint is always loopback HTTP. A generic urllib opener also sets
     # up HTTPS/certificates on a fresh CLI process. Use one direct connection,
     # without consulting proxies or following redirects that could replay work.
-    connection = HTTPConnection("127.0.0.1", instance.port, timeout=timeout_ms / 1000)
+    connection = LoopbackHTTPConnection(instance.port, timeout=timeout_ms / 1000)
     try:
         connection.request("POST", "/command", body=body,
                            headers={"Content-Type": "application/json", "Connection": "close"})

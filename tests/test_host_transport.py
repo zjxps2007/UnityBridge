@@ -2,6 +2,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 import os
 import ssl
+import socket
 import threading
 import unittest
 from unittest.mock import patch
@@ -106,6 +107,10 @@ class HostTransportTests(unittest.TestCase):
         self.assertTrue(result['success'])
         tls.assert_not_called()
         self.assertEqual(self.requests, [('/health', 'private-token', {})])
+
+    def test_loopback_request_never_resolves_names(self):
+        with patch.object(socket, 'getaddrinfo', side_effect=AssertionError('Numeric loopback must bypass name resolution')):
+            self.assertTrue(post(self.server.server_port, 'private-token', '/health', {}, 1)['success'])
 
     def test_environment_proxies_cannot_intercept_loopback_credentials(self):
         proxy = 'http://127.0.0.1:1'

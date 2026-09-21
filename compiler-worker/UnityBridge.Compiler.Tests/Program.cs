@@ -1,4 +1,6 @@
+using System.Buffers.Binary;
 using System.Reflection.Metadata;
+using System.Reflection.Metadata.Ecma335;
 using System.Reflection.PortableExecutable;
 using System.Text.Json;
 using Microsoft.CodeAnalysis;
@@ -209,6 +211,58 @@ try
             Check(parallel.Process(Request("return 1;", providedReferences: [missing, malformed])).ErrorCode == "stale_reference", "First input error wins over a later preflight error.");
             Check(parallel.Process(Request("return 1;", providedReferences: [malformed, missing])).ErrorCode == "invalid_request", "Reversed input errors retain their order.");
         }
+    });
+
+    Test("Cached MVID probes reread values and reject changed PE or metadata layouts", () =>
+    {
+        var path = Path.Combine(temporary, "ProbeFixture.dll");
+        WriteFixture(path, framework, 25);
+        var identity = Identity(path);
+        var mvid = Guid.Parse(identity.Mvid);
+        var cache = new MetadataReferenceCache();
+        var cached = cache.Get(path, mvid);
+        Check(cached.Probe is not null, "Ordinary compiler references support bounded layout validation.");
+        var original = File.ReadAllBytes(path);
+        var timestamp = File.GetLastWriteTimeUtc(path);
+        using var pe = new PEReader(System.Collections.Immutable.ImmutableArray.Create(original));
+        var metadata = pe.GetMetadataReader();
+        var start = pe.PEHeaders.MetadataStartOffset;
+        var moduleOffset = start + metadata.GetTableMetadataOffset(TableIndex.Module);
+        var mvidIndexOffset = moduleOffset + 2 + (metadata.GetHeapSize(HeapIndex.String) > ushort.MaxValue ? 4 : 2);
+        var mvidOffset = start + metadata.GetHeapMetadataOffset(HeapIndex.Guid)
+            + (MetadataTokens.GetHeapOffset(metadata.GetModuleDefinition().Mvid) - 1) * 16;
+        foreach (var mutation in new Action<byte[]>[]
+        {
+            bytes => bytes[mvidOffset] ^= 1,
+            bytes => BinaryPrimitives.WriteUInt16LittleEndian(bytes.AsSpan(mvidIndexOffset, 2), 0),
+            bytes => BinaryPrimitives.WriteInt32LittleEndian(bytes.AsSpan(pe.PEHeaders.CorHeaderStartOffset + 8, 4), 0),
+            bytes => bytes[0] = 0,
+            bytes => bytes[start] = 0,
+        })
+        {
+            var changed = (byte[])original.Clone();
+            mutation(changed);
+            File.WriteAllBytes(path, changed);
+            File.SetLastWriteTimeUtc(path, timestamp);
+            var rejected = false;
+            try { cache.Get(path, mvid); }
+            catch (Exception ex) when (ex is StaleReferenceException or BadImageFormatException) { rejected = true; }
+            Check(rejected, "Same-size, same-timestamp MVID/layout mutations cannot return cached metadata.");
+            File.WriteAllBytes(path, original);
+            Check(ReferenceEquals(cached, cache.Get(path, mvid)), "A restored image still uses its original cache entry.");
+        }
+        // A harmless change to a probed header must use the full reader, rather
+        // than rejecting a valid reference just because the fast layout differs.
+        var validChange = (byte[])original.Clone();
+        validChange[pe.PEHeaders.CoffHeaderStartOffset + 4] ^= 1; // COFF timestamp.
+        File.WriteAllBytes(path, validChange);
+        Check(ReferenceEquals(cached, cache.Get(path, mvid)), "Valid changed headers retain full-reader compatibility.");
+        File.WriteAllBytes(path, original[..(mvidOffset + 8)]);
+        var truncated = false;
+        try { cache.Get(path, mvid); }
+        catch (Exception ex) when (ex is StaleReferenceException or BadImageFormatException or IOException) { truncated = true; }
+        Check(truncated, "A shortened file is never accepted from the saved layout.");
+        using (File.Open(path, FileMode.Open, FileAccess.ReadWrite, FileShare.None)) { }
     });
 
     Test("Validation-only requests check cached MVIDs without emitting executable bytes", () =>
